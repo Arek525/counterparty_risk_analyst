@@ -8,7 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
 RUN groupadd --gid 10001 app \
-    && useradd --uid 10001 --gid app --create-home app
+    && useradd --uid 10001 --gid app --create-home app \
+    && mkdir -p /app/storage \
+    && chown app:app /app/storage
 COPY pyproject.toml uv.lock ./
 
 FROM base AS runtime

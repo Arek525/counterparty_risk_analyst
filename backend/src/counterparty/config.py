@@ -9,6 +9,23 @@ class Settings(BaseSettings):
 
     database_url: SecretStr
     database_password: SecretStr | None = None
+    demo_mode: bool = True
+    model_mode: str = "demo"
+    storage_path: str = "/app/storage"
+    allowed_origins: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://test",
+    ]
+    cookie_secure: bool = False
+    ticket_service_url: str = "http://tickets:8010"
+    ticket_service_token: SecretStr = SecretStr("local-demo-ticket-token")
+    worker_poll_seconds: float = 1.0
+    worker_lease_seconds: int = 30
+    worker_max_attempts: int = 3
+    worker_max_runtime_seconds: int = 120
 
     @field_validator("database_url")
     @classmethod
