@@ -1,0 +1,8 @@
+{
+  "dataset_version": "synthetic-held-out-v1",
+  "mode": "gemini",
+  "timestamp": "2026-09-14T19:13:36.434676+00:00",
+  "real_model_quality_validated": false,
+  "status": "pending_credentials",
+  "reason": "Set GEMINI_API_KEY and explicitly select GEMINI_MODEL; no calls made."
+}
