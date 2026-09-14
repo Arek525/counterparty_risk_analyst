@@ -18,6 +18,7 @@ from psycopg.rows import dict_row
 from sqlalchemy import Engine, and_, or_, select
 from sqlalchemy.orm import Session
 
+from counterparty.analysis.adapters import ModelError
 from counterparty.config import Settings
 from counterparty.database import create_engine_for_settings
 from counterparty.models import AnalysisRun, AuditEvent, Decision
@@ -246,9 +247,17 @@ def _execute_claim(engine, settings, run_id, saver):
             )
             if run.lease_owner != claim_token or run.status != "running":
                 return True
-            run.status = "failed" if run.attempts >= attempt_limit else "running"
+            # The adapter already bounds transient retries. Never retry exhausted
+            # quota, missing configuration or rejected output at the job layer.
+            terminal = isinstance(error, ModelError) or run.attempts >= attempt_limit
+            run.status = "failed" if terminal else "running"
             run.error = (
-                f"{type(error).__name__}: analysis could not finish. Check provider configuration."
+                str(error)
+                if isinstance(error, ModelError)
+                else (
+                    f"{type(error).__name__}: analysis could not finish. "
+                    "Check provider configuration."
+                )
             )
             run.lease_owner = None
             run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=2**run.attempts)

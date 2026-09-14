@@ -171,3 +171,24 @@ def test_finalization_preserves_reviewed_report_when_checkpoint_report_differs(w
         assert run.status == "completed"
         assert run.report == {**reviewed_report, "workflow_complete": True}
     assert process_one(engine, settings) is False
+
+
+def test_model_quota_failure_stops_job_without_outer_retry(workflow_setup, monkeypatch):
+    from counterparty.analysis.adapters import ModelError
+
+    engine, settings, (run_id, _, _) = workflow_setup
+    calls = []
+
+    def exhausted(snapshot, variant):
+        calls.append(True)
+        raise ModelError("Gemini quota exhausted; stopped without fallback")
+
+    monkeypatch.setattr("counterparty.analysis.analyze", exhausted)
+    assert process_one(engine, settings)
+    with Session(engine) as session:
+        run = session.get(AnalysisRun, run_id)
+        assert run.status == "failed"
+        assert "quota exhausted" in run.error
+        assert run.attempts == 1
+    assert process_one(engine, settings) is False
+    assert len(calls) == 1
