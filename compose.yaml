@@ -1,0 +1,60 @@
+name: counterparty-risk-analyst
+
+x-backend: &backend
+  image: counterparty-risk-analyst-api:local
+  build:
+    context: ./backend
+    target: runtime
+  environment:
+    DATABASE_URL: postgresql+psycopg://counterparty@db:5432/counterparty
+    DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env}
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.6-pg17-trixie@sha256:724a4041afdb1750446e3f6b5cfa8f3b0ac5a2cf538ddfa6bfee4f94c2fa85c6
+    environment:
+      POSTGRES_DB: counterparty
+      POSTGRES_USER: counterparty
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U counterparty -d counterparty"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  migrate:
+    <<: *backend
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=10)"]
+      interval: 10s
+      timeout: 12s
+      retries: 3
+      start_period: 5s
+
+  seed:
+    <<: *backend
+    profiles: ["tools"]
+    command: ["python", "-m", "counterparty.seed", "/datasets/organizations.json"]
+    volumes:
+      - ./datasets/synthetic:/datasets:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-data:

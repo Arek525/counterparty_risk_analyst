@@ -1,0 +1,26 @@
+name: counterparty-risk-analyst-tests
+
+services:
+  db-test:
+    image: pgvector/pgvector:0.8.6-pg17-trixie@sha256:724a4041afdb1750446e3f6b5cfa8f3b0ac5a2cf538ddfa6bfee4f94c2fa85c6
+    environment:
+      POSTGRES_USER: test_admin
+      POSTGRES_PASSWORD: ephemeral-test-password
+      POSTGRES_DB: postgres
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_admin -d postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  tests:
+    build:
+      context: ./backend
+      target: test
+    environment:
+      TEST_DATABASE_ADMIN_URL: postgresql+psycopg://test_admin:ephemeral-test-password@db-test:5432/postgres
+    depends_on:
+      db-test:
+        condition: service_healthy
