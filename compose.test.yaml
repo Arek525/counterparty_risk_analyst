@@ -21,6 +21,11 @@ services:
       target: test
     environment:
       TEST_DATABASE_ADMIN_URL: postgresql+psycopg://test_admin:ephemeral-test-password@db-test:5432/postgres
+      STORAGE_PATH: /tmp/counterparty-test-storage
+      LANGSMITH_TRACING: "false"
+      LANGCHAIN_TRACING_V2: "false"
+    volumes:
+      - ./datasets:/datasets:ro
     depends_on:
       db-test:
         condition: service_healthy
