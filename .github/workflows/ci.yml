@@ -50,7 +50,7 @@ jobs:
           docker compose up --build -d --wait --wait-timeout 180
           docker compose run --rm seed
           docker compose run --rm seed
-      - name: Seeded scenarios through the API and worker
+      - name: Atlas assessment through the API and worker
         run: python3 scripts/verify_demo.py
       - name: Browser boundary and real-stack journeys
         working-directory: frontend

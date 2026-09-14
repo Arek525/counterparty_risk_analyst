@@ -433,7 +433,7 @@ def test_structured_source_location_preserved():
 def test_two_repository_policies_and_all_demo_scenarios():
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[2] / "datasets" / "synthetic"
+    root = Path(__file__).resolve().parents[2] / "datasets" / "synthetic" / "regression"
     assert root.exists(), "Mount datasets at /datasets when running in the test container"
     policies = {}
     for name in ["northstar", "orchard"]:

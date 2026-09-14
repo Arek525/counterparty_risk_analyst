@@ -5,18 +5,19 @@ Authorization and snapshot scoping happen before this pure analysis boundary.
 """
 
 import hashlib
+import json
 import math
 import re
 import time
 from collections import Counter, defaultdict
 from uuid import NAMESPACE_URL, uuid5
 
-from .adapters import GeminiAdapter
+from .adapters import GeminiAdapter, ModelError
 from .schemas import FactBatch, RequirementBatch, validate_requirements, validate_source
 
 EMBEDDING_MODEL = "demo-hash-v1"
 RULES_VERSION = "risk-rules-v1"
-PROMPT_VERSION = "grounded-extraction-v3"
+PROMPT_VERSION = "grounded-extraction-v4"
 ALIASES = {
     "retention_days": r"retention(?: period)?|data (?:deletion|erasure)|retain(?:ed)?",
     "notification_hours": r"(?:breach|incident) notification|notify|notification",
@@ -164,33 +165,103 @@ def extract_facts(chunks: list[dict]) -> list[dict]:
     return FactBatch.model_validate({"facts": facts}).model_dump()["facts"]
 
 
-def propose_requirements(chunks: list[dict], mode: str = "demo") -> list[dict]:
+# Leave substantial headroom below the adapter input limit and bound response size by
+# preserving document boundaries (the larger corpus has 4–6 obligations per document).
+BATCH_INPUT_CHARS = 25000
+MAX_BATCHES = 8
+
+
+def chunk_batches(chunks: list[dict], base: dict, instruction: str) -> list[list[dict]]:
+    """Pack contiguous document chunks by serialized size, never truncate inputs."""
+    batches, current = [], []
+    for chunk in chunks:
+        candidate = [*current, chunk]
+        size = len(json.dumps({**base, "chunks": candidate}, ensure_ascii=False)) + len(instruction)
+        new_document = current and chunk["document_id"] != current[-1]["document_id"]
+        if current and (size > BATCH_INPUT_CHARS or new_document):
+            batches.append(current)
+            current = []
+        if (
+            len(json.dumps({**base, "chunks": [chunk]}, ensure_ascii=False)) + len(instruction)
+            > BATCH_INPUT_CHARS
+        ):
+            raise ModelError("Model batch input limit exceeded; an individual chunk is too large")
+        current.append(chunk)
+    if current:
+        batches.append(current)
+    if len(batches) > MAX_BATCHES:
+        raise ModelError("Model batch call limit exceeded; reduce selected documents")
+    return batches
+
+
+POLICY_INSTRUCTION = (
+    "Propose every supplier-facing obligation from these policies, including requirements outside "
+    "the supported fields. Do not turn the assessing organization's internal customer duties, "
+    "explanatory prose or "
+    "document metadata into supplier requirements. Keep one requirement per normative "
+    "supplier obligation; preserve explicit control IDs when present. Do not split its "
+    "examples into extra requirements. Do not omit a requirement because it needs manual review. "
+    "Extract applicability context and severity. Applicability may use these exact "
+    "relationship keys: personal_data (boolean), privileged_access (boolean), "
+    "business_criticality (low/medium/high), purpose, data_shared, system_access. "
+    "Represent stated conditional relationship scope as applicability, not just in the title. "
+    "purpose means the business purpose of the relationship, never an incident/event trigger. "
+    "Assess preparedness for future incident duties across relationships; do not encode a "
+    "future incident, termination or request as an invented exact-text context predicate. "
+    "When a condition cannot be represented faithfully by supported equality predicates, "
+    "leave applicability empty and retain that condition in the title and source. "
+    "Supported fields: retention_days, notification_hours, hosting_region, "
+    "subprocessors_region, mfa, encryption_at_rest, dpa_signed. Use deterministic "
+    "evaluation for these fields. A requirement to enable MFA, encrypt data at rest or "
+    "have a signed DPA uses the corresponding supported field, operator eq, expected true "
+    "and evaluation_method deterministic. Scope examples do not make those boolean "
+    "requirements manual. Numeric days/hours use numeric expected values and lte/gte "
+    "as stated; region requirements use eq with the stated region. Use operator manual "
+    "and evaluation_method manual "
+    "with expected null and a descriptive snake_case field for unsupported interpretation. "
+    "Require human approval. Unique IDs. Quote only the supplier obligation sentence "
+    "from ONE chunk. Do not include its heading or concatenate adjacent chunks. "
+    "Copy metadata from the chunk actually containing that exact quoted sentence. "
+    "Source chunk_id, document_id and location must be copied verbatim from the "
+    "supplied chunk metadata. Location identifies the whole chunk: do not calculate "
+    "new line numbers or narrow the location to the quoted sentence. "
+    "Write all generated titles and explanations in natural English, while preserving "
+    "every source quote verbatim in its original language."
+)
+
+
+def propose_requirements(
+    chunks: list[dict], mode: str = "demo", metrics: dict | None = None
+) -> list[dict]:
     policies = [c for c in chunks if c.get("kind") == "policy"]
     if not policies:
         raise ValueError("Select at least one policy document")
     if mode == "gemini":
+        batches = chunk_batches(policies, {}, POLICY_INSTRUCTION)
         adapter = GeminiAdapter()
-        result = adapter.generate(
-            "Propose every requirement from these policies, including requirements outside "
-            "the supported fields. Do not omit a requirement because it needs manual review. "
-            "Extract applicability context and severity. Applicability may use these exact "
-            "relationship keys: personal_data (boolean), privileged_access (boolean), "
-            "business_criticality (low/medium/high), purpose, data_shared, system_access. "
-            "Represent stated conditional scope as applicability, not just in the title. "
-            "Supported fields: retention_days, notification_hours, hosting_region, "
-            "subprocessors_region, mfa, encryption_at_rest, dpa_signed. Use deterministic "
-            "evaluation for these fields; use operator manual and evaluation_method manual "
-            "with a descriptive snake_case field for unsupported interpretation. "
-            "Require human approval. Unique IDs. Preserve exact source quote. "
-            "Source chunk_id, document_id and location must be copied verbatim from the "
-            "supplied chunk metadata. Location identifies the whole chunk: do not calculate "
-            "new line numbers or narrow the location to the quoted sentence. "
-            "Write all generated titles and explanations in natural English, while preserving "
-            "every source quote verbatim in its original language.",
-            {"chunks": policies},
-            RequirementBatch,
-        )["requirements"]
-        return validate_requirements(result, policies)
+        result = []
+        start = time.monotonic()
+        try:
+            for batch in batches:
+                proposed = adapter.generate(
+                    POLICY_INSTRUCTION, {"chunks": batch}, RequirementBatch
+                )["requirements"]
+                # Empty context-only batches are allowed; the complete proposal cannot be empty.
+                if proposed:
+                    result.extend(validate_requirements(proposed, batch))
+            seen_rules = set()
+            for requirement in result:
+                cite = requirement["source"]
+                key = (cite["document_id"], cite["chunk_id"], cite["quote"], requirement["field"])
+                if key in seen_rules:
+                    raise ModelError("Duplicate or conflicting proposed obligation across batches")
+                seen_rules.add(key)
+            return validate_requirements(result, policies)
+        finally:
+            if metrics is not None:
+                metrics.update(
+                    adapter.metrics, duration_ms=round((time.monotonic() - start) * 1000, 2)
+                )
     if mode != "demo":
         raise ValueError("Unsupported MODEL_MODE")
     proposals = []
@@ -301,7 +372,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             ):
                 chosen[str(c["id"])] = c
         selected = list(chosen.values())
-        facts = adapter.generate(
+        instruction = (
             "Extract explicit counterparty facts for these approved requirement fields. "
             "Also extract other explicitly stated supported controls: retention_days, "
             "notification_hours, hosting_region, subprocessors_region, mfa, "
@@ -314,10 +385,31 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             "or 'unspecified'. evidence_type must equal chunk metadata, default declaration. "
             "Only supported fact values; omit uncertain facts. Do not assign findings or risk. "
             "Write generated descriptions in natural English and preserve source quotes verbatim "
-            "in their original language.",
-            {"requirements": requirements, "chunks": selected},
-            FactBatch,
-        )["facts"]
+            "in their original language."
+        )
+        # Approved quotes remain in the immutable snapshot, not repeated in provider payloads.
+        projected = [
+            {
+                key: req[key]
+                for key in ("id", "title", "field", "operator", "expected", "applicability")
+                if key in req
+            }
+            for req in requirements
+        ]
+        facts = []
+        seen = set()
+        for batch in chunk_batches(selected, {"requirements": projected}, instruction):
+            extracted = adapter.generate(
+                instruction, {"requirements": projected, "chunks": batch}, FactBatch
+            )["facts"]
+            for fact in FactBatch.model_validate({"facts": extracted}).model_dump()["facts"]:
+                validate_source(fact["source"], batch)
+                key = json.dumps(fact, sort_keys=True, ensure_ascii=False)
+                if key not in seen:
+                    seen.add(key)
+                    facts.append(fact)
+            if len(facts) > 200:
+                raise ModelError("Merged fact output limit exceeded")
         for fact in facts:
             validate_source(fact["source"], selected)
             original = chosen[fact["source"]["chunk_id"]]

@@ -8,7 +8,7 @@ test("the complete MVP journey works on the real local stack", async ({
   const caseName = `E2E assessment ${Date.now()}`;
   const evidencePath = path.resolve(
     process.cwd(),
-    "../datasets/synthetic/evidence/complete.md",
+    "../datasets/synthetic/evidence/atlas-assurance-pack.md",
   );
 
   await page.goto("/login");
@@ -20,12 +20,12 @@ test("the complete MVP journey works on the real local stack", async ({
 
   await page.getByRole("link", { name: "New case" }).click();
   await page.getByLabel("Case name").fill(caseName);
-  await page.getByLabel("Counterparty name").fill("E2E Synthetic Vendor");
+  await page.getByLabel("Counterparty name").fill("Atlas Compute Services (synthetic)");
   await page
     .getByLabel("Relationship purpose")
-    .fill("Support for a critical service platform");
-  await page.getByLabel("Data shared").fill("Synthetic customer data");
-  await page.getByLabel("System access").fill("Administration console");
+    .fill("Hosted customer operations analytics");
+  await page.getByLabel("Data shared").fill("Synthetic customer contact and usage data");
+  await page.getByLabel("System access").fill("Privileged support access to the analytics administration console");
   await page.getByLabel("Business criticality").selectOption("high");
   await page
     .getByText("The relationship involves personal data processing")
@@ -35,11 +35,11 @@ test("the complete MVP journey works on the real local stack", async ({
   await expect(page.getByRole("heading", { name: caseName })).toBeVisible();
 
   await page.getByLabel("Evidence document").setInputFiles(evidencePath);
-  await page.getByLabel("Evidence type").selectOption("independent");
+  await page.getByLabel("Evidence type").selectOption("declaration");
   await page.getByRole("button", { name: "Add document" }).click();
-  await expect(page.getByText("complete.md")).toBeVisible();
+  await expect(page.getByText("atlas-assurance-pack.md")).toBeVisible();
   await expect(
-    page.locator(".document-row .subtle").filter({ hasText: "Independent evidence" }),
+    page.locator(".document-row .subtle").filter({ hasText: "Counterparty declaration" }),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Run analysis" }).first().click();
@@ -48,7 +48,7 @@ test("the complete MVP journey works on the real local stack", async ({
   ).toBeVisible();
   await page
     .getByLabel("Approved policy")
-    .selectOption({ label: "Synthetic Northstar policy · v1" });
+    .selectOption({ label: "Northstar Labs Third-Party Assurance Standard · v1" });
   await page.getByRole("button", { name: "Run analysis" }).last().click();
   await expect(page.getByText("Risk", { exact: true })).toBeVisible({
     timeout: 120_000,
@@ -60,12 +60,12 @@ test("the complete MVP journey works on the real local stack", async ({
     page.getByText("Human decision", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.locator(".stat").filter({ hasText: "Risk" }).getByText("Low"),
+    page.locator(".stat").filter({ hasText: "Risk" }).getByText("Unable to assess"),
   ).toBeVisible();
   await expect(
-    page.locator(".stat").filter({ hasText: "Completeness" }).getByText("100%"),
+    page.locator(".stat").filter({ hasText: "Completeness" }).getByText("30%"),
   ).toBeVisible();
-  await expect(page.getByText("Missing information:")).toHaveCount(0);
+  await expect(page.getByText("Missing information:").first()).toBeVisible();
 
   const citation = page.getByRole("button", { name: /open source/ }).first();
   await expect(citation).toBeVisible();
@@ -75,16 +75,16 @@ test("the complete MVP journey works on the real local stack", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Close" }).click();
 
-  await page.getByRole("button", { name: "Accept" }).click();
+  await page.getByRole("button", { name: "Request information" }).click();
   await page
     .getByLabel("Decision rationale")
-    .fill("The evidence is complete and the findings meet the approved requirements.");
+    .fill("Please provide support-portal assurance coverage and clarify US support access; manual controls require review.");
   await page.getByRole("button", { name: "Save decision" }).click();
   await expect(
     page
       .locator("section.card")
       .filter({ has: page.getByRole("heading", { name: "Decision", exact: true }) })
-      .getByText("Accepted"),
+      .getByText("Information required"),
   ).toBeVisible();
 
   await page

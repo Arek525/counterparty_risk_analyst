@@ -1,6 +1,7 @@
-"""Exercise seeded scenarios through the real API and worker; synthetic writes only.
+"""Create and assess an Atlas synthetic case through the real local API and worker.
 
-Run after `docker compose run --rm seed`: python3 scripts/verify_demo.py
+Run on a disposable demo stack: python3 scripts/verify_demo.py
+This explicitly creates a case, evidence and report; it never resets the workspace.
 """
 
 import argparse
@@ -8,6 +9,8 @@ import http.cookiejar
 import json
 import time
 import urllib.request
+from pathlib import Path
+from uuid import uuid4
 
 
 def main():
@@ -29,58 +32,102 @@ def main():
 
     assert api("/meta")["model_mode"] == "demo", "This check must not call a real model"
     api("/auth/login", {"email": "reviewer@northstar.demo", "password": "Demo-only-2026!"})
-    policies = {policy["name"]: policy for policy in api("/policies")}
-    cases = {case["name"]: case for case in api("/cases")}
-    northstar = policies["Synthetic Northstar policy"]["id"]
-    orchard = policies["Synthetic Orchard policy"]["id"]
-    expected = {
-        "complete": "Low",
-        "missing": "High",
-        "conflict": "High",
-        "discrepancy": "Unable to assess",
-        "injection": "High",
-    }
-    queue = [("complete", orchard, "Unable to assess", "alternate-policy")]
-    queue += [(name, northstar, risk, name) for name, risk in expected.items()]
-    pending = []
-    for scenario, policy_id, risk, label in queue:
-        case_id = cases[f"Synthetic scenario: {scenario}"]["id"]
-        run = api(
-            f"/cases/{case_id}/runs",
-            {"policy_version_id": policy_id, "retrieval_variant": "hybrid"},
-        )
-        pending.append((run["id"], risk, label))
-    results = []
+    policy = next(
+        p
+        for p in api("/policies")
+        if p["name"] == "Northstar Labs Third-Party Assurance Standard"
+        and p["status"] == "approved"
+    )
+    case = api(
+        "/cases",
+        {
+            "name": f"Atlas verification {uuid4().hex[:8]}",
+            "counterparty_name": "Atlas Compute Services (synthetic)",
+            "relationship": {
+                "purpose": "Hosted customer operations analytics",
+                "data_shared": "Synthetic customer contact and usage data",
+                "system_access": (
+                    "Privileged support access to the analytics administration console"
+                ),
+                "business_criticality": "high",
+                "personal_data": True,
+                "privileged_access": True,
+            },
+        },
+    )
+    path = (
+        Path(__file__).resolve().parents[1] / "datasets/synthetic/evidence/atlas-assurance-pack.md"
+    )
+    boundary = uuid4().hex
+    fields = {"kind": "evidence", "case_id": case["id"], "evidence_type": "declaration"}
+    data = b"".join(
+        (
+            f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n{value}\r\n'
+        ).encode()
+        for key, value in fields.items()
+    )
+    data += (
+        (
+            f'--{boundary}\r\nContent-Disposition: form-data; name="file"; '
+            f'filename="{path.name}"\r\nContent-Type: text/markdown\r\n\r\n'
+        ).encode()
+        + path.read_bytes()
+        + f"\r\n--{boundary}--\r\n".encode()
+    )
+    with opener.open(
+        urllib.request.Request(
+            args.base_url + "/api/documents",
+            data=data,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        ),
+        timeout=30,
+    ) as response:
+        assert response.status == 201
+    run = api(
+        f"/cases/{case['id']}/runs",
+        {
+            "policy_version_id": policy["id"],
+            "retrieval_variant": "hybrid",
+        },
+    )
     deadline = time.monotonic() + 90
-    for run_id, risk, label in pending:
-        while True:
-            run = api(f"/runs/{run_id}")
-            assert run["status"] != "failed", run.get("error")
-            if run["status"] == "awaiting_review":
-                break
-            assert time.monotonic() < deadline, "Worker did not finish within 90 seconds"
-            time.sleep(0.5)
-        report = run["report"]
-        assert report["risk"] == risk, (label, report["risk"], risk)
-        assert run["input_snapshot"]["retrieval_config"]["backend"] == "pgvector-exact"
-        quotes = 0
-        for finding in report["findings"]:
-            for citation in finding["evidence"]:
-                doc = api(f"/documents/{citation['document_id']}")
-                chunk = next(c for c in doc["chunks"] if c["id"] == citation["chunk_id"])
-                assert citation["quote"] in chunk["text"]
-                assert citation["location"] == chunk["location"]
-                quotes += 1
-        results.append(
+    while run["status"] != "awaiting_review":
+        assert run["status"] != "failed", run.get("error")
+        assert time.monotonic() < deadline, "Worker did not finish within 90 seconds"
+        time.sleep(0.5)
+        run = api(f"/runs/{run['id']}")
+    report = run["report"]
+    assert report["risk"] == "Unable to assess" and report["completeness"] == 30
+    assert sum(f["status"] == "pass" for f in report["findings"]) == 6
+    assert sum(f["status"] == "unknown" for f in report["findings"]) == 14
+    quotes = 0
+    for finding in report["findings"]:
+        for citation in finding["evidence"]:
+            doc = api(f"/documents/{citation['document_id']}")
+            chunk = next(c for c in doc["chunks"] if c["id"] == citation["chunk_id"])
+            assert citation["quote"] in chunk["text"]
+            assert citation["location"] == chunk["location"]
+            quotes += 1
+    api(
+        f"/runs/{run['id']}/decision",
+        {
+            "decision": "needs_information",
+            "rationale": "Provide support-portal assurance coverage and clarify US support access.",
+        },
+    )
+    print(
+        json.dumps(
             {
-                "scenario": label,
-                "run_id": run_id,
-                "risk": risk,
+                "case_id": case["id"],
+                "run_id": run["id"],
+                "risk": report["risk"],
                 "completeness": report["completeness"],
                 "resolved_quotes": quotes,
-            }
+                "decision": "needs_information",
+            },
+            indent=2,
         )
-    print(json.dumps(results, indent=2))
+    )
 
 
 if __name__ == "__main__":

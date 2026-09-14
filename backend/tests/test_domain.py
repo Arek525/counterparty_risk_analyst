@@ -331,16 +331,38 @@ async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, 
         fixtures = Path(__file__).resolve().parents[2] / "datasets" / "synthetic"
     try:
         first = bootstrap(engine, settings, fixtures)
-        assert first == {"users": 5, "policies": 2, "cases": 5, "documents": 7}
+        assert first == {"users": 5, "policies": 1, "cases": 0, "documents": 4}
+        from counterparty.models import ApprovalRequest, AuditEvent, Document, IntegrationCall
+
+        def seed_state():
+            with Session(engine) as session:
+                policy = session.scalar(select(PolicySetVersion))
+                documents = session.scalars(select(Document).order_by(Document.filename)).all()
+                return (
+                    str(policy.id),
+                    policy.requirements,
+                    [(str(d.id), d.sha256) for d in documents],
+                )
+
+        original = seed_state()
         assert bootstrap(engine, settings, fixtures) == {
             "users": 0,
             "policies": 0,
             "cases": 0,
             "documents": 0,
         }
+        assert seed_state() == original
+        assert len(original[1]) == 20
         with Session(engine) as session:
-            assert session.scalar(select(func.count()).select_from(PolicySetVersion)) == 2
-            assert session.scalar(select(func.count()).select_from(AssessmentCase)) == 5
+            assert session.scalar(select(func.count()).select_from(Organization)) == 2
+            assert session.scalar(select(func.count()).select_from(User)) == 5
+            assert session.scalar(select(func.count()).select_from(Document)) == 4
+            assert session.scalar(select(func.count()).select_from(AuditEvent)) == 1
+            assert session.scalar(select(AuditEvent)).event == "synthetic.policy_seeded"
+            for entity in (ApprovalRequest, IntegrationCall):
+                assert session.scalar(select(func.count()).select_from(entity)) == 0
+            assert session.scalar(select(func.count()).select_from(PolicySetVersion)) == 1
+            assert session.scalar(select(func.count()).select_from(AssessmentCase)) == 0
             assert session.scalar(select(func.count()).select_from(AnalysisRun)) == 0
     finally:
         engine.dispose()
