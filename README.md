@@ -134,6 +134,12 @@ provide **`GEMINI_API_KEY` and an explicitly selected `GEMINI_MODEL`** in your l
 `.env`. Verify the model's availability, account quotas and data terms first.
 No billing activation or paid fallback is configured. Never commit the key.
 
+The first live integration used `gemini-3.5-flash-lite`. On 2026-09-14 Google
+rejected `gemini-2.5-flash-lite` for a new account despite listing it in Models.
+The [live verification report](docs/verification/gemini.md) records compatibility
+fixes, before/after measurements and the remaining quality limits. Availability
+still depends on the account; there is no automatic model substitution.
+
 Run a separate real-model evaluation before enabling it for normal analyses:
 
 ```bash

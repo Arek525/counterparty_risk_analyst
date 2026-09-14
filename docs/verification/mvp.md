@@ -2,7 +2,9 @@
 
 Scope: local synthetic application with the deterministic demo adapter. No paid
 model calls, external publication or real business-system writes were made.
-Real-model quality remains [pending](../../evaluations/report-gemini.md).
+This document records the original demo verification. Subsequent live-provider
+verification is recorded in [Gemini integration](gemini.md); broader model quality
+validation remains unfinished.
 
 ## Automated backend and evaluation
 

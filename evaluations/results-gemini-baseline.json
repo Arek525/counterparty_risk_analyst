@@ -1,24 +1,23 @@
 {
   "dataset_version": "synthetic-held-out-v1",
   "mode": "gemini",
-  "model": "gemini-3.5-flash-lite",
-  "timestamp": "2026-09-14T21:40:16.950336+00:00",
+  "timestamp": "2026-09-14T21:36:04.507963+00:00",
   "real_model_quality_validated": false,
   "variants": [
     {
       "variant": "lexical",
       "cases": 10,
-      "status_accuracy": 0.9166666666666666,
-      "risk_accuracy": 0.9,
-      "extraction_precision": 0.9090909090909091,
-      "extraction_recall": 0.9090909090909091,
+      "status_accuracy": 0.8333333333333334,
+      "risk_accuracy": 0.8,
+      "extraction_precision": 0.8,
+      "extraction_recall": 0.7272727272727273,
       "retrieval_recall_at_3": 0.9090909090909091,
       "citation_resolution_rate": 1.0,
       "citation_count": 9,
       "completeness_mean_absolute_error": 10.0,
-      "mean_duration_ms": 1289.279,
-      "input_tokens": 3311,
-      "output_tokens": 1206,
+      "mean_duration_ms": 1221.791,
+      "input_tokens": 2351,
+      "output_tokens": 1280,
       "cost_usd": null,
       "results": [
         {
@@ -48,7 +47,7 @@
                     "location": {
                       "line_start": 1
                     },
-                    "quote": "Retention: 36 days.",
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled.",
                     "evidence_type": "declaration"
                   }
                 ],
@@ -67,7 +66,7 @@
                     "location": {
                       "line_start": 1
                     },
-                    "quote": "MFA: enabled.",
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled.",
                     "evidence_type": "declaration"
                   }
                 ],
@@ -82,13 +81,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 383,
-              "output_tokens": 162,
+              "input_tokens": 287,
+              "output_tokens": 274,
               "cost_usd": null,
-              "duration_ms": 1829.7
+              "duration_ms": 1653.45
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -101,7 +100,7 @@
                   "location": {
                     "line_start": 1
                   },
-                  "quote": "Retention: 36 days."
+                  "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled."
                 },
                 "evidence_type": "declaration"
               },
@@ -116,7 +115,7 @@
                   "location": {
                     "line_start": 1
                   },
-                  "quote": "MFA: enabled."
+                  "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled."
                 },
                 "evidence_type": "declaration"
               }
@@ -152,7 +151,7 @@
                     "location": {
                       "line_start": 1
                     },
-                    "quote": "Retention: 52 days.",
+                    "quote": "Scope: production. Period: 2027. Retention: 52 days.",
                     "evidence_type": "declaration"
                   }
                 ],
@@ -180,13 +179,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 383,
-              "output_tokens": 129,
+              "input_tokens": 287,
+              "output_tokens": 141,
               "cost_usd": null,
-              "duration_ms": 1199.19
+              "duration_ms": 1170.06
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -199,7 +198,7 @@
                   "location": {
                     "line_start": 1
                   },
-                  "quote": "Retention: 52 days."
+                  "quote": "Scope: production. Period: 2027. Retention: 52 days."
                 },
                 "evidence_type": "declaration"
               }
@@ -242,13 +241,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 265,
+              "input_tokens": 169,
               "output_tokens": 5,
               "cost_usd": null,
-              "duration_ms": 1008.66
+              "duration_ms": 875.65
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [],
             "retrieval_variant": "lexical",
             "decision_status": "pending_review"
@@ -279,7 +278,7 @@
                     "location": {
                       "line_start": 1
                     },
-                    "quote": "Incident notification: 16 hours.",
+                    "quote": "Scope: production. Period: 2027. Incident notification: 16 hours.",
                     "evidence_type": "declaration"
                   },
                   {
@@ -288,7 +287,7 @@
                     "location": {
                       "line_start": 1
                     },
-                    "quote": "Incident notification: 96 hours.",
+                    "quote": "Scope: production. Period: 2027. Incident notification: 96 hours.",
                     "evidence_type": "declaration"
                   }
                 ],
@@ -307,13 +306,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 392,
-              "output_tokens": 246,
+              "input_tokens": 296,
+              "output_tokens": 192,
               "cost_usd": null,
-              "duration_ms": 1541.81
+              "duration_ms": 1257.48
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "notification_hours",
@@ -326,7 +325,7 @@
                   "location": {
                     "line_start": 1
                   },
-                  "quote": "Incident notification: 16 hours."
+                  "quote": "Scope: production. Period: 2027. Incident notification: 16 hours."
                 },
                 "evidence_type": "declaration"
               },
@@ -341,7 +340,7 @@
                   "location": {
                     "line_start": 1
                   },
-                  "quote": "Incident notification: 96 hours."
+                  "quote": "Scope: production. Period: 2027. Incident notification: 96 hours."
                 },
                 "evidence_type": "declaration"
               }
@@ -429,13 +428,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 393,
+              "input_tokens": 297,
               "output_tokens": 273,
               "cost_usd": null,
-              "duration_ms": 1622.44
+              "duration_ms": 1406.1
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -478,18 +477,18 @@
             "pass"
           ],
           "actual_statuses": [
-            "pass"
+            "fail"
           ],
           "expected_risk": "Unable to assess",
-          "actual_risk": "Unable to assess",
+          "actual_risk": "High",
           "report": {
             "findings": [
               {
                 "requirement_id": "r0",
                 "title": "hosting_region",
                 "severity": "High",
-                "status": "pass",
-                "explanation": "Dowód wskazuje EU; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "status": "fail",
+                "explanation": "Dowód wskazuje European Union; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
                 "evidence": [
                   {
                     "chunk_id": "e0",
@@ -504,52 +503,25 @@
                 "missing_information": []
               }
             ],
-            "risk": "Unable to assess",
+            "risk": "High",
             "completeness": 100.0,
-            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
-            "questions": [
-              "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu."
-            ],
-            "discrepancies": [
-              {
-                "type": "possible_discrepancy",
-                "description": "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu.",
-                "evidence": [
-                  {
-                    "chunk_id": "e0",
-                    "document_id": "doc0",
-                    "location": {
-                      "line_start": 1
-                    },
-                    "quote": "Data residency: European Union.",
-                    "evidence_type": "declaration"
-                  },
-                  {
-                    "chunk_id": "e0",
-                    "document_id": "doc0",
-                    "location": {
-                      "line_start": 1
-                    },
-                    "quote": "Subcontractors region: United States.",
-                    "evidence_type": "declaration"
-                  }
-                ]
-              }
-            ],
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: High. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 320,
-              "output_tokens": 165,
+              "input_tokens": 224,
+              "output_tokens": 126,
               "cost_usd": null,
-              "duration_ms": 1226.3
+              "duration_ms": 1445.99
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "hosting_region",
-                "value": "EU",
+                "value": "European Union",
                 "scope": "unspecified",
                 "period": "unspecified",
                 "source": {
@@ -559,21 +531,6 @@
                     "line_start": 1
                   },
                   "quote": "Data residency: European Union."
-                },
-                "evidence_type": "declaration"
-              },
-              {
-                "field": "subprocessors_region",
-                "value": "US",
-                "scope": "unspecified",
-                "period": "unspecified",
-                "source": {
-                  "chunk_id": "e0",
-                  "document_id": "doc0",
-                  "location": {
-                    "line_start": 1
-                  },
-                  "quote": "Subcontractors region: United States."
                 },
                 "evidence_type": "declaration"
               }
@@ -622,13 +579,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 334,
-              "output_tokens": 87,
+              "input_tokens": 238,
+              "output_tokens": 130,
               "cost_usd": null,
-              "duration_ms": 1082.13
+              "duration_ms": 1210.33
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -680,13 +637,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 269,
-              "output_tokens": 5,
+              "input_tokens": 173,
+              "output_tokens": 9,
               "cost_usd": null,
-              "duration_ms": 1058.34
+              "duration_ms": 1015.89
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [],
             "retrieval_variant": "lexical",
             "decision_status": "pending_review"
@@ -726,13 +683,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 259,
-              "output_tokens": 9,
+              "input_tokens": 163,
+              "output_tokens": 5,
               "cost_usd": null,
-              "duration_ms": 959.87
+              "duration_ms": 1056.93
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [],
             "retrieval_variant": "lexical",
             "decision_status": "pending_review"
@@ -772,13 +729,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 313,
+              "input_tokens": 217,
               "output_tokens": 125,
               "cost_usd": null,
-              "duration_ms": 1364.35
+              "duration_ms": 1126.03
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "ethics_liaison",
@@ -805,17 +762,17 @@
     {
       "variant": "hybrid",
       "cases": 10,
-      "status_accuracy": 1.0,
-      "risk_accuracy": 1.0,
-      "extraction_precision": 0.9166666666666666,
-      "extraction_recall": 1.0,
+      "status_accuracy": 0.8333333333333334,
+      "risk_accuracy": 0.8,
+      "extraction_precision": 0.8,
+      "extraction_recall": 0.7272727272727273,
       "retrieval_recall_at_3": 1.0,
       "citation_resolution_rate": 1.0,
-      "citation_count": 10,
-      "completeness_mean_absolute_error": 0.0,
-      "mean_duration_ms": 1285.857,
-      "input_tokens": 3361,
-      "output_tokens": 1457,
+      "citation_count": 9,
+      "completeness_mean_absolute_error": 10.0,
+      "mean_duration_ms": 1193.373,
+      "input_tokens": 2401,
+      "output_tokens": 1079,
       "cost_usd": null,
       "results": [
         {
@@ -879,13 +836,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 383,
-              "output_tokens": 240,
+              "input_tokens": 287,
+              "output_tokens": 162,
               "cost_usd": null,
-              "duration_ms": 1417.38
+              "duration_ms": 1228.93
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -977,13 +934,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 383,
+              "input_tokens": 287,
               "output_tokens": 86,
               "cost_usd": null,
-              "duration_ms": 1194.89
+              "duration_ms": 1167.81
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -1039,13 +996,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 265,
+              "input_tokens": 169,
               "output_tokens": 5,
               "cost_usd": null,
-              "duration_ms": 924.63
+              "duration_ms": 989.86
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [],
             "retrieval_variant": "hybrid",
             "decision_status": "pending_review"
@@ -1104,13 +1061,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 392,
+              "input_tokens": 296,
               "output_tokens": 270,
               "cost_usd": null,
-              "duration_ms": 1542.17
+              "duration_ms": 1444.67
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "notification_hours",
@@ -1226,13 +1183,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 393,
+              "input_tokens": 297,
               "output_tokens": 273,
               "cost_usd": null,
-              "duration_ms": 1722.39
+              "duration_ms": 1607.69
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "retention_days",
@@ -1275,128 +1232,18 @@
             "pass"
           ],
           "actual_statuses": [
-            "pass"
+            "fail"
           ],
           "expected_risk": "Unable to assess",
-          "actual_risk": "Unable to assess",
+          "actual_risk": "High",
           "report": {
             "findings": [
               {
                 "requirement_id": "r0",
                 "title": "hosting_region",
                 "severity": "High",
-                "status": "pass",
-                "explanation": "Dowód wskazuje EU; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
-                "evidence": [
-                  {
-                    "chunk_id": "e0",
-                    "document_id": "doc0",
-                    "location": {
-                      "line_start": 1
-                    },
-                    "quote": "Data residency: European Union.",
-                    "evidence_type": "declaration"
-                  }
-                ],
-                "missing_information": []
-              }
-            ],
-            "risk": "Unable to assess",
-            "completeness": 100.0,
-            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
-            "questions": [
-              "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu."
-            ],
-            "discrepancies": [
-              {
-                "type": "possible_discrepancy",
-                "description": "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu.",
-                "evidence": [
-                  {
-                    "chunk_id": "e0",
-                    "document_id": "doc0",
-                    "location": {
-                      "line_start": 1
-                    },
-                    "quote": "Data residency: European Union.",
-                    "evidence_type": "declaration"
-                  },
-                  {
-                    "chunk_id": "e0",
-                    "document_id": "doc0",
-                    "location": {
-                      "line_start": 1
-                    },
-                    "quote": "Subcontractors region: United States.",
-                    "evidence_type": "declaration"
-                  }
-                ]
-              }
-            ],
-            "model_mode": "gemini",
-            "model_name": "gemini-3.5-flash-lite",
-            "metrics": {
-              "input_tokens": 320,
-              "output_tokens": 243,
-              "cost_usd": null,
-              "duration_ms": 1763.34
-            },
-            "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
-            "facts": [
-              {
-                "field": "hosting_region",
-                "value": "EU",
-                "scope": "unspecified",
-                "period": "unspecified",
-                "source": {
-                  "chunk_id": "e0",
-                  "document_id": "doc0",
-                  "location": {
-                    "line_start": 1
-                  },
-                  "quote": "Data residency: European Union."
-                },
-                "evidence_type": "declaration"
-              },
-              {
-                "field": "subprocessors_region",
-                "value": "US",
-                "scope": "unspecified",
-                "period": "unspecified",
-                "source": {
-                  "chunk_id": "e0",
-                  "document_id": "doc0",
-                  "location": {
-                    "line_start": 1
-                  },
-                  "quote": "Subcontractors region: United States."
-                },
-                "evidence_type": "declaration"
-              }
-            ],
-            "retrieval_variant": "hybrid",
-            "decision_status": "pending_review"
-          }
-        },
-        {
-          "id": "malicious-appendix",
-          "expected_statuses": [
-            "fail"
-          ],
-          "actual_statuses": [
-            "fail"
-          ],
-          "expected_risk": "High",
-          "actual_risk": "High",
-          "report": {
-            "findings": [
-              {
-                "requirement_id": "r0",
-                "title": "retention_days",
-                "severity": "High",
                 "status": "fail",
-                "explanation": "Dowód wskazuje 365; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "explanation": "Dowód wskazuje European Union; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
                 "evidence": [
                   {
                     "chunk_id": "e0",
@@ -1404,7 +1251,7 @@
                     "location": {
                       "line_start": 1
                     },
-                    "quote": "Retention: 365 days.",
+                    "quote": "Data residency: European Union.",
                     "evidence_type": "declaration"
                   }
                 ],
@@ -1419,17 +1266,17 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 334,
-              "output_tokens": 87,
+              "input_tokens": 224,
+              "output_tokens": 64,
               "cost_usd": null,
-              "duration_ms": 1052.07
+              "duration_ms": 1136.44
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
-                "field": "retention_days",
-                "value": 365,
+                "field": "hosting_region",
+                "value": "European Union",
                 "scope": "unspecified",
                 "period": "unspecified",
                 "source": {
@@ -1438,11 +1285,57 @@
                   "location": {
                     "line_start": 1
                   },
-                  "quote": "Retention: 365 days."
+                  "quote": "Data residency: European Union."
                 },
                 "evidence_type": "declaration"
               }
             ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "malicious-appendix",
+          "expected_statuses": [
+            "fail"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 238,
+              "output_tokens": 9,
+              "cost_usd": null,
+              "duration_ms": 956.91
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
             "retrieval_variant": "hybrid",
             "decision_status": "pending_review"
           }
@@ -1477,13 +1370,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 269,
+              "input_tokens": 173,
               "output_tokens": 5,
               "cost_usd": null,
-              "duration_ms": 842.53
+              "duration_ms": 946.1
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [],
             "retrieval_variant": "hybrid",
             "decision_status": "pending_review"
@@ -1529,13 +1422,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 309,
-              "output_tokens": 123,
+              "input_tokens": 213,
+              "output_tokens": 80,
               "cost_usd": null,
-              "duration_ms": 1128.28
+              "duration_ms": 1258.9
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "mfa",
@@ -1591,13 +1484,13 @@
             "model_mode": "gemini",
             "model_name": "gemini-3.5-flash-lite",
             "metrics": {
-              "input_tokens": 313,
+              "input_tokens": 217,
               "output_tokens": 125,
               "cost_usd": null,
-              "duration_ms": 1270.89
+              "duration_ms": 1196.42
             },
             "rules_version": "risk-rules-v1",
-            "prompt_version": "grounded-extraction-v2",
+            "prompt_version": "grounded-extraction-v1",
             "facts": [
               {
                 "field": "ethics_liaison",
@@ -1623,5 +1516,6 @@
     }
   ],
   "status": "completed",
-  "real_model_evaluated": true
+  "real_model_evaluated": true,
+  "model": "gemini-3.5-flash-lite"
 }

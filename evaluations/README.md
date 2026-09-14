@@ -19,8 +19,10 @@ Default evaluation without `--check` remains a reporting command.
 The real-model command
 requires `GEMINI_API_KEY` and an explicitly chosen `GEMINI_MODEL`; missing values
 write `pending_credentials` to `results-gemini.json` and exit 2. No real model calls
-were made for the committed demo report. Real quality validation is pending model
-selection, credentials, dataset review and measurement. Never add credentials to Git.
+were made for the committed demo report. Separate live results now exist for
+`gemini-3.5-flash-lite`: [report](report-gemini.md), [first baseline](results-gemini-baseline.json),
+and [verification notes](../docs/verification/gemini.md). Dataset review and broader
+quality validation remain unfinished. Never add credentials to Git.
 
 `held_out.json` is a small versioned synthetic regression set separate from the
 Northstar/Orchard development examples in `datasets/synthetic`. Gold labels are
@@ -28,6 +30,8 @@ hand-authored for this project, not independently reviewed. Ten cases cover comp
 missing, high-with-missing, direct contradiction, different scope/period, regional
 ambiguity, inapplicability, synonym retrieval, arbitrary manual policy and injection.
 Results retain each generated report so metric totals can be inspected.
+This corpus has now been used to fix real-provider integration and prompts, so
+it is a development regression set, not an untouched final test set.
 
 The extraction metric matches field/value pairs, not scope or period accuracy.
 Citation resolution checks exact quote/document/location, not semantic entailment.
@@ -72,7 +76,12 @@ be checked before credentials are enabled; real cost is reported `null`, never z
 
 Source for the implemented optional API contract:
 [Google structured output documentation](https://ai.google.dev/gemini-api/docs/generate-content/structured-output).
-Live compatibility and model availability remain unverified without credentials.
+Live compatibility was checked with Gemini 3.5 Flash-Lite. Large top-level batch
+`maxItems` caused HTTP 400; these bounds remain in local Pydantic validation
+(200 facts, 100 requirements), while token/byte caps still bound provider output.
+Region aliases such as `European Union`/`EU` are canonicalized for equality and
+discrepancy checks. The original `raw_value` is retained when changed and used for
+text operators such as `contains`, so normalization cannot create substring matches.
 
 ## Explicit risk rules v1
 

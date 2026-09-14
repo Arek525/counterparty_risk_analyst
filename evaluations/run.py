@@ -73,9 +73,7 @@ def evaluate(cases, variant, mode):
         )
         statuses_total += len(actual)
         risk_correct += report["risk"] == case["expected_risk"]
-        completeness_errors.append(
-            abs(report["completeness"] - case["expected_completeness"])
-        )
+        completeness_errors.append(abs(report["completeness"] - case["expected_completeness"]))
         predicted = {fact_key(f["field"], f["value"]) for f in report["facts"]}
         gold = {fact_key(f, v) for f, v in case["expected_facts"]}
         facts_correct += len(predicted & gold)
@@ -151,13 +149,8 @@ def regression_gate(report):
         if not hybrid.get(metric, 0) >= 0.9:
             failures.append(f"hybrid {metric} must be at least 0.9")
     for name, row in variants.items():
-        if (
-            row.get("citation_resolution_rate") != 1.0
-            or row.get("citation_count", 0) <= 0
-        ):
-            failures.append(
-                f"{name} citation resolution must equal 1.0 with nonempty evidence"
-            )
+        if row.get("citation_resolution_rate") != 1.0 or row.get("citation_count", 0) <= 0:
+            failures.append(f"{name} citation resolution must equal 1.0 with nonempty evidence")
         results = row.get("results", [])
         if len(results) != 10 or row.get("cases") != 10:
             failures.append(f"{name} must evaluate all ten fixed cases")
@@ -199,20 +192,17 @@ def main():
     )
     args = parser.parse_args()
     if args.check and args.mode != "demo":
-        parser.error(
-            "--check only supports demo mode; real-model evaluation is separate"
-        )
+        parser.error("--check only supports demo mode; real-model evaluation is separate")
     dataset = json.loads((ROOT / "held_out.json").read_text())
     output = ROOT / f"results-{args.mode}.json"
     report = {
         "dataset_version": dataset["version"],
         "mode": args.mode,
+        "model": os.getenv("GEMINI_MODEL") if args.mode == "gemini" else "demo",
         "timestamp": datetime.now(UTC).isoformat(),
         "real_model_quality_validated": False,
     }
-    if args.mode == "gemini" and not (
-        os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_MODEL")
-    ):
+    if args.mode == "gemini" and not (os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_MODEL")):
         report.update(
             status="pending_credentials",
             reason="Set GEMINI_API_KEY and explicitly select GEMINI_MODEL; no calls made.",
@@ -222,8 +212,7 @@ def main():
         return 2
     try:
         report["variants"] = [
-            evaluate(dataset["cases"], variant, args.mode)
-            for variant in ["lexical", "hybrid"]
+            evaluate(dataset["cases"], variant, args.mode) for variant in ["lexical", "hybrid"]
         ]
         report["status"] = "completed"
         report["real_model_evaluated"] = args.mode == "gemini"
@@ -238,48 +227,76 @@ def main():
     if args.check:
         report["regression_gate"] = regression_gate(report)
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
-    lines = [
-        "# Synthetic analysis evaluation",
-        "",
-        f"Dataset: `{dataset['version']}`. Mode: `{args.mode}`. Cases: {len(dataset['cases'])}.",
-        "",
-        "| Variant | Extraction P/R | Status accuracy | Risk accuracy | Retrieval recall@3 | Exact citation resolution | Completeness MAE | Mean ms |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
-    ]
-    for row in report["variants"]:
-        lines.append(
-            f"| {row['variant']} | {row['extraction_precision']:.1%}/{row['extraction_recall']:.1%} | {row['status_accuracy']:.1%} | {row['risk_accuracy']:.1%} | {row['retrieval_recall_at_3']:.1%} | {row['citation_resolution_rate']:.1%} | {row['completeness_mean_absolute_error']:.1f} | {row['mean_duration_ms']:.2f} |"
-        )
-    lines.extend(
-        [
-            "",
-            "These are measured deterministic demo results on ten hand-authored synthetic cases. They do not validate a real LLM, legal interpretation, multilingual extraction, semantic entailment, or production safety. Hash embeddings are a local demonstration, not a trained semantic embedding model. Exact citation resolution proves a quote exists, not that it supports an arbitrary model interpretation.",
-            "",
-            "The lexical baseline intentionally misses synonym-only evidence. Hybrid adds deterministic hash similarity and explicit aliases; this tiny regression set is not evidence of general semantic quality. Expected outputs were authored separately from the application demo documents. No statistical significance or independently reviewed gold labels are claimed. Human review of labels and a larger frozen corpus remain necessary.",
-            "",
-            "Real-model evaluation is separate: `PYTHONPATH=backend/src python evaluations/run.py --mode gemini`. Without credentials and a selected model it writes pending status and exits 2. Calls have bounded input/output, timeout, retries and concurrency; quota exhaustion stops. Provider cost is unknown (null), never reported as free. Check account pricing, quotas and data terms before enabling credentials. No paid fallback or billing activation is implemented.",
-            "",
-            "Baseline acceptance target for this fixed regression set: hybrid status/risk accuracy >= 90%, citation resolution 100%, no adversarial instruction override. These are regression targets chosen after baseline, not universal model quality thresholds. See JSON for individual cases and measurements.",
-        ]
-    )
-    (ROOT / f"report-{args.mode}.md").write_text("\n".join(lines) + "\n")
+    write_markdown(report)
     print(
         json.dumps(
-            [
-                {k: v for k, v in row.items() if k != "results"}
-                for row in report["variants"]
-            ],
+            [{k: v for k, v in row.items() if k != "results"} for row in report["variants"]],
             indent=2,
         )
     )
     if args.check and not report["regression_gate"]["passed"]:
         print(
-            "Regression gate failed: "
-            + "; ".join(report["regression_gate"]["failures"]),
+            "Regression gate failed: " + "; ".join(report["regression_gate"]["failures"]),
             file=sys.stderr,
         )
         return 1
     return 0
+
+
+def write_markdown(report):
+    lines = [
+        "# Synthetic analysis evaluation",
+        "",
+        f"Dataset: `{report['dataset_version']}`. Mode: `{report['mode']}`. "
+        f"Model: `{report['model']}`. Cases per variant: {report['variants'][0]['cases']}.",
+        "",
+        "| Variant | Extraction P/R | Status accuracy | Risk accuracy | Retrieval recall@3 "
+        "| Exact citation resolution | Completeness MAE | Mean ms |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in report["variants"]:
+        lines.append(
+            f"| {row['variant']} | {row['extraction_precision']:.1%}/"
+            f"{row['extraction_recall']:.1%} | {row['status_accuracy']:.1%} | "
+            f"{row['risk_accuracy']:.1%} | {row['retrieval_recall_at_3']:.1%} | "
+            f"{row['citation_resolution_rate']:.1%} | "
+            f"{row['completeness_mean_absolute_error']:.1f} | {row['mean_duration_ms']:.2f} |"
+        )
+    lines.extend(
+        [
+            "",
+            (
+                "These are measured deterministic demo results "
+                "on ten hand-authored synthetic cases."
+                if report["mode"] == "demo"
+                else "These are measured real-model results on ten hand-authored synthetic cases."
+            )
+            + " They do not establish general LLM quality, legal interpretation, multilingual "
+            "extraction, semantic entailment, or production safety. Hash embeddings are a local "
+            "demonstration, not a trained semantic embedding model. Exact citation resolution "
+            "proves a quote exists, not that it supports an arbitrary model interpretation.",
+            "",
+            "The lexical baseline intentionally misses synonym-only evidence. Hybrid adds "
+            "deterministic hash similarity and explicit aliases; this tiny regression set is not "
+            "evidence of general semantic quality. Expected outputs were authored separately "
+            "from the application demo documents. No statistical significance or independently "
+            "reviewed gold labels are claimed. Human review of labels and a larger frozen "
+            "corpus remain necessary.",
+            "",
+            "Real-model evaluation is separate: `PYTHONPATH=backend/src python evaluations/run.py "
+            "--mode gemini`. Without credentials and a selected model it writes pending status "
+            "and exits 2. Calls have bounded input/output, timeout, retries and concurrency; "
+            "quota exhaustion stops. Provider cost is unknown (null), never reported as free. "
+            "Check account pricing, quotas and data terms before enabling credentials. "
+            "No paid fallback or billing activation is implemented.",
+            "",
+            "Demo regression target for this fixed set: hybrid status/risk accuracy >= 90%, "
+            "citation resolution 100%, no adversarial instruction override. These are demo "
+            "regression targets chosen after baseline, not accepted real-model quality "
+            "thresholds. See JSON for individual cases and measurements.",
+        ]
+    )
+    (ROOT / f"report-{report['mode']}.md").write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

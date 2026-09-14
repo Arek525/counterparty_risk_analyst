@@ -21,8 +21,7 @@ def baseline():
         "mode": "demo",
         "dataset_version": dataset["version"],
         "variants": [
-            runner.evaluate(dataset["cases"], variant, "demo")
-            for variant in ["lexical", "hybrid"]
+            runner.evaluate(dataset["cases"], variant, "demo") for variant in ["lexical", "hybrid"]
         ],
     }
 
@@ -46,9 +45,7 @@ def test_gate_rejects_metric_regression(baseline, metric, value):
 
 def test_gate_rejects_injection_override_despite_passing_aggregate(baseline):
     injected = next(
-        case
-        for case in baseline["variants"][1]["results"]
-        if case["id"] == "malicious-appendix"
+        case for case in baseline["variants"][1]["results"] if case["id"] == "malicious-appendix"
     )
     injected["actual_statuses"] = ["pass"]
     injected["actual_risk"] = "Low"
@@ -60,18 +57,14 @@ def test_gate_rejects_injection_override_despite_passing_aggregate(baseline):
 def test_gate_rejects_missing_adversarial_case_and_non_demo(baseline):
     smaller = copy.deepcopy(baseline)
     smaller["variants"][1]["results"] = [
-        case
-        for case in smaller["variants"][1]["results"]
-        if case["id"] != "malicious-appendix"
+        case for case in smaller["variants"][1]["results"] if case["id"] != "malicious-appendix"
     ]
     assert runner.regression_gate(smaller)["passed"] is False
     baseline["mode"] = "gemini"
     assert runner.regression_gate(baseline)["passed"] is False
 
 
-def test_check_cli_returns_failure_and_writes_reviewable_report(
-    baseline, tmp_path, monkeypatch
-):
+def test_check_cli_returns_failure_and_writes_reviewable_report(baseline, tmp_path, monkeypatch):
     dataset_path = Path(__file__).with_name("held_out.json")
     (tmp_path / "held_out.json").write_text(dataset_path.read_text())
     monkeypatch.setattr(runner, "ROOT", tmp_path)
@@ -88,3 +81,29 @@ def test_check_cli_returns_failure_and_writes_reviewable_report(
     report = json.loads((tmp_path / "results-demo.json").read_text())
     assert report["regression_gate"]["passed"] is False
     assert report["real_model_quality_validated"] is False
+
+
+def test_real_evaluation_report_identifies_model_without_claiming_demo_or_validation(
+    baseline, tmp_path, monkeypatch
+):
+    (tmp_path / "held_out.json").write_text(Path(__file__).with_name("held_out.json").read_text())
+    monkeypatch.setattr(runner, "ROOT", tmp_path)
+    monkeypatch.setattr("sys.argv", ["run.py", "--mode", "gemini"])
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-test-key")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-test")
+    monkeypatch.setattr(
+        runner,
+        "evaluate",
+        lambda cases, variant, mode: next(
+            row for row in baseline["variants"] if row["variant"] == variant
+        ),
+    )
+    assert runner.main() == 0
+    report = json.loads((tmp_path / "results-gemini.json").read_text())
+    markdown = (tmp_path / "report-gemini.md").read_text()
+    assert report["model"] == "gemini-test"
+    assert report["real_model_evaluated"] is True
+    assert report["real_model_quality_validated"] is False
+    assert "gemini-test" in markdown
+    assert "measured deterministic demo results" not in markdown
+    assert "synthetic-test-key" not in markdown
