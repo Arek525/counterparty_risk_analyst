@@ -36,6 +36,12 @@ class GeminiAdapter:
         content = json.dumps(payload, ensure_ascii=False)
         if len(content) + len(instruction) > self.MAX_INPUT_CHARS:
             raise ModelError("Model input limit exceeded; reduce selected documents")
+        provider_schema = schema.model_json_schema()
+        # Large batch maxItems causes HTTP 400 for Gemini's constrained decoder.
+        # Keep token/byte bounds here and enforce the original schema after decoding.
+        for field in provider_schema.get("properties", {}).values():
+            if field.get("type") == "array":
+                field.pop("maxItems", None)
         body = {
             "systemInstruction": {
                 "parts": [
@@ -56,7 +62,7 @@ class GeminiAdapter:
                 "temperature": 0,
                 "maxOutputTokens": self.MAX_OUTPUT_TOKENS,
                 "responseMimeType": "application/json",
-                "responseJsonSchema": schema.model_json_schema(),
+                "responseJsonSchema": provider_schema,
             },
         }
         url = (

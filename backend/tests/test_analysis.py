@@ -290,6 +290,138 @@ def test_gemini_input_bound_before_network(monkeypatch):
         GeminiAdapter().generate("Extract", {"text": "x" * 48001}, FactBatch)
 
 
+@pytest.mark.parametrize("overflow", [False, True])
+@pytest.mark.parametrize("batch_name,limit", [("facts", 200), ("requirements", 100)])
+def test_gemini_array_limits_are_enforced_locally_without_provider_rejection(
+    monkeypatch, overflow, batch_name, limit
+):
+    import json
+
+    import httpx
+
+    from counterparty.analysis.schemas import FactBatch, RequirementBatch
+
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-test-key")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-test")
+    monkeypatch.setattr(GeminiAdapter, "_last_call", 0)
+    real_client = httpx.Client
+    fact = {
+        "field": "retention_days",
+        "value": 90,
+        "source": {
+            "chunk_id": "e0",
+            "document_id": "d0",
+            "location": {"line_start": 1},
+            "quote": "Retention: 90 days.",
+        },
+    }
+    schema_class = FactBatch if batch_name == "facts" else RequirementBatch
+    item = (
+        fact
+        if batch_name == "facts"
+        else {
+            "id": "retention",
+            "title": "Retention",
+            "field": "retention_days",
+            "operator": "lte",
+            "expected": 30,
+            "severity": "High",
+            "source": fact["source"],
+            "evaluation_method": "deterministic",
+        }
+    )
+
+    def respond(request):
+        schema = json.loads(request.content)["generationConfig"]["responseJsonSchema"]
+        # Observed provider contract: maxItems=200 rejects this nested schema.
+        if "maxItems" in schema["properties"][batch_name]:
+            return httpx.Response(400, json={"error": {"status": "INVALID_ARGUMENT"}})
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [
+                    {
+                        "finishReason": "STOP",
+                        "content": {
+                            "parts": [
+                                {
+                                    "text": json.dumps(
+                                        {batch_name: [item] * (limit + 1 if overflow else 1)}
+                                    )
+                                }
+                            ]
+                        },
+                    }
+                ],
+            },
+        )
+
+    monkeypatch.setattr(
+        httpx, "Client", lambda **kw: real_client(transport=httpx.MockTransport(respond), **kw)
+    )
+    if overflow:
+        with pytest.raises(ModelError, match="schema validation"):
+            GeminiAdapter().generate("Extract", {}, schema_class)
+    else:
+        result = GeminiAdapter().generate("Extract", {}, schema_class)
+        assert len(result[batch_name]) == 1
+        assert result[batch_name][0]["field"] == "retention_days"
+
+
+def test_gemini_region_names_match_codes_and_preserve_transfer_question(monkeypatch):
+    chunks = [
+        chunk("Data residency: European Union. Subcontractors region: United States.", id="e0")
+    ]
+    facts = [
+        dict(
+            field=field,
+            value=value,
+            scope="unspecified",
+            period="unspecified",
+            source=dict(chunk_id="e0", document_id="doc-e0", location="line 1", quote=quote),
+        )
+        for field, value, quote in [
+            ("hosting_region", "European Union", "Data residency: European Union."),
+            ("subprocessors_region", "United States", "Subcontractors region: United States."),
+        ]
+    ]
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-test-key")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-test")
+    monkeypatch.setattr(GeminiAdapter, "generate", lambda *args: {"facts": facts})
+    snap = snapshot(chunks)
+    snap["model_mode"] = "gemini"
+    snap["requirements"] = [
+        dict(
+            id="region",
+            title="hosting_region",
+            field="hosting_region",
+            operator="eq",
+            expected="EU",
+            severity="High",
+        )
+    ]
+    report = analyze(snap)
+    assert report["findings"][0]["status"] == "pass"
+    assert report["risk"] == "Unable to assess"
+    assert report["discrepancies"]
+    assert report["facts"][0]["source"]["quote"] == "Data residency: European Union."
+    snap["requirements"][0]["expected"] = "European Union"
+    assert analyze(snap)["findings"][0]["status"] == "pass"
+    # Region equality aliases must not turn text containment into substring "US".
+    facts[:] = [facts[0]]
+    req = snap["requirements"][0]
+    req["operator"] = "contains"
+    for actual, expected, status in [
+        ("Russia", "United States", "fail"),
+        ("United States and Canada", "United States", "pass"),
+        ("United States", "United", "pass"),
+    ]:
+        facts[0]["value"] = actual
+        facts[0].pop("raw_value", None)
+        req["expected"] = expected
+        assert analyze(snap)["findings"][0]["status"] == status
+
+
 def test_structured_source_location_preserved():
     chunks = [chunk("Retention must not exceed 30 days.", kind="policy")]
     chunks[0]["location"] = {"line_start": 1, "line_end": 1}
