@@ -29,3 +29,10 @@ node_modules/
 .next/
 
 # Deliberately keep datasets/synthetic/ and public documentation trackable.
+
+# Generated local browser/agent artifacts
+/frontend/AGENTS.md
+/frontend/CLAUDE.md
+/frontend/test-results/
+/frontend/playwright-report/
+*.tsbuildinfo

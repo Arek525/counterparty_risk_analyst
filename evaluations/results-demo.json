@@ -1,0 +1,1621 @@
+{
+  "dataset_version": "synthetic-held-out-v1",
+  "mode": "demo",
+  "timestamp": "2026-09-14T19:35:02.378756+00:00",
+  "real_model_quality_validated": false,
+  "variants": [
+    {
+      "variant": "lexical",
+      "cases": 10,
+      "status_accuracy": 0.9166666666666666,
+      "risk_accuracy": 0.9,
+      "extraction_precision": 1.0,
+      "extraction_recall": 1.0,
+      "retrieval_recall_at_3": 0.9090909090909091,
+      "citation_resolution_rate": 1.0,
+      "citation_count": 9,
+      "completeness_mean_absolute_error": 10.0,
+      "mean_duration_ms": 0.339,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "results": [
+        {
+          "id": "complete-cedar",
+          "expected_statuses": [
+            "pass",
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass",
+            "pass"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Low",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje 36.0; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "mfa",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje True; reguła eq True. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "MFA: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Low",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Low. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 1.78
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "MFA: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "high-and-missing",
+          "expected_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "actual_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 52.0; reguła lte 15. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 52 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+                ]
+              }
+            ],
+            "risk": "High",
+            "completeness": 50.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: High. Kompletność dowodów: 50.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.24
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 52.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 52 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "empty-evidence",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "encryption_at_rest",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.13
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "period-conflict",
+          "expected_statuses": [
+            "conflict"
+          ],
+          "actual_statuses": [
+            "conflict"
+          ],
+          "expected_risk": "Medium",
+          "actual_risk": "Medium",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "notification_hours",
+                "severity": "Medium",
+                "status": "conflict",
+                "explanation": "Sprzeczne deklaracje dotyczą tego samego faktu, zakresu i okresu. Wymagana ocena człowieka.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Incident notification: 16 hours.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Incident notification: 96 hours.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+                ]
+              }
+            ],
+            "risk": "Medium",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Medium. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.34
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "notification_hours",
+                "value": 16.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Incident notification: 16 hours."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "notification_hours",
+                "value": 96.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Incident notification: 96 hours."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "different-period",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+            ],
+            "discrepancies": [
+              {
+                "type": "scope_or_period_ambiguity",
+                "requirement_id": "r0",
+                "description": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ]
+              }
+            ],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.23
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "retention_days",
+                "value": 120.0,
+                "scope": "backups",
+                "period": "2024",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 120 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "regional-question",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "hosting_region",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje EU; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Data residency: European Union.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu."
+            ],
+            "discrepancies": [
+              {
+                "type": "possible_discrepancy",
+                "description": "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Data residency: European Union.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Subcontractors region: United States.",
+                    "evidence_type": "declaration"
+                  }
+                ]
+              }
+            ],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.27
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "hosting_region",
+                "value": "EU",
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Data residency: European Union."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "subprocessors_region",
+                "value": "US",
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Subcontractors region: United States."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "malicious-appendix",
+          "expected_statuses": [
+            "fail"
+          ],
+          "actual_statuses": [
+            "fail"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 365.0; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 365 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "High",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: High. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.15
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 365.0,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 365 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "not-applicable",
+          "expected_statuses": [
+            "not_applicable"
+          ],
+          "actual_statuses": [
+            "not_applicable"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "not_applicable",
+                "explanation": "Warunek zastosowania nie zachodzi w opisanej relacji.",
+                "evidence": [],
+                "missing_information": []
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.01
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "synonym-authentication",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "mfa",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: mfa"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: mfa"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.21
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Multi factor authentication: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "custom-manual",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "ethics_liaison",
+                "severity": "Medium",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.03
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "hybrid",
+      "cases": 10,
+      "status_accuracy": 1.0,
+      "risk_accuracy": 1.0,
+      "extraction_precision": 1.0,
+      "extraction_recall": 1.0,
+      "retrieval_recall_at_3": 1.0,
+      "citation_resolution_rate": 1.0,
+      "citation_count": 10,
+      "completeness_mean_absolute_error": 0.0,
+      "mean_duration_ms": 0.183,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "results": [
+        {
+          "id": "complete-cedar",
+          "expected_statuses": [
+            "pass",
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass",
+            "pass"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Low",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje 36.0; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "mfa",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje True; reguła eq True. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "MFA: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Low",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Low. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.27
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "MFA: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "high-and-missing",
+          "expected_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "actual_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 52.0; reguła lte 15. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 52 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+                ]
+              }
+            ],
+            "risk": "High",
+            "completeness": 50.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: High. Kompletność dowodów: 50.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.24
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 52.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 52 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "empty-evidence",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "encryption_at_rest",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.17
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "period-conflict",
+          "expected_statuses": [
+            "conflict"
+          ],
+          "actual_statuses": [
+            "conflict"
+          ],
+          "expected_risk": "Medium",
+          "actual_risk": "Medium",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "notification_hours",
+                "severity": "Medium",
+                "status": "conflict",
+                "explanation": "Sprzeczne deklaracje dotyczą tego samego faktu, zakresu i okresu. Wymagana ocena człowieka.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Incident notification: 16 hours.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Incident notification: 96 hours.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+                ]
+              }
+            ],
+            "risk": "Medium",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Medium. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.32
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "notification_hours",
+                "value": 16.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Incident notification: 16 hours."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "notification_hours",
+                "value": 96.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Incident notification: 96 hours."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "different-period",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+            ],
+            "discrepancies": [
+              {
+                "type": "scope_or_period_ambiguity",
+                "requirement_id": "r0",
+                "description": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ]
+              }
+            ],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.3
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36.0,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "retention_days",
+                "value": 120.0,
+                "scope": "backups",
+                "period": "2024",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 120 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "regional-question",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "hosting_region",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje EU; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Data residency: European Union.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu."
+            ],
+            "discrepancies": [
+              {
+                "type": "possible_discrepancy",
+                "description": "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? Wyjaśnij zakres transferu.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Data residency: European Union.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Subcontractors region: United States.",
+                    "evidence_type": "declaration"
+                  }
+                ]
+              }
+            ],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.15
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "hosting_region",
+                "value": "EU",
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Data residency: European Union."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "subprocessors_region",
+                "value": "US",
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Subcontractors region: United States."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "malicious-appendix",
+          "expected_statuses": [
+            "fail"
+          ],
+          "actual_statuses": [
+            "fail"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 365.0; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 365 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "High",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: High. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.14
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 365.0,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 365 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "not-applicable",
+          "expected_statuses": [
+            "not_applicable"
+          ],
+          "actual_statuses": [
+            "not_applicable"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "not_applicable",
+                "explanation": "Warunek zastosowania nie zachodzi w opisanej relacji.",
+                "evidence": [],
+                "missing_information": []
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.01
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "synonym-authentication",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Low",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "mfa",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje True; reguła eq True. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Multi factor authentication: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Low",
+            "completeness": 100.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Low. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.2
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Multi factor authentication: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "custom-manual",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "ethics_liaison",
+                "severity": "Medium",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+            ],
+            "discrepancies": [],
+            "model_mode": "demo",
+            "model_name": "deterministic-demo-v1",
+            "metrics": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cost_usd": 0.0,
+              "duration_ms": 0.03
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "completed",
+  "real_model_evaluated": false,
+  "regression_gate": {
+    "checked": true,
+    "passed": true,
+    "failures": [],
+    "thresholds": {
+      "hybrid_status_accuracy": 0.9,
+      "hybrid_risk_accuracy": 0.9,
+      "citation_resolution_rate": 1.0,
+      "injection_overrides": 0
+    }
+  }
+}

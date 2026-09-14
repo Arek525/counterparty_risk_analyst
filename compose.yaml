@@ -1,0 +1,112 @@
+name: counterparty-risk-analyst
+
+x-backend: &backend
+  image: counterparty-risk-analyst-api:local
+  build:
+    context: ./backend
+    target: runtime
+  environment:
+    DATABASE_URL: postgresql+psycopg://counterparty@db:5432/counterparty
+    DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env}
+    STORAGE_PATH: /app/storage
+    ALLOWED_ORIGINS: '${ALLOWED_ORIGINS:-["http://localhost:3000","http://127.0.0.1:3000","http://localhost:8000","http://127.0.0.1:8000"]}'
+    DEMO_MODE: ${DEMO_MODE:-true}
+    MODEL_MODE: ${MODEL_MODE:-demo}
+    GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    GEMINI_MODEL: ${GEMINI_MODEL:-}
+    TICKET_SERVICE_URL: http://tickets:8010
+    TICKET_SERVICE_TOKEN: ${TICKET_SERVICE_TOKEN:-local-demo-ticket-token}
+    LANGSMITH_TRACING: "false"
+    LANGCHAIN_TRACING_V2: "false"
+  volumes:
+    - document-storage:/app/storage
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.6-pg17-trixie@sha256:724a4041afdb1750446e3f6b5cfa8f3b0ac5a2cf538ddfa6bfee4f94c2fa85c6
+    environment:
+      POSTGRES_DB: counterparty
+      POSTGRES_USER: counterparty
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U counterparty -d counterparty"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  migrate:
+    <<: *backend
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=10)"]
+      interval: 10s
+      timeout: 12s
+      retries: 3
+      start_period: 5s
+
+  seed:
+    <<: *backend
+    profiles: ["tools"]
+    command: ["python", "-m", "counterparty.bootstrap", "--fixtures", "/datasets"]
+    volumes:
+      - ./datasets/synthetic:/datasets:ro
+      - document-storage:/app/storage
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *backend
+    command: ["python", "-m", "counterparty.worker"]
+    init: true
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  tickets:
+    <<: *backend
+    command: ["uvicorn", "counterparty.ticket_service:create_app", "--factory", "--host", "0.0.0.0", "--port", "8010"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login', {signal: AbortSignal.timeout(3000)}).then(r => {if (!r.ok) process.exit(1)}).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  document-storage:

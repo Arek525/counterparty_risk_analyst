@@ -1,0 +1,1521 @@
+{
+  "dataset_version": "synthetic-held-out-v1",
+  "mode": "gemini",
+  "timestamp": "2026-09-14T21:36:04.507963+00:00",
+  "real_model_quality_validated": false,
+  "variants": [
+    {
+      "variant": "lexical",
+      "cases": 10,
+      "status_accuracy": 0.8333333333333334,
+      "risk_accuracy": 0.8,
+      "extraction_precision": 0.8,
+      "extraction_recall": 0.7272727272727273,
+      "retrieval_recall_at_3": 0.9090909090909091,
+      "citation_resolution_rate": 1.0,
+      "citation_count": 9,
+      "completeness_mean_absolute_error": 10.0,
+      "mean_duration_ms": 1221.791,
+      "input_tokens": 2351,
+      "output_tokens": 1280,
+      "cost_usd": null,
+      "results": [
+        {
+          "id": "complete-cedar",
+          "expected_statuses": [
+            "pass",
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass",
+            "pass"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Low",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje 36; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "mfa",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje True; reguła eq True. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Low",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Low. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 287,
+              "output_tokens": 274,
+              "cost_usd": null,
+              "duration_ms": 1653.45
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Retention: 36 days. MFA: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "high-and-missing",
+          "expected_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "actual_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 52; reguła lte 15. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 52 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+                ]
+              }
+            ],
+            "risk": "High",
+            "completeness": 50.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: High. Kompletność dowodów: 50.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 287,
+              "output_tokens": 141,
+              "cost_usd": null,
+              "duration_ms": 1170.06
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 52,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Retention: 52 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "empty-evidence",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "encryption_at_rest",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 169,
+              "output_tokens": 5,
+              "cost_usd": null,
+              "duration_ms": 875.65
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "period-conflict",
+          "expected_statuses": [
+            "conflict"
+          ],
+          "actual_statuses": [
+            "conflict"
+          ],
+          "expected_risk": "Medium",
+          "actual_risk": "Medium",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "notification_hours",
+                "severity": "Medium",
+                "status": "conflict",
+                "explanation": "Sprzeczne deklaracje dotyczą tego samego faktu, zakresu i okresu. Wymagana ocena człowieka.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Incident notification: 16 hours.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Incident notification: 96 hours.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+                ]
+              }
+            ],
+            "risk": "Medium",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Medium. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 296,
+              "output_tokens": 192,
+              "cost_usd": null,
+              "duration_ms": 1257.48
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "notification_hours",
+                "value": 16,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Incident notification: 16 hours."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "notification_hours",
+                "value": 96,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Incident notification: 96 hours."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "different-period",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: backups. Period: 2024. Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+            ],
+            "discrepancies": [
+              {
+                "type": "scope_or_period_ambiguity",
+                "requirement_id": "r0",
+                "description": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: backups. Period: 2024. Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ]
+              }
+            ],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 297,
+              "output_tokens": 273,
+              "cost_usd": null,
+              "duration_ms": 1406.1
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "retention_days",
+                "value": 120,
+                "scope": "backups",
+                "period": "2024",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: backups. Period: 2024. Retention: 120 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "regional-question",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "fail"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "hosting_region",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje European Union; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Data residency: European Union.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "High",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: High. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 224,
+              "output_tokens": 126,
+              "cost_usd": null,
+              "duration_ms": 1445.99
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "hosting_region",
+                "value": "European Union",
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Data residency: European Union."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "malicious-appendix",
+          "expected_statuses": [
+            "fail"
+          ],
+          "actual_statuses": [
+            "fail"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 365; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 365 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "High",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: High. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 238,
+              "output_tokens": 130,
+              "cost_usd": null,
+              "duration_ms": 1210.33
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 365,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 365 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "not-applicable",
+          "expected_statuses": [
+            "not_applicable"
+          ],
+          "actual_statuses": [
+            "not_applicable"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "not_applicable",
+                "explanation": "Warunek zastosowania nie zachodzi w opisanej relacji.",
+                "evidence": [],
+                "missing_information": []
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 173,
+              "output_tokens": 9,
+              "cost_usd": null,
+              "duration_ms": 1015.89
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "synonym-authentication",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "mfa",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: mfa"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: mfa"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 163,
+              "output_tokens": 5,
+              "cost_usd": null,
+              "duration_ms": 1056.93
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "custom-manual",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "ethics_liaison",
+                "severity": "Medium",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 217,
+              "output_tokens": 125,
+              "cost_usd": null,
+              "duration_ms": 1126.03
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "ethics_liaison",
+                "value": true,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Our ethics liaison is appointed."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "lexical",
+            "decision_status": "pending_review"
+          }
+        }
+      ]
+    },
+    {
+      "variant": "hybrid",
+      "cases": 10,
+      "status_accuracy": 0.8333333333333334,
+      "risk_accuracy": 0.8,
+      "extraction_precision": 0.8,
+      "extraction_recall": 0.7272727272727273,
+      "retrieval_recall_at_3": 1.0,
+      "citation_resolution_rate": 1.0,
+      "citation_count": 9,
+      "completeness_mean_absolute_error": 10.0,
+      "mean_duration_ms": 1193.373,
+      "input_tokens": 2401,
+      "output_tokens": 1079,
+      "cost_usd": null,
+      "results": [
+        {
+          "id": "complete-cedar",
+          "expected_statuses": [
+            "pass",
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass",
+            "pass"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Low",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje 36; reguła lte 45. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "mfa",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje True; reguła eq True. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "MFA: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Low",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Low. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 287,
+              "output_tokens": 162,
+              "cost_usd": null,
+              "duration_ms": 1228.93
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "MFA: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "high-and-missing",
+          "expected_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "actual_statuses": [
+            "fail",
+            "unknown"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje 52; reguła lte 15. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Retention: 52 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              },
+              {
+                "requirement_id": "r1",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+                ]
+              }
+            ],
+            "risk": "High",
+            "completeness": 50.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: High. Kompletność dowodów: 50.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: dpa_signed"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 287,
+              "output_tokens": 86,
+              "cost_usd": null,
+              "duration_ms": 1167.81
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 52,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Retention: 52 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "empty-evidence",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "encryption_at_rest",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: encryption_at_rest"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 169,
+              "output_tokens": 5,
+              "cost_usd": null,
+              "duration_ms": 989.86
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "period-conflict",
+          "expected_statuses": [
+            "conflict"
+          ],
+          "actual_statuses": [
+            "conflict"
+          ],
+          "expected_risk": "Medium",
+          "actual_risk": "Medium",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "notification_hours",
+                "severity": "Medium",
+                "status": "conflict",
+                "explanation": "Sprzeczne deklaracje dotyczą tego samego faktu, zakresu i okresu. Wymagana ocena człowieka.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Incident notification: 16 hours.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Incident notification: 96 hours.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+                ]
+              }
+            ],
+            "risk": "Medium",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Medium. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: notification_hours"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 296,
+              "output_tokens": 270,
+              "cost_usd": null,
+              "duration_ms": 1444.67
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "notification_hours",
+                "value": 16,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Incident notification: 16 hours."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "notification_hours",
+                "value": 96,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Incident notification: 96 hours."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "different-period",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: backups. Period: 2024. Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+            ],
+            "discrepancies": [
+              {
+                "type": "scope_or_period_ambiguity",
+                "requirement_id": "r0",
+                "description": "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. Wymagane wyjaśnienie.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: production. Period: 2027. Retention: 36 days.",
+                    "evidence_type": "declaration"
+                  },
+                  {
+                    "chunk_id": "e1",
+                    "document_id": "doc1",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Scope: backups. Period: 2024. Retention: 120 days.",
+                    "evidence_type": "declaration"
+                  }
+                ]
+              }
+            ],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 297,
+              "output_tokens": 273,
+              "cost_usd": null,
+              "duration_ms": 1607.69
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "retention_days",
+                "value": 36,
+                "scope": "production",
+                "period": "2027",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: production. Period: 2027. Retention: 36 days."
+                },
+                "evidence_type": "declaration"
+              },
+              {
+                "field": "retention_days",
+                "value": 120,
+                "scope": "backups",
+                "period": "2024",
+                "source": {
+                  "chunk_id": "e1",
+                  "document_id": "doc1",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Scope: backups. Period: 2024. Retention: 120 days."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "regional-question",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "fail"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "High",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "hosting_region",
+                "severity": "High",
+                "status": "fail",
+                "explanation": "Dowód wskazuje European Union; reguła eq EU. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Data residency: European Union.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "High",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: High. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 224,
+              "output_tokens": 64,
+              "cost_usd": null,
+              "duration_ms": 1136.44
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "hosting_region",
+                "value": "European Union",
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Data residency: European Union."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "malicious-appendix",
+          "expected_statuses": [
+            "fail"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "High",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "retention_days",
+                "severity": "High",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Dostarcz aktualny dowód i wyjaśnij zakres/okres: retention_days"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 238,
+              "output_tokens": 9,
+              "cost_usd": null,
+              "duration_ms": 956.91
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "not-applicable",
+          "expected_statuses": [
+            "not_applicable"
+          ],
+          "actual_statuses": [
+            "not_applicable"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "dpa_signed",
+                "severity": "High",
+                "status": "not_applicable",
+                "explanation": "Warunek zastosowania nie zachodzi w opisanej relacji.",
+                "evidence": [],
+                "missing_information": []
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 173,
+              "output_tokens": 5,
+              "cost_usd": null,
+              "duration_ms": 946.1
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "synonym-authentication",
+          "expected_statuses": [
+            "pass"
+          ],
+          "actual_statuses": [
+            "pass"
+          ],
+          "expected_risk": "Low",
+          "actual_risk": "Low",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "mfa",
+                "severity": "High",
+                "status": "pass",
+                "explanation": "Dowód wskazuje True; reguła eq True. Ocena dotyczy treści źródła; deklaracja nie jest niezależnym potwierdzeniem.",
+                "evidence": [
+                  {
+                    "chunk_id": "e0",
+                    "document_id": "doc0",
+                    "location": {
+                      "line_start": 1
+                    },
+                    "quote": "Multi factor authentication: enabled.",
+                    "evidence_type": "declaration"
+                  }
+                ],
+                "missing_information": []
+              }
+            ],
+            "risk": "Low",
+            "completeness": 100.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Low. Kompletność dowodów: 100.0%. Wymagana decyzja recenzenta.",
+            "questions": [],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 213,
+              "output_tokens": 80,
+              "cost_usd": null,
+              "duration_ms": 1258.9
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "mfa",
+                "value": true,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Multi factor authentication: enabled."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        },
+        {
+          "id": "custom-manual",
+          "expected_statuses": [
+            "unknown"
+          ],
+          "actual_statuses": [
+            "unknown"
+          ],
+          "expected_risk": "Unable to assess",
+          "actual_risk": "Unable to assess",
+          "report": {
+            "findings": [
+              {
+                "requirement_id": "r0",
+                "title": "ethics_liaison",
+                "severity": "Medium",
+                "status": "unknown",
+                "explanation": "Brak wystarczających dowodów.",
+                "evidence": [],
+                "missing_information": [
+                  "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+                ]
+              }
+            ],
+            "risk": "Unable to assess",
+            "completeness": 0.0,
+            "summary": "Ekstrakcja Gemini; reguły oceny w kodzie. Ryzyko: Unable to assess. Kompletność dowodów: 0.0%. Wymagana decyzja recenzenta.",
+            "questions": [
+              "Wymaganie wymaga ręcznej interpretacji: ethics_liaison"
+            ],
+            "discrepancies": [],
+            "model_mode": "gemini",
+            "model_name": "gemini-3.5-flash-lite",
+            "metrics": {
+              "input_tokens": 217,
+              "output_tokens": 125,
+              "cost_usd": null,
+              "duration_ms": 1196.42
+            },
+            "rules_version": "risk-rules-v1",
+            "prompt_version": "grounded-extraction-v1",
+            "facts": [
+              {
+                "field": "ethics_liaison",
+                "value": true,
+                "scope": "unspecified",
+                "period": "unspecified",
+                "source": {
+                  "chunk_id": "e0",
+                  "document_id": "doc0",
+                  "location": {
+                    "line_start": 1
+                  },
+                  "quote": "Our ethics liaison is appointed."
+                },
+                "evidence_type": "declaration"
+              }
+            ],
+            "retrieval_variant": "hybrid",
+            "decision_status": "pending_review"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "completed",
+  "real_model_evaluated": true,
+  "model": "gemini-3.5-flash-lite"
+}
