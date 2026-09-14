@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from counterparty.database import Base
+from counterparty.organizations import Organization as Organization
 
 
 def now():
