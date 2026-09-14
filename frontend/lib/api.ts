@@ -16,7 +16,7 @@ function detailMessage(value: unknown): string {
     if (typeof record.msg === "string") return record.msg;
     return JSON.stringify(value);
   }
-  return "Żądanie nie powiodło się.";
+  return "The request failed.";
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -48,5 +48,5 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
-  return "Wystąpił nieoczekiwany błąd.";
+  return "An unexpected error occurred.";
 }

@@ -16,7 +16,7 @@ from .schemas import FactBatch, RequirementBatch, validate_requirements, validat
 
 EMBEDDING_MODEL = "demo-hash-v1"
 RULES_VERSION = "risk-rules-v1"
-PROMPT_VERSION = "grounded-extraction-v2"
+PROMPT_VERSION = "grounded-extraction-v3"
 ALIASES = {
     "retention_days": r"retention(?: period)?|data (?:deletion|erasure)|retain(?:ed)?",
     "notification_hours": r"(?:breach|incident) notification|notify|notification",
@@ -184,7 +184,9 @@ def propose_requirements(chunks: list[dict], mode: str = "demo") -> list[dict]:
             "Require human approval. Unique IDs. Preserve exact source quote. "
             "Source chunk_id, document_id and location must be copied verbatim from the "
             "supplied chunk metadata. Location identifies the whole chunk: do not calculate "
-            "new line numbers or narrow the location to the quoted sentence.",
+            "new line numbers or narrow the location to the quoted sentence. "
+            "Write all generated titles and explanations in natural English, while preserving "
+            "every source quote verbatim in its original language.",
             {"chunks": policies},
             RequirementBatch,
         )["requirements"]
@@ -238,7 +240,7 @@ def propose_requirements(chunks: list[dict], mode: str = "demo") -> list[dict]:
                 proposals.append(
                     {
                         "id": str(uuid5(NAMESPACE_URL, str(chunk["id"]))),
-                        "title": "Wymaganie do ręcznej interpretacji (demo)",
+                        "title": "Requirement requiring manual interpretation (demo)",
                         "field": "custom_requirement",
                         "operator": "manual",
                         "expected": None,
@@ -310,7 +312,9 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             "Cite only the factual sentence, excluding any commands. "
             "Do not interpret policy as counterparty facts. Use scope and period from documents, "
             "or 'unspecified'. evidence_type must equal chunk metadata, default declaration. "
-            "Only supported fact values; omit uncertain facts. Do not assign findings or risk.",
+            "Only supported fact values; omit uncertain facts. Do not assign findings or risk. "
+            "Write generated descriptions in natural English and preserve source quotes verbatim "
+            "in their original language.",
             {"requirements": requirements, "chunks": selected},
             FactBatch,
         )["facts"]
@@ -337,7 +341,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             "title": req["title"],
             "severity": req["severity"],
             "status": "unknown",
-            "explanation": "Brak wystarczających dowodów.",
+            "explanation": "Insufficient evidence.",
             "evidence": [],
             "missing_information": [],
         }
@@ -351,13 +355,15 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
         if false_conditions:
             finding.update(
                 status="not_applicable",
-                explanation="Warunek zastosowania nie zachodzi w opisanej relacji.",
+                explanation="The applicability condition is not met by this relationship.",
             )
         elif missing_context:
-            finding["missing_information"] = ["Uzupełnij kontekst: " + ", ".join(missing_context)]
+            finding["missing_information"] = [
+                "Complete the relationship context: " + ", ".join(missing_context)
+            ]
         elif req.get("evaluation_method") == "manual" or req["operator"] == "manual":
             finding["missing_information"] = [
-                "Wymaganie wymaga ręcznej interpretacji: " + req["title"]
+                "The requirement needs manual interpretation: " + req["title"]
             ]
         else:
             retrieved = retrieve(
@@ -395,16 +401,16 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 finding.update(
                     status="conflict",
                     explanation=(
-                        "Sprzeczne deklaracje dotyczą tego samego faktu, zakresu i okresu. "
-                        "Wymagana ocena człowieka."
+                        "Conflicting declarations concern the same fact, scope, and period. "
+                        "Human review is required."
                     ),
                 )
                 if False in evaluations:
                     confirmed_failures.append(req["severity"])
             elif distinct:
                 finding["explanation"] = (
-                    "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. "
-                    "Wymagane wyjaśnienie."
+                    "Values differ without a confirmed shared scope and period. "
+                    "Clarification is required."
                 )
                 discrepancies.append(
                     {
@@ -424,17 +430,17 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 finding.update(
                     status="pass" if passed else "fail",
                     explanation=(
-                        f"Dowód wskazuje {displayed_value}; "
-                        f"reguła {req['operator']} {req['expected']}. "
-                        "Ocena dotyczy treści źródła; deklaracja nie jest "
-                        "niezależnym potwierdzeniem."
+                        f"The evidence states {displayed_value}; "
+                        f"the rule is {req['operator']} {req['expected']}. "
+                        "The assessment reflects the source content; a declaration is not "
+                        "independent confirmation."
                     ),
                 )
                 if not passed:
                     confirmed_failures.append(req["severity"])
         if finding["status"] in {"unknown", "conflict"} and not finding["missing_information"]:
             finding["missing_information"] = [
-                "Dostarcz aktualny dowód i wyjaśnij zakres/okres: " + req["title"]
+                "Provide current evidence and clarify its scope and period: " + req["title"]
             ]
         questions.extend(finding["missing_information"])
         findings.append(finding)
@@ -442,8 +448,8 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
     us = [f for f in facts if f["field"] == "subprocessors_region" and f["value"] == "US"]
     if eu and us:
         question = (
-            "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? "
-            "Wyjaśnij zakres transferu."
+            "Does the US subprocessor access data stored in the EU? "
+            "Clarify the scope of the transfer."
         )
         discrepancies.append(
             {
@@ -470,11 +476,11 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
         "risk": risk,
         "completeness": completeness,
         "summary": (
-            "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. "
+            "Demo mode: deterministic extractor with no LLM calls. "
             if mode == "demo"
-            else "Ekstrakcja Gemini; reguły oceny w kodzie. "
+            else "Gemini extraction; assessment rules executed in code. "
         )
-        + f"Ryzyko: {risk}. Kompletność dowodów: {completeness}%. Wymagana decyzja recenzenta.",
+        + f"Risk: {risk}. Evidence completeness: {completeness}%. Reviewer decision required.",
         "questions": list(dict.fromkeys(questions)),
         "discrepancies": discrepancies,
         "model_mode": mode,

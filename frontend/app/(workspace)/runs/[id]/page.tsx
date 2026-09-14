@@ -62,18 +62,18 @@ export default function RunPage() {
     () => run?.decision ?? run?.decisions?.[0] ?? null,
     [run],
   );
-  if (!run && !error) return <Spinner label="Ładowanie analizy…" />;
+  if (!run && !error) return <Spinner label="Loading analysis…" />;
   if (!run) return <ErrorNotice message={error} retry={load} />;
   const processing = run.status === "queued" || run.status === "running";
   return (
     <>
       <PageHeader
-        eyebrow={`Analiza · ${run.retrieval_variant}`}
-        title="Raport oceny"
-        description={`Przebieg ${run.id}`}
+        eyebrow={`Analysis · ${run.retrieval_variant}`}
+        title="Assessment report"
+        description={`Run ${run.id}`}
         actions={
           <Link className="button button-quiet" href={`/cases/${run.case_id}`}>
-            Powrót do sprawy
+            Back to case
           </Link>
         }
       />
@@ -84,14 +84,14 @@ export default function RunPage() {
           <Spinner
             label={
               run.status === "queued"
-                ? "Analiza czeka na wolnego pracownika…"
-                : "Trwa wyszukiwanie dowodów i ocena wymagań…"
+                ? "The analysis is waiting for an available worker…"
+                : "Retrieving evidence and evaluating requirements…"
             }
           />
         </section>
       )}
       {run.status === "failed" && (
-        <ErrorNotice message={run.error || "Analiza zakończyła się błędem."} />
+        <ErrorNotice message={run.error || "The analysis failed."} />
       )}{" "}
       {run.report && (
         <>
@@ -102,7 +102,7 @@ export default function RunPage() {
           )}
           <div className="stat-grid">
             <article className="card stat">
-              <span className="stat-label">Ryzyko</span>
+              <span className="stat-label">Risk</span>
               <span className="stat-value">
                 <StatusBadge value={run.report.risk}>
                   {run.report.risk}
@@ -110,7 +110,7 @@ export default function RunPage() {
               </span>
             </article>
             <article className="card stat">
-              <span className="stat-label">Kompletność dowodów</span>
+              <span className="stat-label">Evidence completeness</span>
               <span className="stat-value">{run.report.completeness}%</span>
               <div className="progress-track">
                 <div
@@ -120,7 +120,7 @@ export default function RunPage() {
               </div>
             </article>
             <article className="card stat">
-              <span className="stat-label">Decyzja człowieka</span>
+              <span className="stat-label">Human decision</span>
               <span className="stat-value" style={{ fontSize: 18 }}>
                 {decision ? (
                   <StatusBadge value={decision.decision}>
@@ -128,21 +128,21 @@ export default function RunPage() {
                   </StatusBadge>
                 ) : (
                   <StatusBadge value="awaiting_review">
-                    Oczekuje na decyzję
+                    Awaiting decision
                   </StatusBadge>
                 )}
               </span>
             </article>
           </div>
           <section className="card report-summary">
-            <h2>Podsumowanie</h2>
+            <h2>Summary</h2>
             <p>{run.report.summary}</p>
           </section>
           <div className="detail-grid" style={{ marginTop: 18 }}>
             <div className="stack">
               <section>
                 <h2 style={{ font: "600 24px Georgia,serif" }}>
-                  Ustalenia ({run.report.findings.length})
+                  Findings ({run.report.findings.length})
                 </h2>
                 <div className="stack">
                   {run.report.findings.map((finding) => (
@@ -168,7 +168,7 @@ export default function RunPage() {
                         : (finding.missing_information?.length ?? 0) > 0) && (
                           <div className="notice notice-info">
                             <p>
-                              <strong>Brakująca informacja:</strong>{" "}
+                              <strong>Missing information:</strong>{" "}
                               {Array.isArray(finding.missing_information)
                                 ? finding.missing_information.join(" ")
                                 : finding.missing_information}
@@ -188,10 +188,9 @@ export default function RunPage() {
                                 style={{ width: 14, verticalAlign: "middle" }}
                               />{" "}
                               {evidence.evidence_type === "independent"
-                                ? "niezależny dowód"
-                                : "deklaracja"}{" "}
-                              · {formatLocation(evidence.location)} · otwórz
-                              źródło
+                                ? "independent evidence"
+                                : "declaration"}{" "}
+                              · {formatLocation(evidence.location)} · open source
                             </span>
                           </button>
                         ))}
@@ -217,7 +216,7 @@ export default function RunPage() {
               <TicketPanel run={run} tickets={tickets} saved={load} />
               <section className="card">
                 <div className="card-header">
-                  <h2>Ślad wykonania</h2>
+                  <h2>Execution trace</h2>
                 </div>
                 <div className="card-body">
                   <dl className="definition-list">
@@ -231,7 +230,7 @@ export default function RunPage() {
                       </dd>
                     </div>
                     <div>
-                      <dt>Reguły</dt>
+                      <dt>Rules</dt>
                       <dd className="mono">{run.report.rules_version}</dd>
                     </div>
                     <div>
@@ -239,21 +238,21 @@ export default function RunPage() {
                       <dd className="mono">{run.report.prompt_version}</dd>
                     </div>
                     <div>
-                      <dt>Czas</dt>
+                      <dt>Duration</dt>
                       <dd>{run.report.metrics.duration_ms} ms</dd>
                     </div>
                     <div>
-                      <dt>Tokeny</dt>
+                      <dt>Tokens</dt>
                       <dd>
                         {run.report.metrics.input_tokens} /{" "}
                         {run.report.metrics.output_tokens}
                       </dd>
                     </div>
                     <div>
-                      <dt>Koszt</dt>
+                      <dt>Cost</dt>
                       <dd>
                         {run.report.metrics.cost_usd === null
-                          ? "Koszt nieustalony"
+                          ? "Cost unavailable"
                           : `$${run.report.metrics.cost_usd.toFixed(4)}`}
                       </dd>
                     </div>
@@ -273,10 +272,10 @@ export default function RunPage() {
 
 function RunProgress({ run }: { run: AnalysisRun }) {
   const steps = [
-    { key: "queued", label: "Utworzono" },
-    { key: "running", label: "Analiza" },
-    { key: "awaiting_review", label: "Przegląd" },
-    { key: "completed", label: "Decyzja" },
+    { key: "queued", label: "Created" },
+    { key: "running", label: "Analysis" },
+    { key: "awaiting_review", label: "Review" },
+    { key: "completed", label: "Decision" },
   ];
   const index =
     run.status === "failed"
@@ -339,17 +338,17 @@ function RunProgress({ run }: { run: AnalysisRun }) {
 
 function runEventLabel(event: string): string {
   const labels: Record<string, string> = {
-    "analysis.queued": "Analiza została dodana do kolejki",
-    "run.started": "Analiza została rozpoczęta",
-    "run.awaiting_review": "Raport oczekuje na przegląd",
-    "analysis.decision": "Decyzja została zapisana",
-    "run.completed": "Analiza została zakończona",
-    "run.retry_scheduled": "Zaplanowano ponowienie analizy",
-    "run.failed": "Analiza zakończyła się błędem",
+    "analysis.queued": "Analysis queued",
+    "run.started": "Analysis started",
+    "run.awaiting_review": "Report awaiting review",
+    "analysis.decision": "Decision recorded",
+    "run.completed": "Analysis completed",
+    "run.retry_scheduled": "Analysis retry scheduled",
+    "run.failed": "Analysis failed",
   };
   if (labels[event]) return labels[event];
   if (event.startsWith("run.") || event.startsWith("analysis.")) {
-    return "Zaktualizowano stan analizy";
+    return "Analysis status updated";
   }
   return titleCase(event);
 }
@@ -367,7 +366,7 @@ function ReportLists({
       {questions.length > 0 && (
         <section className="card">
           <div className="card-header">
-            <h2>Pytania uzupełniające</h2>
+            <h2>Follow-up questions</h2>
           </div>
           <div className="card-body">
             <ol className="plain-list">
@@ -381,7 +380,7 @@ function ReportLists({
       {discrepancies.length > 0 && (
         <section className="card">
           <div className="card-header">
-            <h2>Rozbieżności</h2>
+            <h2>Discrepancies</h2>
           </div>
           <div className="card-body">
             <ul className="plain-list">
@@ -392,7 +391,7 @@ function ReportLists({
                     : (item.description ??
                       item.message ??
                       item.explanation ??
-                      "Rozbieżność wymaga wyjaśnienia.");
+                      "The discrepancy requires clarification.");
                 return <li key={index}>{description}</li>;
               })}
             </ul>
@@ -437,7 +436,7 @@ function DecisionPanel({
   return (
     <section className="card">
       <div className="card-header">
-        <h2>Decyzja</h2>
+        <h2>Decision</h2>
       </div>
       <div className="card-body">
         {decision ? (
@@ -450,19 +449,19 @@ function DecisionPanel({
           </>
         ) : run.status !== "awaiting_review" ? (
           <p className="subtle">
-            Decyzję można zapisać po przygotowaniu raportu.
+            A decision can be recorded after the report is ready.
           </p>
         ) : !canDecide ? (
-          <p className="subtle">Raport oczekuje na decyzję recenzenta.</p>
+          <p className="subtle">The report is awaiting a reviewer decision.</p>
         ) : (
           <form onSubmit={submit}>
             {error && <ErrorNotice message={error} />}
             <div className="decision-options">
               {(
                 [
-                  ["accepted", "Akceptuję"],
-                  ["rejected", "Odrzucam"],
-                  ["needs_information", "Potrzebuję danych"],
+                  ["accepted", "Accept"],
+                  ["rejected", "Reject"],
+                  ["needs_information", "Request information"],
                 ] as const
               ).map(([key, label]) => (
                 <button
@@ -476,14 +475,14 @@ function DecisionPanel({
               ))}
             </div>
             <label className="field">
-              <span>Uzasadnienie decyzji</span>
+              <span>Decision rationale</span>
               <textarea
                 className="textarea"
                 required
                 minLength={3}
                 value={rationale}
                 onChange={(e) => setRationale(e.target.value)}
-                placeholder="Wyjaśnij, które ustalenia wpłynęły na decyzję."
+                placeholder="Explain which findings informed the decision."
               />
             </label>
             <button
@@ -491,7 +490,7 @@ function DecisionPanel({
               style={{ width: "100%" }}
               disabled={pending || !rationale.trim()}
             >
-              {pending ? "Zapisywanie…" : "Zapisz decyzję"}
+              {pending ? "Saving…" : "Save decision"}
             </button>
           </form>
         )}
@@ -511,7 +510,7 @@ function TicketPanel({
 }) {
   const { user } = useAuth();
   const [title, setTitle] = useState(
-    `Uzupełnienie informacji — analiza ${run.id.slice(0, 8)}`,
+    `Information request — analysis ${run.id.slice(0, 8)}`,
   );
   const [body, setBody] = useState(
     run.report?.questions.map((q) => `- ${q}`).join("\n") ?? "",
@@ -564,20 +563,20 @@ function TicketPanel({
   return (
     <section className="card">
       <div className="card-header">
-        <h2>Zgłoszenie follow-up</h2>
+        <h2>Follow-up ticket</h2>
       </div>
       <div className="card-body">
         {error && <ErrorNotice message={error} />}
         <p className="subtle">
-          Propozycja, jej zatwierdzenie i zapis w usłudze to trzy osobne kroki
-          audytowe.
+          Proposal, approval, and submission to the service are three separate
+          auditable steps.
         </p>
         {!canPropose ? (
-          <p className="subtle">Konto audytora ma dostęp tylko do odczytu.</p>
+          <p className="subtle">The auditor account has read-only access.</p>
         ) : (
           <>
             <label className="field">
-              <span>Tytuł</span>
+              <span>Title</span>
               <input
                 className="input"
                 value={title}
@@ -588,7 +587,7 @@ function TicketPanel({
               />
             </label>
             <label className="field">
-              <span>Treść</span>
+              <span>Body</span>
               <textarea
                 className="textarea"
                 value={body}
@@ -609,7 +608,7 @@ function TicketPanel({
                 className="button button-quiet button-small"
                 onClick={() => setPreview(false)}
               >
-                Wróć do edycji
+                Return to editing
               </button>
               <button
                 className="button button-small"
@@ -622,8 +621,8 @@ function TicketPanel({
                 }
               >
                 {pending === "new"
-                  ? "Zapisywanie…"
-                  : "Zapisz dokładną propozycję"}
+                  ? "Saving…"
+                  : "Save exact proposal"}
               </button>
             </div>
           </div>
@@ -633,7 +632,7 @@ function TicketPanel({
             disabled={!title.trim() || !body.trim()}
             onClick={() => setPreview(true)}
           >
-            Pokaż podgląd propozycji
+            Preview proposal
           </button>
         ) : null}
         {tickets.length > 0 && (
@@ -650,7 +649,7 @@ function TicketPanel({
                   <h4>
                     {approval.arguments?.title ??
                       approval.ticket?.title ??
-                      "Zgłoszenie"}
+                      "Ticket"}
                   </h4>
                   <StatusBadge value={approval.status}>
                     {statusLabels[approval.status] ?? approval.status}
@@ -658,7 +657,7 @@ function TicketPanel({
                 </div>
                 <p>{approval.arguments?.body ?? approval.ticket?.body}</p>
                 <span className="subtle">
-                  Wygasa: {formatDate(approval.expires_at)}
+                  Expires: {formatDate(approval.expires_at)}
                 </span>
                 {approval.error && (
                   <div
@@ -688,7 +687,7 @@ function TicketPanel({
                           )
                         }
                       >
-                        Zatwierdź dokładne dane
+                        Approve exact details
                       </button>
                     )}
                   {approval.status === "approved" &&
@@ -703,7 +702,7 @@ function TicketPanel({
                           )
                         }
                       >
-                        Wykonaj zapis
+                        Execute write
                       </button>
                     )}
                   {approval.status === "failed" &&
@@ -718,7 +717,7 @@ function TicketPanel({
                           )
                         }
                       >
-                        Odzyskaj potwierdzenie
+                        Reconcile receipt
                       </button>
                     )}
                   {(approval.status === "executed" || approval.ticket) && (
@@ -727,7 +726,7 @@ function TicketPanel({
                       disabled={!!pending}
                       onClick={() => refresh(approval.id)}
                     >
-                      Odśwież status
+                      Refresh status
                     </button>
                   )}
                 </div>
@@ -756,10 +755,10 @@ function SourceModal({
   }, [citation.document_id]);
   const chunk = document?.chunks?.find((item) => item.id === citation.chunk_id);
   return (
-    <Modal title="Źródło dowodu" close={close}>
+    <Modal title="Evidence source" close={close}>
       <div className="modal-content">
         {error && <ErrorNotice message={error} />}{" "}
-        {!document && !error && <Spinner label="Pobieranie dokumentu…" />}
+        {!document && !error && <Spinner label="Loading document…" />}
         {document && (
           <>
             <p>
@@ -783,7 +782,7 @@ function SourceModal({
               className="arrow-link"
               href={`/documents/${citation.document_id}?chunk=${citation.chunk_id}`}
             >
-              Otwórz pełny dokument <Icon name="arrow" />
+              Open full document <Icon name="arrow" />
             </Link>
           </>
         )}

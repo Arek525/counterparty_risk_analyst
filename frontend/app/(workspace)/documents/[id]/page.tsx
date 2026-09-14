@@ -41,7 +41,7 @@ export default function DocumentPage() {
   async function remove() {
     if (
       !confirm(
-        "Usunąć ten dokument? Dokumentu powiązanego z zachowaną wersją nie można usunąć.",
+        "Delete this document? A document retained by a saved version cannot be deleted.",
       )
     )
       return;
@@ -57,23 +57,23 @@ export default function DocumentPage() {
       setDeleting(false);
     }
   }
-  if (!document && !error) return <Spinner label="Ładowanie źródła…" />;
+  if (!document && !error) return <Spinner label="Loading source…" />;
   if (!document) return <ErrorNotice message={error} retry={load} />;
   return (
     <>
       <PageHeader
         eyebrow={
-          document.kind === "policy" ? "Dokument polityki" : "Dowód kontrahenta"
+          document.kind === "policy" ? "Policy document" : "Counterparty evidence"
         }
         title={document.filename}
-        description={`Wersja ${document.version} · ${formatDate(document.created_at)}`}
+        description={`Version ${document.version} · ${formatDate(document.created_at)}`}
         actions={
           <>
             <a
               className="button button-secondary"
               href={`/api/documents/${document.id}/download`}
             >
-              Pobierz oryginał
+              Download original
             </a>
             {user?.role !== "auditor" && (
               <button
@@ -81,7 +81,7 @@ export default function DocumentPage() {
                 disabled={deleting}
                 onClick={remove}
               >
-                {deleting ? "Usuwanie…" : "Usuń"}
+                {deleting ? "Deleting…" : "Delete"}
               </button>
             )}
           </>
@@ -91,18 +91,18 @@ export default function DocumentPage() {
       {document.kind === "evidence" && (
         <div className="notice notice-info" style={{ marginBottom: 18 }}>
           <p>
-            <strong>Rodzaj źródła:</strong>{" "}
+            <strong>Source type:</strong>{" "}
             {document.evidence_type === "independent"
-              ? "niezależny dowód"
-              : "deklaracja kontrahenta"}
+              ? "independent evidence"
+              : "counterparty declaration"}
           </p>
         </div>
       )}
       <section className="card">
         <div className="card-header">
-          <h2>Wyodrębniony tekst źródłowy</h2>
+          <h2>Extracted source text</h2>
           <StatusBadge value="neutral">
-            {document.chunks?.length ?? 0} fragmentów
+            {document.chunks?.length ?? 0} chunks
           </StatusBadge>
         </div>
         <div className="card-body stack">
@@ -120,7 +120,7 @@ export default function DocumentPage() {
             </article>
           )) ?? (
             <p className="subtle">
-              Dokument nie zawiera fragmentów tekstowych.
+              This document contains no text chunks.
             </p>
           )}
         </div>
@@ -130,7 +130,7 @@ export default function DocumentPage() {
           className="arrow-link"
           href={document.case_id ? `/cases/${document.case_id}` : "/policies"}
         >
-          ← Powrót
+          ← Back
         </Link>
       </p>
     </>

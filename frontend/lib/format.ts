@@ -1,35 +1,35 @@
 import type { FindingStatus, Role, SourceLocation } from "./types";
 
 export const roleLabels: Record<Role, string> = {
-  analyst: "Analityk",
-  reviewer: "Recenzent",
-  auditor: "Audytor",
+  analyst: "Analyst",
+  reviewer: "Reviewer",
+  auditor: "Auditor",
   administrator: "Administrator",
 };
 
 export const findingLabels: Record<FindingStatus, string> = {
-  pass: "Spełnione",
-  fail: "Niespełnione",
-  unknown: "Brak danych",
-  conflict: "Sprzeczność",
-  not_applicable: "Nie dotyczy",
+  pass: "Pass",
+  fail: "Fail",
+  unknown: "Insufficient evidence",
+  conflict: "Conflict",
+  not_applicable: "Not applicable",
 };
 
 export const statusLabels: Record<string, string> = {
-  draft: "Wersja robocza",
-  approved: "Zatwierdzona",
-  queued: "W kolejce",
-  running: "Analiza trwa",
-  awaiting_review: "Oczekuje na decyzję",
-  completed: "Zakończona",
-  failed: "Błąd",
-  proposed: "Do zatwierdzenia",
-  executing: "Wysyłanie",
-  executed: "Wykonano",
-  succeeded: "Wykonano",
-  accepted: "Zaakceptowano",
-  rejected: "Odrzucono",
-  needs_information: "Potrzebne informacje",
+  draft: "Draft",
+  approved: "Approved",
+  queued: "Queued",
+  running: "Analysis in progress",
+  awaiting_review: "Awaiting decision",
+  completed: "Completed",
+  failed: "Failed",
+  proposed: "Awaiting approval",
+  executing: "Submitting",
+  executed: "Executed",
+  succeeded: "Completed",
+  accepted: "Accepted",
+  rejected: "Rejected",
+  needs_information: "Information required",
 };
 
 export function formatDate(value?: string | null): string {
@@ -37,7 +37,7 @@ export function formatDate(value?: string | null): string {
   const date = new Date(value);
   return Number.isNaN(date.valueOf())
     ? value
-    : new Intl.DateTimeFormat("pl-PL", {
+    : new Intl.DateTimeFormat("en-GB", {
         dateStyle: "medium",
         timeStyle: "short",
       }).format(date);
@@ -52,12 +52,12 @@ export function titleCase(value: string): string {
 export function formatLocation(value: SourceLocation): string {
   if (typeof value === "string") return value;
   const parts: string[] = [];
-  if (value.page !== undefined) parts.push(`strona ${value.page}`);
+  if (value.page !== undefined) parts.push(`page ${value.page}`);
   if (value.line_start !== undefined)
     parts.push(
       value.line_end && value.line_end !== value.line_start
-        ? `wiersze ${value.line_start}–${value.line_end}`
-        : `wiersz ${value.line_start}`,
+        ? `lines ${value.line_start}–${value.line_end}`
+        : `line ${value.line_start}`,
     );
-  return parts.join(", ") || "lokalizacja źródłowa";
+  return parts.join(", ") || "source location";
 }

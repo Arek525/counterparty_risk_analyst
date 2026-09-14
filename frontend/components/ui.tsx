@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Icon } from "./icons";
 
-export function Spinner({ label = "Ładowanie" }: { label?: string }) {
+export function Spinner({ label = "Loading" }: { label?: string }) {
   return (
     <div className="loading-state" role="status">
       <span className="spinner" aria-hidden="true" />
@@ -22,12 +22,12 @@ export function ErrorNotice({
   return (
     <div className="notice notice-error" role="alert">
       <div>
-        <strong>Nie udało się wykonać operacji</strong>
+        <strong>We couldn't complete the operation</strong>
         <p>{message}</p>
       </div>
       {retry && (
         <button className="button button-small button-quiet" onClick={retry}>
-          Spróbuj ponownie
+          Try again
         </button>
       )}
     </div>
@@ -136,7 +136,7 @@ export function Modal({
       >
         <header>
           <h2>{title}</h2>
-          <button className="icon-button" onClick={close} aria-label="Zamknij">
+          <button className="icon-button" onClick={close} aria-label="Close">
             <Icon name="close" />
           </button>
         </header>

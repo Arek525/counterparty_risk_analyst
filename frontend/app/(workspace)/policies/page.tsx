@@ -67,14 +67,14 @@ export default function PoliciesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Źródło kryteriów"
-        title="Polityki i wymagania"
-        description="Wymagania powstają z dokumentów źródłowych, a każda zatwierdzona wersja pozostaje niezmienna."
+        eyebrow="Criteria source"
+        title="Policies and requirements"
+        description="Requirements are derived from source documents, and every approved version remains immutable."
         actions={
           canWrite && (
             <button className="button" onClick={() => setCreateOpen(true)}>
               <Icon name="plus" />
-              Nowy zestaw
+              New policy set
             </button>
           )
         }
@@ -83,26 +83,26 @@ export default function PoliciesPage() {
       <div className="detail-grid">
         <section className="card">
           <div className="card-header">
-            <h2>Zestawy polityk</h2>
-            <span className="subtle">{policies.length} wersji</span>
+            <h2>Policy sets</h2>
+            <span className="subtle">{policies.length} versions</span>
           </div>
           {loading ? (
-            <Spinner label="Pobieranie polityk…" />
+            <Spinner label="Loading policies…" />
           ) : policies.length === 0 ? (
             <EmptyState
-              title="Brak zestawów"
-              description="Prześlij dokument polityki i wygeneruj propozycję wymagań."
+              title="No policy sets"
+              description="Upload a policy document and generate proposed requirements."
             />
           ) : (
             <div className="table-wrap">
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Nazwa</th>
-                    <th>Wersja</th>
+                    <th>Name</th>
+                    <th>Version</th>
                     <th>Status</th>
-                    <th>Wymagania</th>
-                    <th>Data</th>
+                    <th>Requirements</th>
+                    <th>Date</th>
                     <th />
                   </tr>
                 </thead>
@@ -127,7 +127,7 @@ export default function PoliciesPage() {
                           href={`/policies/${policy.id}`}
                           className="arrow-link"
                         >
-                          Otwórz <Icon name="arrow" />
+                          Open <Icon name="arrow" />
                         </Link>
                       </td>
                     </tr>
@@ -139,12 +139,12 @@ export default function PoliciesPage() {
         </section>
         <aside className="card">
           <div className="card-header">
-            <h2>Dokumenty źródłowe</h2>
+            <h2>Source documents</h2>
           </div>
           <div className="card-body">
             {documents.length === 0 ? (
               <p className="subtle">
-                Nie przesłano jeszcze dokumentu polityki.
+                No policy document has been uploaded yet.
               </p>
             ) : (
               documents.map((document) => (
@@ -156,7 +156,7 @@ export default function PoliciesPage() {
                     <Link href={`/documents/${document.id}`}>
                       <strong>{document.filename}</strong>
                     </Link>
-                    <span className="subtle">wersja {document.version}</span>
+                    <span className="subtle">version {document.version}</span>
                   </div>
                 </div>
               ))
@@ -166,7 +166,7 @@ export default function PoliciesPage() {
                 <Icon name="upload" style={{ width: 24 }} />
                 <div>
                   <input
-                    aria-label="Dokument polityki"
+                    aria-label="Policy document"
                     type="file"
                     accept=".pdf,.md,.txt,text/plain,text/markdown,application/pdf"
                     onChange={(event) =>
@@ -179,7 +179,7 @@ export default function PoliciesPage() {
                   style={{ marginTop: 12 }}
                   disabled={!file || uploading}
                 >
-                  {uploading ? "Przesyłanie…" : "Dodaj dokument"}
+                  {uploading ? "Uploading…" : "Add document"}
                 </button>
               </form>
             )}
@@ -237,31 +237,31 @@ function ProposePolicyModal({
     }
   }
   return (
-    <Modal title="Zaproponuj wymagania" close={close}>
+    <Modal title="Propose requirements" close={close}>
       <form className="modal-content" onSubmit={submit}>
         {error && <ErrorNotice message={error} />}
         <label className="field">
-          <span>Nazwa zestawu</span>
+          <span>Policy set name</span>
           <input
             className="input"
             required
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="np. Minimalne wymagania dla dostawców"
+            placeholder="e.g. Minimum supplier requirements"
           />
         </label>
-        <span className="field-label">Dokumenty źródłowe</span>
+        <span className="field-label">Source documents</span>
         <div className="stack" style={{ gap: 8, marginTop: 8 }}>
           {documents.length === 0 ? (
             <div className="notice notice-info">
-              <p>Najpierw dodaj dokument polityki.</p>
+              <p>Add a policy document first.</p>
             </div>
           ) : (
             documents.map((document) => (
               <label className="demo-account" key={document.id}>
                 <div>
                   <strong>{document.filename}</strong>
-                  <span>wersja {document.version}</span>
+                  <span>version {document.version}</span>
                 </div>
                 <input
                   type="checkbox"
@@ -273,18 +273,18 @@ function ProposePolicyModal({
           )}
         </div>
         <p className="field-help">
-          Adapter zaproponuje wymagania wraz z cytatami. Przed zatwierdzeniem
-          możesz je poprawić.
+          The adapter will propose requirements with citations. Before approval,
+          you can revise them.
         </p>
         <div className="form-actions">
           <button type="button" className="button button-quiet" onClick={close}>
-            Anuluj
+            Cancel
           </button>
           <button
             className="button"
             disabled={pending || !name || selected.length === 0}
           >
-            {pending ? "Tworzenie propozycji…" : "Utwórz wersję roboczą"}
+            {pending ? "Generating proposals…" : "Create draft"}
           </button>
         </div>
       </form>

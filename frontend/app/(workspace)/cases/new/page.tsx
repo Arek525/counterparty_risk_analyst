@@ -50,80 +50,80 @@ export default function NewCasePage() {
   return (
     <>
       <PageHeader
-        eyebrow="Nowa ocena"
-        title="Utwórz sprawę"
-        description="Kontekst relacji decyduje, które wymagania będą miały zastosowanie. Opisz go konkretnie."
+        eyebrow="New assessment"
+        title="Create case"
+        description="The relationship context determines which requirements apply. Describe it precisely."
       />
       <form className="card" onSubmit={submit}>
         <div className="card-header">
-          <h2>Dane sprawy i relacji</h2>
+          <h2>Case and relationship details</h2>
         </div>
         <div className="card-body">
           {error && <ErrorNotice message={error} />}
           <div className="form-grid">
             <label className="field">
-              <span>Nazwa sprawy</span>
+              <span>Case name</span>
               <input
                 className="input"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="np. Ocena dostawcy hostingu 2026"
+                placeholder="e.g. Hosting provider assessment 2026"
               />
             </label>
             <label className="field">
-              <span>Nazwa kontrahenta</span>
+              <span>Counterparty name</span>
               <input
                 className="input"
                 required
                 value={counterpartyName}
                 onChange={(e) => setCounterpartyName(e.target.value)}
-                placeholder="np. Northstar Labs"
+                placeholder="e.g. Northstar Labs"
               />
             </label>
           </div>
           <label className="field">
-            <span>Cel współpracy</span>
+            <span>Relationship purpose</span>
             <textarea
               className="textarea"
               required
               value={relationship.purpose}
               onChange={(e) => set("purpose", e.target.value)}
-              placeholder="Jaki proces biznesowy będzie obsługiwał kontrahent?"
+              placeholder="Which business process will the counterparty support?"
             />
           </label>
           <div className="form-grid">
             <label className="field">
-              <span>Udostępniane dane</span>
+              <span>Data shared</span>
               <textarea
                 className="textarea"
                 required
                 value={relationship.data_shared}
                 onChange={(e) => set("data_shared", e.target.value)}
-                placeholder="Kategorie i zakres danych"
+                placeholder="Data categories and scope"
               />
             </label>
             <label className="field">
-              <span>Dostęp do systemów</span>
+              <span>System access</span>
               <textarea
                 className="textarea"
                 required
                 value={relationship.system_access}
                 onChange={(e) => set("system_access", e.target.value)}
-                placeholder="Systemy, środowiska i poziom dostępu"
+                placeholder="Systems, environments, and access level"
               />
             </label>
           </div>
           <label className="field">
-            <span>Krytyczność biznesowa</span>
+            <span>Business criticality</span>
             <select
               className="select"
               value={relationship.business_criticality}
               onChange={(e) => set("business_criticality", e.target.value)}
             >
-              <option value="low">Niska</option>
-              <option value="medium">Średnia</option>
-              <option value="high">Wysoka</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
             </select>
           </label>
           <div className="form-grid">
@@ -133,7 +133,7 @@ export default function NewCasePage() {
                 checked={relationship.personal_data}
                 onChange={(e) => set("personal_data", e.target.checked)}
               />
-              <span>Relacja obejmuje przetwarzanie danych osobowych</span>
+              <span>The relationship involves personal data processing</span>
             </label>
             <label className="checkbox">
               <input
@@ -141,15 +141,15 @@ export default function NewCasePage() {
                 checked={relationship.privileged_access}
                 onChange={(e) => set("privileged_access", e.target.checked)}
               />
-              <span>Kontrahent otrzyma dostęp uprzywilejowany</span>
+              <span>The counterparty will receive privileged access</span>
             </label>
           </div>
           <div className="form-actions">
             <Link href="/cases" className="button button-quiet">
-              Anuluj
+              Cancel
             </Link>
             <button className="button" disabled={pending}>
-              {pending ? "Tworzenie…" : "Utwórz sprawę"}
+              {pending ? "Creating…" : "Create case"}
             </button>
           </div>
         </div>

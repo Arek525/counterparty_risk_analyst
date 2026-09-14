@@ -18,8 +18,8 @@ async function mockApi(page: Page) {
     run_id: "run-1",
     action: "create_ticket",
     arguments: {
-      title: "Uzupełnienie informacji",
-      body: "Prosimy o odpowiedź.",
+      title: "Information request",
+      body: "Please respond.",
       run_id: "run-1",
       organization_id: "organization-1",
     },
@@ -34,8 +34,8 @@ async function mockApi(page: Page) {
         ? {
             id: "60000000-0000-4000-8000-000000000001",
             status: "open",
-            title: "Uzupełnienie informacji",
-            body: "Prosimy o odpowiedź.",
+            title: "Information request",
+            body: "Please respond.",
             run_id: "run-1",
             created_at: now,
             service: "demo-ticketing",
@@ -80,7 +80,7 @@ async function mockApi(page: Page) {
             email: "reviewer@demo.local",
             role: "reviewer",
           })
-        : json(route, { detail: "Brak sesji" }, 401);
+        : json(route, { detail: "No session" }, 401);
     if (path === "/api/auth/logout") {
       loggedIn = false;
       return json(route, {});
@@ -89,12 +89,12 @@ async function mockApi(page: Page) {
       return json(route, [
         {
           id: "case-1",
-          name: "Ocena Northstar",
+          name: "Northstar assessment",
           counterparty_name: "Northstar Labs",
           relationship: {
-            purpose: "Obsługa danych klientów",
-            data_shared: "Dane kontaktowe",
-            system_access: "Portal wsparcia",
+            purpose: "Customer data support",
+            data_shared: "Contact details",
+            system_access: "Support portal",
             business_criticality: "high",
             personal_data: true,
             privileged_access: false,
@@ -107,7 +107,7 @@ async function mockApi(page: Page) {
       return json(route, [
         {
           id: "policy-1",
-          name: "Polityka dostawców",
+          name: "Supplier policy",
           version: 2,
           status: "approved",
           document_ids: ["doc-policy"],
@@ -131,12 +131,12 @@ async function mockApi(page: Page) {
     if (path === "/api/cases/case-1")
       return json(route, {
         id: "case-1",
-        name: "Ocena Northstar",
+        name: "Northstar assessment",
         counterparty_name: "Northstar Labs",
         relationship: {
-          purpose: "Obsługa danych klientów",
-          data_shared: "Dane kontaktowe",
-          system_access: "Portal wsparcia",
+          purpose: "Customer data support",
+          data_shared: "Contact details",
+          system_access: "Support portal",
           business_criticality: "high",
           personal_data: true,
           privileged_access: false,
@@ -185,7 +185,7 @@ async function mockApi(page: Page) {
         report: {
           risk: "High",
           completeness: 72,
-          summary: "Brakuje potwierdzenia szyfrowania kopii zapasowych.",
+          summary: "Backup encryption has not been confirmed.",
           model_mode: "demo",
           model_name: "deterministic-demo-v1",
           rules_version: "risk-v1",
@@ -196,23 +196,23 @@ async function mockApi(page: Page) {
             cost_usd: null,
             duration_ms: 120,
           },
-          questions: ["Czy kopie zapasowe są szyfrowane?"],
+          questions: ["Are backups encrypted?"],
           discrepancies: [
             {
               type: "possible_discrepancy",
               description:
-                "Deklaracja retencji nie odpowiada okresowi w umowie.",
+                "The retention declaration does not match the contract period.",
               evidence: [],
             },
           ],
-          workflow_error: "Finalizacja śladu workflow wymaga ponowienia.",
+          workflow_error: "Workflow trace finalization must be retried.",
           findings: [
             {
               requirement_id: "req-1",
-              title: "Szyfrowanie kopii",
+              title: "Backup encryption",
               status: "pass",
               severity: "High",
-              explanation: "Dokument nie opisuje szyfrowania kopii.",
+              explanation: "The document does not describe backup encryption.",
               missing_information: [],
               evidence: [
                 {
@@ -268,82 +268,82 @@ async function mockApi(page: Page) {
       return json(route, ticketStep ? [ticketResponse()] : []);
     return json(
       route,
-      { detail: `Brak mocka dla ${request.method()} ${path}` },
+      { detail: `No mock for ${request.method()} ${path}` },
       404,
     );
   });
 }
 
-test("logowanie kontem demo otwiera chroniony obszar roboczy", async ({
+test("demo account sign-in opens the protected workspace", async ({
   page,
 }) => {
   await mockApi(page);
   await page.goto("/login");
-  await expect(page.getByText("Tryb demonstracyjny")).toBeVisible();
+  await expect(page.getByText("Demo mode", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Marta Recenzent/ }).click();
-  await page.getByRole("button", { name: "Zaloguj się" }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/cases/);
   await expect(
-    page.getByRole("heading", { name: "Sprawy kontrahentów" }),
+    page.getByRole("heading", { name: "Counterparty cases" }),
   ).toBeVisible();
   await expect(page.getByText("Northstar Labs")).toBeVisible();
 });
 
-test("raport rozdziela ryzyko, kompletność i decyzję oraz otwiera źródło", async ({
+test("report separates risk, completeness and decision and opens its source", async ({
   page,
 }) => {
   await mockApi(page);
   await page.goto("/login");
   await page.getByRole("button", { name: /Marta Recenzent/ }).click();
-  await page.getByRole("button", { name: "Zaloguj się" }).click();
-  await page.getByRole("link", { name: "Ocena Northstar" }).click();
-  await page.getByRole("link", { name: /Otwórz analizę/ }).click();
-  await expect(page.getByText("Ryzyko", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("link", { name: "Northstar assessment" }).click();
+  await page.getByRole("link", { name: /Open analysis/ }).click();
+  await expect(page.getByText("Risk", { exact: true })).toBeVisible();
   await expect(
     page
       .locator(".stat")
-      .filter({ hasText: "Ryzyko" })
+      .filter({ hasText: "Risk" })
       .getByText("High", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("72%")).toBeVisible();
-  await expect(page.getByText("Oczekuje na decyzję")).toBeVisible();
-  await expect(page.getByText("Koszt nieustalony")).toBeVisible();
+  await expect(page.getByText("Awaiting decision")).toBeVisible();
+  await expect(page.getByText("Cost unavailable")).toBeVisible();
   await expect(
-    page.getByText("Finalizacja śladu workflow wymaga ponowienia."),
+    page.getByText("Workflow trace finalization must be retried."),
   ).toBeVisible();
   await expect(
-    page.getByText("Deklaracja retencji nie odpowiada okresowi w umowie."),
+    page.getByText("The retention declaration does not match the contract period."),
   ).toBeVisible();
-  await expect(page.getByText("Brakująca informacja:")).toHaveCount(0);
+  await expect(page.getByText("Missing information:")).toHaveCount(0);
   await expect(page.getByText("Run.awaiting review")).toHaveCount(0);
   await page.getByRole("button", { name: /sekcja 4/ }).click();
   await expect(
-    page.getByRole("dialog", { name: "Źródło dowodu" }),
+    page.getByRole("dialog", { name: "Evidence source" }),
   ).toContainText("Kopie są przechowywane przez 30 dni.");
 });
 
-test("zgłoszenie wymaga podglądu, zatwierdzenia i osobnego wykonania", async ({
+test("ticket requires preview, approval and separate execution", async ({
   page,
 }) => {
   await mockApi(page);
   await page.goto("/login");
   await page.getByRole("button", { name: /Marta Recenzent/ }).click();
-  await page.getByRole("button", { name: "Zaloguj się" }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
   await page.goto("/runs/run-1");
 
-  await page.getByRole("button", { name: "Pokaż podgląd propozycji" }).click();
+  await page.getByRole("button", { name: "Preview proposal" }).click();
   await expect(
-    page.getByText(/Uzupełnienie informacji — analiza/),
+    page.getByText(/Information request — analysis/),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Zapisz dokładną propozycję" })
+    .getByRole("button", { name: "Save exact proposal" })
     .click();
-  await expect(page.getByText("Do zatwierdzenia")).toBeVisible();
-  await page.getByRole("button", { name: "Zatwierdź dokładne dane" }).click();
+  await expect(page.getByText("Awaiting approval")).toBeVisible();
+  await page.getByRole("button", { name: "Approve exact details" }).click();
   await expect(
-    page.getByRole("button", { name: "Wykonaj zapis" }),
+    page.getByRole("button", { name: "Execute write" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Wykonaj zapis" }).click();
+  await page.getByRole("button", { name: "Execute write" }).click();
   await expect(
     page.getByText(/Ticket 60000000-0000-4000-8000-000000000001/),
   ).toBeVisible();

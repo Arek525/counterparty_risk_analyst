@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 
-test("pełna ścieżka MVP działa na rzeczywistym lokalnym stosie", async ({
+test("the complete MVP journey works on the real local stack", async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -13,94 +13,94 @@ test("pełna ścieżka MVP działa na rzeczywistym lokalnym stosie", async ({
 
   await page.goto("/login");
   await page.getByRole("button", { name: /Demo Reviewer/ }).click();
-  await page.getByRole("button", { name: "Zaloguj się" }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
   await expect(
-    page.getByRole("heading", { name: "Sprawy kontrahentów" }),
+    page.getByRole("heading", { name: "Counterparty cases" }),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: "Nowa sprawa" }).click();
-  await page.getByLabel("Nazwa sprawy").fill(caseName);
-  await page.getByLabel("Nazwa kontrahenta").fill("E2E Synthetic Vendor");
+  await page.getByRole("link", { name: "New case" }).click();
+  await page.getByLabel("Case name").fill(caseName);
+  await page.getByLabel("Counterparty name").fill("E2E Synthetic Vendor");
   await page
-    .getByLabel("Cel współpracy")
-    .fill("Obsługa krytycznej platformy wsparcia");
-  await page.getByLabel("Udostępniane dane").fill("Syntetyczne dane klientów");
-  await page.getByLabel("Dostęp do systemów").fill("Konsola administracyjna");
-  await page.getByLabel("Krytyczność biznesowa").selectOption("high");
+    .getByLabel("Relationship purpose")
+    .fill("Support for a critical service platform");
+  await page.getByLabel("Data shared").fill("Synthetic customer data");
+  await page.getByLabel("System access").fill("Administration console");
+  await page.getByLabel("Business criticality").selectOption("high");
   await page
-    .getByText("Relacja obejmuje przetwarzanie danych osobowych")
+    .getByText("The relationship involves personal data processing")
     .click();
-  await page.getByText("Kontrahent otrzyma dostęp uprzywilejowany").click();
-  await page.getByRole("button", { name: "Utwórz sprawę" }).click();
+  await page.getByText("The counterparty will receive privileged access").click();
+  await page.getByRole("button", { name: "Create case" }).click();
   await expect(page.getByRole("heading", { name: caseName })).toBeVisible();
 
-  await page.getByLabel("Dokument dowodowy").setInputFiles(evidencePath);
-  await page.getByLabel("Rodzaj dowodu").selectOption("independent");
-  await page.getByRole("button", { name: "Dodaj dokument" }).click();
+  await page.getByLabel("Evidence document").setInputFiles(evidencePath);
+  await page.getByLabel("Evidence type").selectOption("independent");
+  await page.getByRole("button", { name: "Add document" }).click();
   await expect(page.getByText("complete.md")).toBeVisible();
   await expect(
-    page.locator(".document-row .subtle").filter({ hasText: "Niezależny dowód" }),
+    page.locator(".document-row .subtle").filter({ hasText: "Independent evidence" }),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: "Uruchom analizę" }).first().click();
+  await page.getByRole("button", { name: "Run analysis" }).first().click();
   await expect(
-    page.getByRole("dialog", { name: "Uruchom analizę" }),
+    page.getByRole("dialog", { name: "Run analysis" }),
   ).toBeVisible();
   await page
-    .getByLabel("Zatwierdzona polityka")
+    .getByLabel("Approved policy")
     .selectOption({ label: "Synthetic Northstar policy · v1" });
-  await page.getByRole("button", { name: "Uruchom analizę" }).last().click();
-  await expect(page.getByText("Ryzyko", { exact: true })).toBeVisible({
+  await page.getByRole("button", { name: "Run analysis" }).last().click();
+  await expect(page.getByText("Risk", { exact: true })).toBeVisible({
     timeout: 120_000,
   });
   await expect(
-    page.getByText("Kompletność dowodów", { exact: true }),
+    page.getByText("Evidence completeness", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Decyzja człowieka", { exact: true }),
+    page.getByText("Human decision", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.locator(".stat").filter({ hasText: "Ryzyko" }).getByText("Low"),
+    page.locator(".stat").filter({ hasText: "Risk" }).getByText("Low"),
   ).toBeVisible();
   await expect(
-    page.locator(".stat").filter({ hasText: "Kompletność" }).getByText("100%"),
+    page.locator(".stat").filter({ hasText: "Completeness" }).getByText("100%"),
   ).toBeVisible();
-  await expect(page.getByText("Brakująca informacja:")).toHaveCount(0);
+  await expect(page.getByText("Missing information:")).toHaveCount(0);
 
-  const citation = page.getByRole("button", { name: /otwórz źródło/ }).first();
+  const citation = page.getByRole("button", { name: /open source/ }).first();
   await expect(citation).toBeVisible();
   await citation.click();
   await expect(
-    page.getByRole("dialog", { name: "Źródło dowodu" }),
+    page.getByRole("dialog", { name: "Evidence source" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Zamknij" }).click();
+  await page.getByRole("button", { name: "Close" }).click();
 
-  await page.getByRole("button", { name: "Akceptuję" }).click();
+  await page.getByRole("button", { name: "Accept" }).click();
   await page
-    .getByLabel("Uzasadnienie decyzji")
-    .fill("Dowody są kompletne, a ustalenia spełniają zatwierdzone wymagania.");
-  await page.getByRole("button", { name: "Zapisz decyzję" }).click();
+    .getByLabel("Decision rationale")
+    .fill("The evidence is complete and the findings meet the approved requirements.");
+  await page.getByRole("button", { name: "Save decision" }).click();
   await expect(
     page
       .locator("section.card")
-      .filter({ has: page.getByRole("heading", { name: "Decyzja", exact: true }) })
-      .getByText("Zaakceptowano"),
+      .filter({ has: page.getByRole("heading", { name: "Decision", exact: true }) })
+      .getByText("Accepted"),
   ).toBeVisible();
 
   await page
-    .getByLabel("Treść")
-    .fill("Zgłoszenie weryfikujące bezpieczny, zatwierdzony zapis integracyjny.");
-  await page.getByRole("button", { name: "Pokaż podgląd propozycji" }).click();
+    .getByLabel("Body")
+    .fill("Ticket verifying a safe, approved integration write.");
+  await page.getByRole("button", { name: "Preview proposal" }).click();
   await expect(
-    page.getByText(/Uzupełnienie informacji — analiza/),
+    page.getByText(/Information request — analysis/),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Zapisz dokładną propozycję" })
+    .getByRole("button", { name: "Save exact proposal" })
     .click();
-  await page.getByRole("button", { name: "Zatwierdź dokładne dane" }).click();
-  await page.getByRole("button", { name: "Wykonaj zapis" }).click();
+  await page.getByRole("button", { name: "Approve exact details" }).click();
+  await page.getByRole("button", { name: "Execute write" }).click();
   await expect(page.getByText(/Ticket [0-9a-f-]+/)).toBeVisible({
     timeout: 30_000,
   });
-  await page.getByRole("button", { name: "Odśwież status" }).click();
+  await page.getByRole("button", { name: "Refresh status" }).click();
 });

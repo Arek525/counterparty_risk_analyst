@@ -37,27 +37,27 @@ export default function CasesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Portfel ocen"
-        title="Sprawy kontrahentów"
-        description="Każda sprawa łączy kontekst relacji, dokumenty, analizy i decyzje w jednej historii."
+        eyebrow="Assessment portfolio"
+        title="Counterparty cases"
+        description="Each case keeps the relationship context, documents, analyses, and decisions in one history."
         actions={
           <Link className="button" href="/cases/new">
             <Icon name="plus" />
-            Nowa sprawa
+            New case
           </Link>
         }
       />
       {error && <ErrorNotice message={error} retry={load} />}
       {loading ? (
-        <Spinner label="Pobieranie spraw…" />
+        <Spinner label="Loading cases…" />
       ) : cases.length === 0 ? (
         <div className="card">
           <EmptyState
-            title="Brak spraw"
-            description="Utwórz pierwszą sprawę i opisz relację z kontrahentem."
+            title="No cases"
+            description="Create your first case and describe the counterparty relationship."
             action={
               <Link className="button" href="/cases/new">
-                Utwórz sprawę
+                Create case
               </Link>
             }
           />
@@ -81,10 +81,10 @@ export default function CasesPage() {
                   }
                 >
                   {item.relationship.business_criticality === "high"
-                    ? "Krytyczna relacja"
+                    ? "Critical relationship"
                     : item.relationship.business_criticality === "medium"
-                      ? "Średnia krytyczność"
-                      : "Niska krytyczność"}
+                      ? "Medium criticality"
+                      : "Low criticality"}
                 </StatusBadge>
                 <span className="subtle">{formatDate(item.updated_at)}</span>
               </div>
@@ -93,11 +93,11 @@ export default function CasesPage() {
               <div className="case-card-footer">
                 <span>
                   {item.relationship.personal_data
-                    ? "Dane osobowe"
-                    : "Bez danych osobowych"}
+                    ? "Personal data"
+                    : "No personal data"}
                 </span>
                 <span className="arrow-link">
-                  Otwórz <Icon name="arrow" />
+                  Open <Icon name="arrow" />
                 </span>
               </div>
             </Link>
