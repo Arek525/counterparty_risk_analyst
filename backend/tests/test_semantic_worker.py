@@ -264,3 +264,56 @@ def test_model_change_stops_before_consuming_requirement_attempt(workflow_setup,
         assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot, "lexical")
     with Session(engine) as session:
         assert session.get(AnalysisRun, run_id).assessment_progress is None
+
+
+def test_progress_waits_for_concurrent_checkpoint_write(workflow_setup, monkeypatch):
+    import time
+    from contextlib import contextmanager
+    from threading import Event
+
+    import psycopg
+    from langgraph.checkpoint.postgres import PostgresSaver
+
+    from counterparty.worker import process_one
+
+    engine, settings, ids = workflow_setup
+    run_id, _ = semantic_run(engine, ids[0])
+    with Session(engine) as session:
+        session.get(AnalysisRun, ids[0]).status = "failed"
+        run = session.get(AnalysisRun, run_id)
+        run.status = "queued"
+        run.lease_owner = None
+        run.retrieval_variant = "lexical"
+        session.commit()
+
+    writing = Event()
+    overlapped = []
+    cursor = PostgresSaver._cursor
+    execute = psycopg.Connection.execute
+
+    @contextmanager
+    def slow_checkpoint(self, *, pipeline=False):
+        with cursor(self, pipeline=pipeline) as current:
+            if pipeline:
+                writing.set()
+                time.sleep(0.1)
+            try:
+                yield current
+            finally:
+                if pipeline:
+                    writing.clear()
+
+    def guarded_execute(self, query, *args, **kwargs):
+        if query == "SELECT 1" and writing.is_set():
+            overlapped.append(True)
+            raise psycopg.OperationalError("Concurrent checkpoint pipeline")
+        return execute(self, query, *args, **kwargs)
+
+    monkeypatch.setattr(PostgresSaver, "_cursor", slow_checkpoint)
+    monkeypatch.setattr(psycopg.Connection, "execute", guarded_execute)
+    assert process_one(engine, settings)
+    assert not overlapped
+    with Session(engine) as session:
+        run = session.get(AnalysisRun, run_id)
+        assert run.status == "awaiting_review"
+        assert run.assessment_progress["completed"] == 3

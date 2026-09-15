@@ -6,7 +6,7 @@ import logging
 import multiprocessing
 import os
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import UTC, datetime, timedelta
 from functools import partial
 from typing import TypedDict
@@ -164,19 +164,27 @@ def process_one(engine: Engine, settings: Settings, model=None, heartbeat=None) 
 MAX_REQUIREMENT_ATTEMPTS = 3
 
 
-def _publish_progress(engine, settings, run_id, token, owner, progress):
-    owner.execute("SELECT 1")
-    with Session(engine) as session:
-        run = session.scalar(select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update())
-        if run.lease_owner != token or run.status != "running":
-            raise EmbeddingError("Analysis ownership changed before assessment publication")
-        run.assessment_progress = copy.deepcopy(progress)
-        run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=settings.worker_lease_seconds)
+def _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock):
+    # Checkpoint writes use this same connection in a background thread.
+    with owner_lock or nullcontext():
         owner.execute("SELECT 1")
-        session.commit()
+        with Session(engine) as session:
+            run = session.scalar(
+                select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update()
+            )
+            if run.lease_owner != token or run.status != "running":
+                raise EmbeddingError("Analysis ownership changed before assessment publication")
+            run.assessment_progress = copy.deepcopy(progress)
+            run.lease_expires_at = datetime.now(UTC) + timedelta(
+                seconds=settings.worker_lease_seconds
+            )
+            owner.execute("SELECT 1")
+            session.commit()
 
 
-def assess_sequential(engine, settings, run_id, token, owner, snapshot, variant, heartbeat=None):
+def assess_sequential(
+    engine, settings, run_id, token, owner, snapshot, variant, heartbeat=None, owner_lock=None
+):
     from counterparty.analysis.semantic import assess_requirement, build_report
 
     with Session(engine) as session:
@@ -211,7 +219,7 @@ def assess_sequential(engine, settings, run_id, token, owner, snapshot, variant,
             raise ModelError("Requirement attempt limit exceeded; create a new analysis to retry.")
         progress["current_requirement_id"] = requirement_id
         progress["attempts"][requirement_id] = attempts + 1
-        _publish_progress(engine, settings, run_id, token, owner, progress)
+        _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
         if heartbeat:
             heartbeat()
         try:
@@ -225,13 +233,13 @@ def assess_sequential(engine, settings, run_id, token, owner, snapshot, variant,
                 metrics=progress["metrics"],
             )
         except Exception:
-            _publish_progress(engine, settings, run_id, token, owner, progress)
+            _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
             raise
         progress["findings"].append(finding)
         progress["completed_ids"].append(requirement_id)
         progress["completed"] = len(progress["completed_ids"])
         progress["current_requirement_id"] = None
-        _publish_progress(engine, settings, run_id, token, owner, progress)
+        _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
         if heartbeat:
             heartbeat()
     report = build_report(
@@ -285,7 +293,14 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
     try:
         assessment = (
             partial(
-                assess_sequential, engine, settings, run_id, claim_token, owner, heartbeat=heartbeat
+                assess_sequential,
+                engine,
+                settings,
+                run_id,
+                claim_token,
+                owner,
+                heartbeat=heartbeat,
+                owner_lock=saver.lock,
             )
             if snapshot.get("assessment_version") == "semantic-v2"
             else None
