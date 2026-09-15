@@ -22,11 +22,18 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .coverage
+.coverage.*
 htmlcov/
+/backend/coverage.xml
+/backend/build/
+/backend/dist/
+*.egg-info/
 
 # Frontend dependencies and build output
 node_modules/
 .next/
+/frontend/out/
+/frontend/coverage/
 
 # Deliberately keep datasets/synthetic/ and public documentation trackable.
 
@@ -36,3 +43,16 @@ node_modules/
 /frontend/test-results/
 /frontend/playwright-report/
 *.tsbuildinfo
+
+# Local agent working state
+/.superpowers/
+/docs/superpowers/
+
+# Local editor settings, OS metadata, and temporary editing files
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
