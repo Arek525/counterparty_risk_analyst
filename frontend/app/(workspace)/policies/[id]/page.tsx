@@ -218,7 +218,7 @@ function RequirementCard({ requirement }: { requirement: Requirement }) {
           <strong>
             {Object.keys(requirement.applicability).length
               ? JSON.stringify(requirement.applicability)
-              : "Zawsze"}
+              : "Always"}
           </strong>
         </div>
       </div>
@@ -291,7 +291,7 @@ function RequirementEditor({
       setApplicabilityError("");
     } catch {
       setApplicabilityError(
-        'Wpisz poprawny obiekt JSON, np. {"personal_data":true}.',
+        'Enter a valid JSON object, for example {"personal_data":true}.',
       );
     }
   }
