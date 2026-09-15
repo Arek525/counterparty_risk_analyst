@@ -315,3 +315,197 @@ def test_fact_merge_keeps_conflicting_values_deduplicates_exact_facts_and_caps_o
     mock_adapter(monkeypatch, excessive)
     with pytest.raises(ModelError, match="Merged fact output limit"):
         analyze(snapshot)
+
+
+def test_interleaved_retrieval_is_grouped_before_fact_batches(monkeypatch):
+    _, snapshot = acceptance.corpus("gemini")
+    snapshot["chunks"] = [
+        {
+            "id": f"{doc}{line}",
+            "document_id": doc,
+            "location": {"line_start": line},
+            "text": "MFA is enabled.",
+            "kind": "evidence",
+        }
+        for line in range(5)
+        for doc in ("a", "b")
+    ]
+    monkeypatch.setattr(
+        "counterparty.analysis.engine.retrieve", lambda *args, **kw: snapshot["chunks"]
+    )
+    calls = mock_adapter(monkeypatch, lambda payload, _: {"facts": []})
+    analyze(snapshot)
+    assert len(calls) == 2
+    assert [[c["id"] for c in p["chunks"]] for p in calls] == [
+        [f"a{i}" for i in range(5)],
+        [f"b{i}" for i in range(5)],
+    ]
+
+
+def test_policy_split_carries_scope_and_rejects_context_citations(monkeypatch):
+    from counterparty.analysis.engine import policy_batches
+
+    chunks = [
+        {
+            "id": str(i),
+            "document_id": "policy",
+            "kind": "policy",
+            "location": {"line_start": i + 1},
+            "text": text,
+        }
+        for i, text in enumerate(
+            [
+                "# External customer and partner standard\nOwner: Internal Risk.\n"
+                "## Restricted relationships\n"
+                "Applies only to personal data processing; severity High.\n\n",
+                *["Operational explanation. " * 70 for _ in range(16)],
+                "The distribution partner must enable MFA.",
+            ]
+        )
+    ]
+    payloads = policy_batches(chunks)
+    assert len(payloads) > 1
+    last = payloads[-1]
+    assert "personal data" in json.dumps(last["context"])
+    assert chunks[-1] in last["chunks"]
+    assert all(
+        len(json.dumps(p, ensure_ascii=False)) + len(POLICY_INSTRUCTION) <= BATCH_INPUT_CHARS
+        for p in payloads
+    )
+    _, snapshot = acceptance.corpus()
+    req = copy.deepcopy(snapshot["requirements"][0])
+    req["source"] = {
+        "chunk_id": "0",
+        "document_id": "policy",
+        "location": chunks[0]["location"],
+        "quote": "External customer and partner standard",
+    }
+    mock_adapter(
+        monkeypatch, lambda payload, call: {"requirements": [req] if call == len(payloads) else []}
+    )
+    with pytest.raises(ValueError, match="eligible chunk"):
+        propose_requirements(chunks, "gemini")
+
+
+def test_provider_prompt_covers_external_customers_and_partners():
+    assert "external customers and partners" in POLICY_INSTRUCTION
+    assert "assessing organization's internal duties" in POLICY_INSTRUCTION
+    assert "supplier-facing" not in POLICY_INSTRUCTION
+    assert "ONLY from current chunks" in POLICY_INSTRUCTION
+
+
+def test_fact_gold_rejects_duplicate_same_value_facts():
+    _, snapshot = acceptance.corpus()
+    report = analyze(snapshot)
+    assert not any(acceptance.fact_coverage(report).values())
+    report["facts"].append(copy.deepcopy(report["facts"][0]))
+    assert acceptance.fact_coverage(report)["cardinality"]
+
+
+def test_unstructured_policy_split_is_rejected_before_calls(monkeypatch):
+    chunks = [
+        {"id": str(i), "document_id": "p", "kind": "policy", "text": "Policy context. " * 100}
+        for i in range(20)
+    ]
+    calls = mock_adapter(monkeypatch, lambda payload, _: {"requirements": []})
+    with pytest.raises(ModelError, match="lacks explicit section context"):
+        propose_requirements(chunks, "gemini")
+    assert not calls
+
+
+def test_gemini_repairs_unique_unchanged_quote_coordinates_and_records_count(monkeypatch):
+    policies, snapshot = acceptance.corpus()
+
+    def response(payload, _):
+        ids = {c["id"] for c in payload["chunks"]}
+        proposed = copy.deepcopy(
+            [r for r in snapshot["requirements"] if r["source"]["chunk_id"] in ids]
+        )
+        for req in proposed:
+            req["source"].update(chunk_id="incorrect-heading-chunk", location={"line_start": 999})
+        return {"requirements": proposed}
+
+    mock_adapter(monkeypatch, response)
+    metrics = {}
+    assert propose_requirements(policies, "gemini", metrics) == snapshot["requirements"]
+    assert metrics["citation_corrections"] == 20
+    assert metrics["calls"] == 4
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "ambiguous_chunks",
+        "ambiguous_occurrences",
+        "overlapping_occurrences",
+        "absent",
+        "cross_document",
+        "context_only",
+        "stitched",
+    ],
+)
+def test_model_citation_repair_rejects_unresolvable_quotes(failure):
+    from counterparty.analysis.engine import ground_model_sources
+
+    quote = "The partner must enable MFA."
+    chunks = [{"id": "actual", "document_id": "p", "location": {"line_start": 4}, "text": quote}]
+    proposed = [
+        {"source": {"chunk_id": "heading", "document_id": "p", "location": {}, "quote": quote}}
+    ]
+    if failure == "ambiguous_chunks":
+        chunks.append({**chunks[0], "id": "other"})
+    elif failure == "ambiguous_occurrences":
+        chunks[0]["text"] += " " + quote
+    elif failure == "overlapping_occurrences":
+        chunks[0]["text"] = "aaaa"
+        proposed[0]["source"]["quote"] = "aaa"
+    elif failure in {"absent", "context_only"}:
+        chunks[0]["text"] = "No obligation in this current chunk."
+    elif failure == "cross_document":
+        proposed[0]["source"]["document_id"] = "different-document"
+    else:
+        chunks[0]["text"] = "The partner must"
+        chunks.append({**chunks[0], "id": "next", "text": " enable MFA."})
+    with pytest.raises(ValueError, match="eligible chunk"):
+        ground_model_sources(proposed, chunks)
+
+
+def test_fact_coordinates_are_canonicalized_without_rewriting_values(monkeypatch):
+    _, snapshot = acceptance.corpus("gemini")
+
+    def response(payload, _):
+        facts = extract_facts(payload["chunks"])
+        for fact in facts:
+            fact["source"]["location"] = "line 17"
+        return {"facts": facts}
+
+    mock_adapter(monkeypatch, response)
+    report = analyze(snapshot)
+    assert report["metrics"]["citation_corrections"] == 7
+    assert {f["field"]: f["value"] for f in report["facts"]} == acceptance.GOLD["atlas"]["facts"]
+    for fact in report["facts"]:
+        validate_source(fact["source"], snapshot["chunks"])
+        assert fact["evidence_type"] == "declaration"
+
+
+def test_fact_coordinates_cannot_reach_a_later_batch(monkeypatch):
+    _, snapshot = acceptance.corpus("gemini")
+    facts = extract_facts(snapshot["chunks"])
+    # An unrelated evidence document is first in source order. The returned fact
+    # points at Atlas's valid source, but that source is not eligible in this call.
+    snapshot["chunks"].append(
+        {
+            "id": "foreign-batch",
+            "document_id": "000-first",
+            "text": "MFA evidence requested.",
+            "location": {"line_start": 1},
+            "kind": "evidence",
+        }
+    )
+    monkeypatch.setattr(
+        "counterparty.analysis.engine.retrieve", lambda *a, **kw: snapshot["chunks"]
+    )
+    calls = mock_adapter(monkeypatch, lambda payload, _: {"facts": [copy.deepcopy(facts[0])]})
+    with pytest.raises(ValueError, match="eligible chunk"):
+        analyze(snapshot)
+    assert len(calls) == 1

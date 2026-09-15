@@ -10,11 +10,12 @@
     9
   ],
   "policy_metrics": {
-    "input_tokens": 17802,
-    "output_tokens": 5316,
+    "input_tokens": 18322,
+    "output_tokens": 5093,
     "cost_usd": null,
     "calls": 4,
-    "duration_ms": 16073.46
+    "citation_corrections": 1,
+    "duration_ms": 15696.01
   },
   "source_hashes": {
     "information-security.md": "3aaed2be8a5bf12f40354b0ea4457e1cb82fb2edccf16fea52734a84bb6ca65c",
@@ -31,25 +32,25 @@
     "rule_mismatches": [],
     "manual_field_names": {
       "SEC-03": "supplier_accountability_and_inventory",
-      "SEC-04": "least_privilege_and_revocation",
+      "SEC-04": "least_privilege_access_and_prompt_revocation",
       "SEC-05": "vulnerability_and_patch_process",
       "SEC-06": "independent_assurance_evidence",
       "PRI-04": "subprocessor_inventory_and_notice",
-      "PRI-05": "purpose_limitation",
+      "PRI-05": "supplier_data_minimization_and_documented_purposes",
       "PRI-06": "individual_request_assistance",
       "GOV-01": "accountable_relationship_owner",
-      "GOV-02": "assurance_response_quality",
-      "GOV-03": "contractual_flow_down",
+      "GOV-02": "assurance_responses_and_evidence",
+      "GOV-03": "subcontractor_flow_down",
       "GOV-04": "continuity_and_exit_plan",
-      "IR-02": "incident_evidence_preservation",
-      "IR-03": "containment_recovery_updates",
-      "IR-04": "root_cause_corrective_action_report"
+      "IR-02": "supplier_evidence_preservation",
+      "IR-03": "supplier_containment_recovery_updates",
+      "IR-04": "supplier_root_cause_report"
     }
   },
   "proposed_requirements": [
     {
-      "id": "SEC-03",
-      "title": "SEC-03 Supplier accountability for security: The supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service",
+      "id": "req-sec-03",
+      "title": "Supplier accountability for security and inventory management",
       "field": "supplier_accountability_and_inventory",
       "operator": "manual",
       "expected": null,
@@ -62,13 +63,13 @@
           "line_start": 23,
           "line_end": 36
         },
-        "quote": "SEC-03 — Severity: Medium. Supplier accountability for security.\n\nThe supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service."
+        "quote": "The supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service."
       },
       "evaluation_method": "manual"
     },
     {
-      "id": "SEC-01",
-      "title": "SEC-01 Identity and privileged access: For relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service",
+      "id": "req-sec-01",
+      "title": "Enable MFA for privileged accounts",
       "field": "mfa",
       "operator": "eq",
       "expected": true,
@@ -83,14 +84,14 @@
           "line_start": 23,
           "line_end": 36
         },
-        "quote": "SEC-01 — Severity: High. Applies when privileged access is present.\n\nFor relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service."
+        "quote": "For relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service."
       },
       "evaluation_method": "deterministic"
     },
     {
-      "id": "SEC-04",
-      "title": "SEC-04 Privileged access lifecycle: For relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end",
-      "field": "least_privilege_and_revocation",
+      "id": "req-sec-04",
+      "title": "Least-privilege access and prompt revocation",
+      "field": "least_privilege_access_and_prompt_revocation",
       "operator": "manual",
       "expected": null,
       "severity": "High",
@@ -104,13 +105,13 @@
           "line_start": 37,
           "line_end": 44
         },
-        "quote": "SEC-04 — Severity: High. Applies when privileged access is present.\n\nFor relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end."
+        "quote": "For relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end."
       },
       "evaluation_method": "manual"
     },
     {
-      "id": "SEC-02",
-      "title": "SEC-02 Data protection and keys: For relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups",
+      "id": "req-sec-02",
+      "title": "Encryption of data at rest",
       "field": "encryption_at_rest",
       "operator": "eq",
       "expected": true,
@@ -125,13 +126,13 @@
           "line_start": 45,
           "line_end": 54
         },
-        "quote": "SEC-02 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups."
+        "quote": "For relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups."
       },
       "evaluation_method": "deterministic"
     },
     {
-      "id": "SEC-05",
-      "title": "SEC-05 Vulnerabilities, development and change: The supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions",
+      "id": "req-sec-05",
+      "title": "Vulnerability and patch management process",
       "field": "vulnerability_and_patch_process",
       "operator": "manual",
       "expected": null,
@@ -144,13 +145,13 @@
           "line_start": 55,
           "line_end": 64
         },
-        "quote": "SEC-05 — Severity: High. Vulnerability management.\n\nThe supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions."
+        "quote": "The supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions."
       },
       "evaluation_method": "manual"
     },
     {
-      "id": "SEC-06",
-      "title": "SEC-06 Independent assurance and recovery context: For high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions",
+      "id": "req-sec-06",
+      "title": "Independent assurance evidence for high-criticality services",
       "field": "independent_assurance_evidence",
       "operator": "manual",
       "expected": null,
@@ -165,13 +166,13 @@
           "line_start": 65,
           "line_end": 74
         },
-        "quote": "SEC-06 — Severity: Medium. Applies when business criticality is high.\n\nFor high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions."
+        "quote": "For high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions."
       },
       "evaluation_method": "manual"
     },
     {
       "id": "req-pri-01",
-      "title": "Signed DPA requirement for personal data processing",
+      "title": "Signed data processing agreement before processing personal data",
       "field": "dpa_signed",
       "operator": "eq",
       "expected": true,
@@ -191,9 +192,9 @@
       "evaluation_method": "deterministic"
     },
     {
-      "id": "req-pri-05-purpose",
-      "title": "Process Northstar data only for documented purposes",
-      "field": "purpose_limitation",
+      "id": "req-pri-05",
+      "title": "Process personal data only for documented purposes and minimize data",
+      "field": "supplier_data_minimization_and_documented_purposes",
       "operator": "manual",
       "expected": null,
       "severity": "High",
@@ -213,7 +214,7 @@
     },
     {
       "id": "req-pri-03",
-      "title": "Primary hosting and processing in the EU",
+      "title": "Keep primary hosting and processing for the assessed service in the EU",
       "field": "hosting_region",
       "operator": "eq",
       "expected": "EU",
@@ -234,7 +235,7 @@
     },
     {
       "id": "req-pri-04",
-      "title": "Maintain subprocessor inventory and give advance notice of changes",
+      "title": "Maintain a current subprocessor inventory and give Northstar advance notice of changes",
       "field": "subprocessor_inventory_and_notice",
       "operator": "manual",
       "expected": null,
@@ -255,7 +256,7 @@
     },
     {
       "id": "req-pri-02",
-      "title": "Complete deletion within 30 calendar days after service termination or authenticated deletion request",
+      "title": "Complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request",
       "field": "retention_days",
       "operator": "lte",
       "expected": 30,
@@ -276,7 +277,7 @@
     },
     {
       "id": "req-pri-06",
-      "title": "Support individual rights requests using agreed process",
+      "title": "Support Northstar with access, correction, deletion and export requests",
       "field": "individual_request_assistance",
       "operator": "manual",
       "expected": null,
@@ -317,7 +318,7 @@
     {
       "id": "GOV-02",
       "title": "Assurance response quality",
-      "field": "assurance_response_quality",
+      "field": "assurance_responses_and_evidence",
       "operator": "manual",
       "expected": null,
       "severity": "Medium",
@@ -335,8 +336,8 @@
     },
     {
       "id": "GOV-03",
-      "title": "Contractual flow-down",
-      "field": "contractual_flow_down",
+      "title": "Contractual flow-down to subcontractors",
+      "field": "subcontractor_flow_down",
       "operator": "manual",
       "expected": null,
       "severity": "High",
@@ -354,7 +355,7 @@
     },
     {
       "id": "GOV-04",
-      "title": "Continuity and exit plan maintenance for high business criticality services",
+      "title": "Continuity and exit plan for high-criticality services",
       "field": "continuity_and_exit_plan",
       "operator": "manual",
       "expected": null,
@@ -374,8 +375,8 @@
       "evaluation_method": "manual"
     },
     {
-      "id": "IR-01",
-      "title": "Supplier notification within 24 hours of incident awareness",
+      "id": "req-ir-01",
+      "title": "Supplier notification within 24 calendar hours of incident awareness",
       "field": "notification_hours",
       "operator": "lte",
       "expected": 24,
@@ -393,9 +394,9 @@
       "evaluation_method": "deterministic"
     },
     {
-      "id": "IR-02",
-      "title": "Preserve incident evidence and maintain a timestamped timeline",
-      "field": "incident_evidence_preservation",
+      "id": "req-ir-02",
+      "title": "Supplier preservation of relevant incident evidence and timeline",
+      "field": "supplier_evidence_preservation",
       "operator": "manual",
       "expected": null,
       "severity": "High",
@@ -412,9 +413,9 @@
       "evaluation_method": "manual"
     },
     {
-      "id": "IR-03",
-      "title": "Provide containment and recovery updates through closure",
-      "field": "containment_recovery_updates",
+      "id": "req-ir-03",
+      "title": "Supplier provision of containment and recovery updates through incident closure",
+      "field": "supplier_containment_recovery_updates",
       "operator": "manual",
       "expected": null,
       "severity": "Medium",
@@ -431,9 +432,9 @@
       "evaluation_method": "manual"
     },
     {
-      "id": "IR-04",
-      "title": "Deliver a scoped root-cause and corrective-action report for confirmed incidents",
-      "field": "root_cause_corrective_action_report",
+      "id": "req-ir-04",
+      "title": "Supplier delivery of a scoped root-cause and corrective-action report for confirmed incidents",
+      "field": "supplier_root_cause_report",
       "operator": "manual",
       "expected": null,
       "severity": "Medium",
@@ -779,13 +780,14 @@
     "model_name": "gemini-3.5-flash-lite",
     "metrics": {
       "input_tokens": 9120,
-      "output_tokens": 1495,
+      "output_tokens": 1439,
       "cost_usd": null,
       "calls": 2,
-      "duration_ms": 5688.82
+      "citation_corrections": 7,
+      "duration_ms": 5222.86
     },
     "rules_version": "risk-rules-v1",
-    "prompt_version": "grounded-extraction-v4",
+    "prompt_version": "grounded-extraction-v5",
     "facts": [
       {
         "field": "mfa",
@@ -905,6 +907,7 @@
   },
   "fact_coverage": {
     "missing": [],
+    "cardinality": {},
     "incorrect": {}
   },
   "atlas_matches_gold": true

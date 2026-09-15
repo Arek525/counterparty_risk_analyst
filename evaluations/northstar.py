@@ -13,7 +13,7 @@ from uuid import NAMESPACE_URL, uuid5
 
 from counterparty.analysis import analyze, propose_requirements
 from counterparty.analysis.adapters import ModelError
-from counterparty.analysis.engine import POLICY_INSTRUCTION, chunk_batches
+from counterparty.analysis.engine import policy_batches
 from counterparty.analysis.schemas import validate_source
 from counterparty.bootstrap import resolve_manifest
 from counterparty.documents import extract
@@ -122,6 +122,9 @@ def fact_coverage(report):
         observed.setdefault(fact["field"], []).append(fact["value"])
     return {
         "missing": [field for field in expected if field not in observed],
+        "cardinality": {
+            field: len(values) for field, values in observed.items() if len(values) != 1
+        },
         "incorrect": {
             field: values
             for field, values in observed.items()
@@ -142,9 +145,7 @@ def evaluate(mode):
         "mode": mode,
         "policy_chunks": len(policies),
         "policy_input_chars_unbatched": len(json.dumps({"chunks": policies}, ensure_ascii=False)),
-        "planned_policy_batches": [
-            len(batch) for batch in chunk_batches(policies, {}, POLICY_INSTRUCTION)
-        ],
+        "planned_policy_batches": [len(payload["chunks"]) for payload in policy_batches(policies)],
         "policy_metrics": {},
         "source_hashes": {
             c["filename"]: c["document_sha256"] for c in policies + snapshot["chunks"]

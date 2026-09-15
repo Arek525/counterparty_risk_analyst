@@ -17,7 +17,7 @@ from .schemas import FactBatch, RequirementBatch, validate_requirements, validat
 
 EMBEDDING_MODEL = "demo-hash-v1"
 RULES_VERSION = "risk-rules-v1"
-PROMPT_VERSION = "grounded-extraction-v4"
+PROMPT_VERSION = "grounded-extraction-v5"
 ALIASES = {
     "retention_days": r"retention(?: period)?|data (?:deletion|erasure)|retain(?:ed)?",
     "notification_hours": r"(?:breach|incident) notification|notify|notification",
@@ -171,6 +171,92 @@ BATCH_INPUT_CHARS = 25000
 MAX_BATCHES = 8
 
 
+def source_order(chunks: list[dict]) -> list[dict]:
+    """Group documents without letting retrieval rank become source order."""
+
+    def key(chunk):
+        location = chunk.get("location", {})
+        coordinates = (
+            (location.get("page", 0), location.get("line_start", 0), location.get("line_end", 0))
+            if isinstance(location, dict)
+            else (0, 0, 0)
+        )
+        return str(chunk["document_id"]), *coordinates, str(chunk["id"])
+
+    return sorted(chunks, key=key)
+
+
+def policy_contexts(chunks: list[dict]) -> dict[str, dict]:
+    """Carry the document introduction, active Markdown sections and adjacent text.
+
+    Context is untrusted interpretation data, never an additional extraction source.
+    Oversized context is rejected at batch planning instead of silently truncated.
+    """
+    contexts, sections = {}, []
+    document_id, intro, previous = None, "", ""
+    for chunk in chunks:
+        if chunk["document_id"] != document_id:
+            document_id, intro, previous = chunk["document_id"], chunk["text"], ""
+            sections = []
+        contexts[str(chunk["id"])] = {
+            "document_intro": intro if previous else "",
+            "active_sections": [
+                {key: value for key, value in section.items() if key != "collecting"}
+                for section in sections
+            ],
+            "preceding_text": previous if previous != intro else "",
+        }
+        for line in chunk["text"].splitlines():
+            heading = re.match(r"^(#{1,6})\s+(.+)$", line)
+            if heading:
+                level = len(heading[1])
+                sections = [section for section in sections if section["level"] < level]
+                sections.append({"level": level, "heading": line, "lead": "", "collecting": True})
+            elif sections and sections[-1]["collecting"]:
+                if line.strip():
+                    sections[-1]["lead"] += ("\n" if sections[-1]["lead"] else "") + line
+                elif sections[-1]["lead"]:
+                    sections[-1]["collecting"] = False
+        previous = chunk["text"]
+    return contexts
+
+
+def policy_batches(chunks: list[dict]) -> list[dict]:
+    contexts = policy_contexts(chunks)
+    payloads, current = [], None
+    for chunk in chunks:
+        candidate = {**current, "chunks": [*current["chunks"], chunk]} if current else None
+        if current and (
+            chunk["document_id"] != current["chunks"][-1]["document_id"]
+            or len(json.dumps(candidate, ensure_ascii=False)) + len(POLICY_INSTRUCTION)
+            > BATCH_INPUT_CHARS
+        ):
+            payloads.append(current)
+            current = None
+        if current is None:
+            context = contexts[str(chunk["id"])]
+            if context["document_intro"] and not context["active_sections"]:
+                raise ModelError(
+                    "Policy split lacks explicit section context; split the document by section"
+                )
+            if len(json.dumps(context, ensure_ascii=False)) > 8000:
+                raise ModelError(
+                    "Policy section context limit exceeded; split the policy by section"
+                )
+            current = {"context": context, "chunks": []}
+        current["chunks"].append(chunk)
+        if (
+            len(json.dumps(current, ensure_ascii=False)) + len(POLICY_INSTRUCTION)
+            > BATCH_INPUT_CHARS
+        ):
+            raise ModelError("Policy context and chunk exceed the model batch input limit")
+    if current:
+        payloads.append(current)
+    if len(payloads) > MAX_BATCHES:
+        raise ModelError("Model batch call limit exceeded; reduce selected documents")
+    return payloads
+
+
 def chunk_batches(chunks: list[dict], base: dict, instruction: str) -> list[list[dict]]:
     """Pack contiguous document chunks by serialized size, never truncate inputs."""
     batches, current = [], []
@@ -195,11 +281,17 @@ def chunk_batches(chunks: list[dict], base: dict, instruction: str) -> list[list
 
 
 POLICY_INSTRUCTION = (
-    "Propose every supplier-facing obligation from these policies, including requirements outside "
-    "the supported fields. Do not turn the assessing organization's internal customer duties, "
+    "Propose every external counterparty obligation from these policies, including "
+    "requirements outside "
+    "the supported fields. Counterparties include suppliers, external customers and partners; "
+    "identify external and internal actors from the policy roles, not from a fixed supplier role. "
+    "Context provides document/section scope, severity and adjacent text; inherit relevant "
+    "conditions, but propose and cite obligations ONLY from current chunks, never context. "
+    "Do not repeat an obligation merely because it appears in context. "
+    "Do not turn the assessing organization's internal duties, "
     "explanatory prose or "
-    "document metadata into supplier requirements. Keep one requirement per normative "
-    "supplier obligation; preserve explicit control IDs when present. Do not split its "
+    "document metadata into counterparty requirements. Keep one requirement per normative "
+    "counterparty obligation; preserve explicit control IDs when present. Do not split its "
     "examples into extra requirements. Do not omit a requirement because it needs manual review. "
     "Extract applicability context and severity. Applicability may use these exact "
     "relationship keys: personal_data (boolean), privileged_access (boolean), "
@@ -208,8 +300,11 @@ POLICY_INSTRUCTION = (
     "purpose means the business purpose of the relationship, never an incident/event trigger. "
     "Assess preparedness for future incident duties across relationships; do not encode a "
     "future incident, termination or request as an invented exact-text context predicate. "
-    "When a condition cannot be represented faithfully by supported equality predicates, "
-    "leave applicability empty and retain that condition in the title and source. "
+    "When an actual relationship condition cannot be represented faithfully by supported "
+    "equality predicates, leave applicability empty, retain the condition in title/source, "
+    "and use manual evaluation with operator manual and expected null to avoid evaluating "
+    "an uncertain scope unconditionally. Future incident duties are readiness obligations, "
+    "not unsupported relationship conditions; assess their stated commitments normally. "
     "Supported fields: retention_days, notification_hours, hosting_region, "
     "subprocessors_region, mfa, encryption_at_rest, dpa_signed. Use deterministic "
     "evaluation for these fields. A requirement to enable MFA, encrypt data at rest or "
@@ -219,7 +314,7 @@ POLICY_INSTRUCTION = (
     "as stated; region requirements use eq with the stated region. Use operator manual "
     "and evaluation_method manual "
     "with expected null and a descriptive snake_case field for unsupported interpretation. "
-    "Require human approval. Unique IDs. Quote only the supplier obligation sentence "
+    "Require human approval. Unique IDs. Quote only the counterparty obligation sentence "
     "from ONE chunk. Do not include its heading or concatenate adjacent chunks. "
     "Copy metadata from the chunk actually containing that exact quoted sentence. "
     "Source chunk_id, document_id and location must be copied verbatim from the "
@@ -230,6 +325,36 @@ POLICY_INSTRUCTION = (
 )
 
 
+def ground_model_sources(items: list[dict], batch: list[dict]) -> int:
+    """Repair only opaque chunk coordinates for uniquely grounded unchanged quotes."""
+    corrections = 0
+    for item in items:
+        citation = item["source"]
+        try:
+            validate_source(citation, batch)
+        except ValueError:
+            matches = [
+                chunk
+                for chunk in batch
+                if str(chunk["document_id"]) == citation["document_id"]
+                and citation["quote"] in chunk["text"]
+            ]
+            if len(matches) != 1 or (
+                matches[0]["text"].find(citation["quote"])
+                != matches[0]["text"].rfind(citation["quote"])
+            ):
+                raise
+            corrected = {
+                **citation,
+                "chunk_id": str(matches[0]["id"]),
+                "location": matches[0]["location"],
+            }
+            validate_source(corrected, batch)
+            item["source"] = corrected
+            corrections += 1
+    return corrections
+
+
 def propose_requirements(
     chunks: list[dict], mode: str = "demo", metrics: dict | None = None
 ) -> list[dict]:
@@ -237,17 +362,20 @@ def propose_requirements(
     if not policies:
         raise ValueError("Select at least one policy document")
     if mode == "gemini":
-        batches = chunk_batches(policies, {}, POLICY_INSTRUCTION)
+        batches = policy_batches(policies)
         adapter = GeminiAdapter()
+        adapter.metrics["citation_corrections"] = 0
         result = []
         start = time.monotonic()
         try:
-            for batch in batches:
-                proposed = adapter.generate(
-                    POLICY_INSTRUCTION, {"chunks": batch}, RequirementBatch
-                )["requirements"]
+            for payload in batches:
+                batch = payload["chunks"]
+                proposed = adapter.generate(POLICY_INSTRUCTION, payload, RequirementBatch)[
+                    "requirements"
+                ]
                 # Empty context-only batches are allowed; the complete proposal cannot be empty.
                 if proposed:
+                    adapter.metrics["citation_corrections"] += ground_model_sources(proposed, batch)
                     result.extend(validate_requirements(proposed, batch))
             seen_rules = set()
             for requirement in result:
@@ -361,6 +489,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
     model_name = "deterministic-demo-v1"
     if mode == "gemini":
         adapter = GeminiAdapter()
+        adapter.metrics["citation_corrections"] = 0
         # Retrieval bounds provider context; authorization already scoped chunks.
         chosen = {}
         for req in requirements:
@@ -371,7 +500,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 semantic_scores=snapshot.get("retrieval_scores", {}).get(req["id"]),
             ):
                 chosen[str(c["id"])] = c
-        selected = list(chosen.values())
+        selected = source_order(list(chosen.values()))
         instruction = (
             "Extract explicit counterparty facts for these approved requirement fields. "
             "Also extract other explicitly stated supported controls: retention_days, "
@@ -402,6 +531,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             extracted = adapter.generate(
                 instruction, {"requirements": projected, "chunks": batch}, FactBatch
             )["facts"]
+            adapter.metrics["citation_corrections"] += ground_model_sources(extracted, batch)
             for fact in FactBatch.model_validate({"facts": extracted}).model_dump()["facts"]:
                 validate_source(fact["source"], batch)
                 key = json.dumps(fact, sort_keys=True, ensure_ascii=False)

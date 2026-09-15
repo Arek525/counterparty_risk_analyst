@@ -537,3 +537,46 @@ def test_analysis_uses_snapshot_retrieval_scores():
     assert analyze(snap)["findings"][0]["status"] == "unknown"
     snap["retrieval_scores"]["mfa"]["e1"] = 0.9
     assert analyze(snap)["findings"][0]["status"] == "pass"
+
+
+def test_model_prompt_retains_customer_and_partner_roles_with_internal_duties(monkeypatch):
+    from counterparty.analysis.engine import POLICY_INSTRUCTION
+
+    policies = [
+        chunk(
+            "# Partner and customer access\n"
+            "External customers and distribution partners are assessed counterparties.\n"
+            "The partner must enable MFA.\n"
+            "The customer must have a signed DPA.\n"
+            "The internal Security Owner must approve the assessment.",
+            kind="policy",
+        )
+    ]
+    monkeypatch.setenv("GEMINI_API_KEY", "mock")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-mock")
+    expected = []
+    for field, quote in (
+        ("mfa", "The partner must enable MFA."),
+        ("dpa_signed", "The customer must have a signed DPA."),
+    ):
+        req = requirement(field, True)
+        req.update(
+            operator="eq",
+            source={
+                "chunk_id": policies[0]["id"],
+                "document_id": policies[0]["document_id"],
+                "location": policies[0]["location"],
+                "quote": quote,
+            },
+        )
+        expected.append(req)
+
+    def generate(self, instruction, payload, schema):
+        assert instruction == POLICY_INSTRUCTION
+        assert "external customers and partners" in instruction
+        assert "assessing organization's internal duties" in instruction
+        assert "The internal Security Owner" in payload["chunks"][0]["text"]
+        return {"requirements": expected}
+
+    monkeypatch.setattr(GeminiAdapter, "generate", generate)
+    assert propose_requirements(policies, "gemini") == expected

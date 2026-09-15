@@ -478,8 +478,12 @@ def propose_policy(body: PolicyProposal, request: Request, user: Actor, session:
     if any(document.kind != "policy" for document in documents):
         raise HTTPException(422, "Only policy documents can define requirements")
     chunks = chunks_for(session, documents)
+    proposal_metrics = {}
     requirements = validated_requirements(
-        propose_requirements(chunks, mode=request.app.state.settings.model_mode), chunks
+        propose_requirements(
+            chunks, mode=request.app.state.settings.model_mode, metrics=proposal_metrics
+        ),
+        chunks,
     )
     policy = PolicySetVersion(
         organization_id=user.organization_id,
@@ -492,7 +496,12 @@ def propose_policy(body: PolicyProposal, request: Request, user: Actor, session:
     )
     session.add(policy)
     session.flush()
-    audit(session, user, "policy.proposed", details={"policy_id": str(policy.id)})
+    audit(
+        session,
+        user,
+        "policy.proposed",
+        details={"policy_id": str(policy.id), "model_metrics": proposal_metrics},
+    )
     session.commit()
     return public_policy(policy)
 
