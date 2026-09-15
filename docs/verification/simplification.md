@@ -39,3 +39,15 @@ lock/checkpointer session, process budgets, index/cache provenance, explicit
 approvals, ticket idempotency and append-only history. Real-provider quality,
 legal interpretation and production readiness remain outside this refactor's
 claims.
+
+Final integration verification on commit `9282b7f` also passed all four browser
+journeys against rebuilt application images, including the real Gemini and
+semantic retrieval journey (19.7 seconds). All 28 installed backend source files
+matched the checkout. Desktop and mobile screenshots before and after the
+refactor were byte-identical. Historical input, report, source and decision
+hashes remained unchanged.
+
+After verification, the active database was freshly migrated and seeded with
+four indexed professional synthetic policies, one approved standard and no
+assessment cases. Previous application and verification data were archived
+separately. API, worker, ticket service and frontend health checks passed.
