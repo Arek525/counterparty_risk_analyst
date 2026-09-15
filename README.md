@@ -123,7 +123,7 @@ docker compose -f compose.test.yaml up --build --abort-on-container-exit --exit-
 docker compose -f compose.test.yaml run --rm --no-deps tests ruff check .
 docker compose -f compose.test.yaml run --rm --no-deps tests ruff format --check .
 docker compose -f compose.test.yaml run --rm --no-deps --user "$(id -u):$(id -g)" \
-  -v "$PWD/evaluations:/evaluations" tests python /evaluations/run.py --check
+  tests python /evaluations/run.py --check
 docker compose -f compose.test.yaml down
 ```
 

@@ -25,6 +25,8 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Prepare synthetic application configuration
+        run: cp .env.example .env
       - name: Backend tests on isolated PostgreSQL
         run: docker compose -f compose.test.yaml up --build --abort-on-container-exit --exit-code-from tests
       - name: Backend static checks
@@ -34,9 +36,9 @@ jobs:
       - name: Deterministic held-out evaluation gate
         run: |
           docker compose -f compose.test.yaml run --rm --no-deps --user "$(id -u):$(id -g)" \
-            -v "$PWD/evaluations:/evaluations" tests python /evaluations/run.py --check
+            tests python /evaluations/run.py --check
           docker compose -f compose.test.yaml run --rm --no-deps --user "$(id -u):$(id -g)" \
-            -v "$PWD/evaluations:/evaluations" tests pytest /evaluations/test_gate.py -p no:cacheprovider
+            tests pytest /evaluations/test_gate.py -p no:cacheprovider
       - name: Frontend build and type check
         working-directory: frontend
         run: |
@@ -46,7 +48,6 @@ jobs:
           npx playwright install --with-deps chrome
       - name: Start and seed the full application
         run: |
-          cp .env.example .env
           docker compose up --build -d --wait --wait-timeout 180
           docker compose run --rm seed
           docker compose run --rm seed
