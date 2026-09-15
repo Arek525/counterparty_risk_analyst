@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import {
   EmptyState,
@@ -58,10 +58,7 @@ export default function RunPage() {
     const timer = setInterval(() => void load(), 1800);
     return () => clearInterval(timer);
   }, [load, run]);
-  const decision = useMemo<Decision | null>(
-    () => run?.decision ?? run?.decisions?.[0] ?? null,
-    [run],
-  );
+  const decision = run?.decision ?? null;
   if (!run && !error) return <Spinner label="Loading analysis…" />;
   if (!run) return <ErrorNotice message={error} retry={load} />;
   const processing = run.status === "queued" || run.status === "running";
@@ -163,15 +160,11 @@ export default function RunPage() {
                       </div>
                       <div className="finding-body">
                         <p>{finding.explanation}</p>
-                      {(typeof finding.missing_information === "string"
-                        ? finding.missing_information.trim().length > 0
-                        : (finding.missing_information?.length ?? 0) > 0) && (
+                        {(finding.missing_information?.length ?? 0) > 0 && (
                           <div className="notice notice-info">
                             <p>
                               <strong>Missing information:</strong>{" "}
-                              {Array.isArray(finding.missing_information)
-                                ? finding.missing_information.join(" ")
-                                : finding.missing_information}
+                              {finding.missing_information?.join(" ")}
                             </p>
                           </div>
                         )}
@@ -325,12 +318,9 @@ function RunProgress({ run }: { run: AnalysisRun }) {
             className="subtle"
             style={{ textAlign: "center", margin: "14px 0 0" }}
           >
-          {run.events.at(-1)?.message ??
-            runEventLabel(
-              run.events.at(-1)?.event ?? run.events.at(-1)?.type ?? "",
-            )}
-        </p>
-      )}
+            {runEventLabel(run.events.at(-1)?.event ?? "")}
+          </p>
+        )}
       </div>
     </section>
   );
@@ -384,16 +374,9 @@ function ReportLists({
           </div>
           <div className="card-body">
             <ul className="plain-list">
-              {discrepancies.map((item, index) => {
-                const description =
-                  typeof item === "string"
-                    ? item
-                    : (item.description ??
-                      item.message ??
-                      item.explanation ??
-                      "The discrepancy requires clarification.");
-                return <li key={index}>{description}</li>;
-              })}
+              {discrepancies.map((item, index) => (
+                <li key={index}>{item.description}</li>
+              ))}
             </ul>
           </div>
         </section>

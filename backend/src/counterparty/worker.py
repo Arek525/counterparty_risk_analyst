@@ -228,8 +228,6 @@ def _execute_claim(engine, settings, run_id, saver, model=None):
             )
         elif state.next and decision_data:
             result = graph.invoke(Command(resume=decision_data), config)
-        elif state.next and not state.tasks:
-            result = graph.invoke(None, config)
         elif state.next and any(task.interrupts for task in state.tasks):
             result = state.values
         elif state.next:

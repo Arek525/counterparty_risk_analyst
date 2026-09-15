@@ -169,21 +169,6 @@ def validated_requirements(requirements, chunks):
 
     try:
         parsed = [Requirement.model_validate(item).model_dump(mode="json") for item in requirements]
-        if not parsed or len(parsed) > 100:
-            raise ValueError("A policy needs between 1 and 100 requirements")
-        if len({item["id"] for item in parsed}) != len(parsed):
-            raise ValueError("Requirement identifiers must be unique")
-        sources = {chunk["id"]: chunk for chunk in chunks}
-        for item in parsed:
-            source = item["source"]
-            chunk = sources.get(source["chunk_id"])
-            if (
-                chunk is None
-                or source["document_id"] != chunk["document_id"]
-                or source["location"] != chunk["location"]
-                or source["quote"] not in chunk["text"]
-            ):
-                raise ValueError("Requirement citation does not resolve to the policy source")
         validate_requirements(parsed, chunks)
         return parsed
     except (ValidationError, ValueError, TypeError, KeyError) as exc:
@@ -448,10 +433,7 @@ def delete_document(document_id: UUID, request: Request, user: Actor, session: D
     require_roles(user, *WRITE_ROLES)
     document = document_for(session, user, document_id)
     # A lock prevents deletion during new policy/run snapshot creation.
-    session.execute(
-        text("SELECT pg_advisory_xact_lock(hashtextextended(:scope, 0))"),
-        {"scope": f"references:{user.organization_id}"},
-    )
+    reference_lock(session, user)
     policies = session.scalars(
         select(PolicySetVersion).where(PolicySetVersion.organization_id == user.organization_id)
     )
