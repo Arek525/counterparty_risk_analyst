@@ -1,0 +1,2126 @@
+[
+  {
+    "file": "aster-policy-markdown.md",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "policy",
+    "layout": "markdown",
+    "sha256": "3caff3d00200240bb5e2d9afd1d81624275deaa8b926d474fbba04404ece5f9f",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-policy-prose.txt",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "policy",
+    "layout": "prose",
+    "sha256": "393f0015693cc2c99993bea2e31788647d6979af7555e4a93141c4dc8dbef433",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-policy-wrapped.txt",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "policy",
+    "layout": "wrapped",
+    "sha256": "2ba6262a6f70d7fc8e21bfc4bbb2eccfb0f80a071e6c91a36e9117bc9254d82c",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-policy-mixed.md",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "policy",
+    "layout": "mixed",
+    "sha256": "4227d71d3b1ab54e41cfce1f34683522b6960ac532b9beb7a766ebb5ddcb05d4",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-policy-pdf.pdf",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "policy",
+    "layout": "pdf",
+    "sha256": "1fff1ba03c9e26802dae866f27fcb05d0c268227e27447a245fa59b97390215b",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-evidence-markdown.md",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "evidence",
+    "layout": "markdown",
+    "sha256": "ae471a2ba07fb3a2a89669c78249b0e13eaf80e64641c46bf84cac6f661075ce",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Aster confirms that its operators use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-evidence-prose.txt",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "evidence",
+    "layout": "prose",
+    "sha256": "c1fb800f9e2c59b930bdb59f8add07b60345aa52f35da332267bc72843f1ad69",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Aster confirms that its operators use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-evidence-wrapped.txt",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "evidence",
+    "layout": "wrapped",
+    "sha256": "ee6c8c15d1a9fe90316a36017c8ca8e566ce72aed96fd446d516c2fabd36ad9c",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Aster confirms that its operators use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-evidence-mixed.md",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "evidence",
+    "layout": "mixed",
+    "sha256": "284b6cc2ff726504ca53f5f4f3d4b1a6218008da2060321fa1a444aa6f15d668",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Aster confirms that its operators use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "aster-evidence-pdf.pdf",
+    "organization": "Aster",
+    "language": "en",
+    "split": "development",
+    "role": "evidence",
+    "layout": "pdf",
+    "sha256": "8c6d73d616e3f7d6524af4e53dbd36a408f88625345c8d2b70bcf902c7d10ff3",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Aster confirms that its operators use multi-factor authentication when administering the payroll hosting service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 20 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 12 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-policy-markdown.md",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "policy",
+    "layout": "markdown",
+    "sha256": "349a943083e396e00f956c1307fe0f618fbd14fa0117f1c7aafd5c5ab5076d01",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-policy-prose.txt",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "policy",
+    "layout": "prose",
+    "sha256": "6d41db69debee33284bb2fdbab1df6dcf4aac416e4e221e40d6b6ae1e964d26e",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-policy-wrapped.txt",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "policy",
+    "layout": "wrapped",
+    "sha256": "56f3aa64b0dc43af0ab447a701105e08efb459615d16f9cbd058acfbffb17e76",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-policy-mixed.md",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "policy",
+    "layout": "mixed",
+    "sha256": "823f79fd652b30de706cda77eecc7f3e5d7dfab3599770d1e31a90827c6c355a",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-evidence-markdown.md",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "evidence",
+    "layout": "markdown",
+    "sha256": "256e7681d004ad0f1571d4b9a9e2f9461577cc3927788824b8f2b03cb9dd81a1",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-evidence-prose.txt",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "evidence",
+    "layout": "prose",
+    "sha256": "a63c0ef84e7a613dcb3354e923edaf71a95c5048a9a1fc58ddd9e16c45e7cbef",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-evidence-wrapped.txt",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "evidence",
+    "layout": "wrapped",
+    "sha256": "16757d041af29b9f3f10b5c4cdd89237841f8fd3e9e8303203b75a770e795282",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "orion-evidence-mixed.md",
+    "organization": "Orion",
+    "language": "pl",
+    "split": "development",
+    "role": "evidence",
+    "layout": "mixed",
+    "sha256": "b0fff1929116ad23f3dc2fb98d58f0f5f1d8b30a309db87441f517d24fbe673d",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi obsługa zgłoszeń klientów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 30 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 24 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-policy-markdown.md",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "markdown",
+    "sha256": "fa8f51c8f57f4323ae742736fc57b0650eeee8a98a9c7f8e2ff50673baf14e11",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-policy-prose.txt",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "prose",
+    "sha256": "042e676511ec13b22cd6cb6435192b2941eed397b02ba311ada235bc761355cc",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-policy-wrapped.txt",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "wrapped",
+    "sha256": "c99d12ff09952df598e6b66178b561c6fa1055ac7d2c318528eacb472d2de198",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-policy-mixed.md",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "mixed",
+    "sha256": "6cec4c931929abe5d6135890e7ec1137d8a4b576daedc20fecc17f3183678c9d",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-policy-pdf.pdf",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "pdf",
+    "sha256": "740bc33823e198f12ca0dedb4d82492bc48e7850a2fe5e03e723bd807a711a4e",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "The supplier must use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records must be removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice must be sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-evidence-markdown.md",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "markdown",
+    "sha256": "a22d156d8988bc7f8142a4200012ca314d7059ed64a38028631201314eeaf3e8",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Meridian confirms that its operators use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-evidence-prose.txt",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "prose",
+    "sha256": "c8a78e83344205ffc4dfa2daf4f1021eaeaef22da6e19399d69858c731a26708",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Meridian confirms that its operators use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-evidence-wrapped.txt",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "wrapped",
+    "sha256": "94bd0c6591b9fda7bba0a3a5dc479aadd9044a61d482328726115b3974a2c169",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Meridian confirms that its operators use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-evidence-mixed.md",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "mixed",
+    "sha256": "ac2ff943462e4c7259b82556d1a159814fedfa91c26f474fa0e13c1396263754",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Meridian confirms that its operators use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "meridian-evidence-pdf.pdf",
+    "organization": "Meridian",
+    "language": "en",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "pdf",
+    "sha256": "d5defab545f8586da6421b783336b85e010ec347c392bbf8824485530b024907",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Which accounts require multiple authentication factors?",
+        "anchors": [
+          "Meridian confirms that its operators use multi-factor authentication when administering the warehouse analytics service.",
+          "This requirement excludes non-interactive service identities, which instead need scoped credentials and rotation."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "When are customer records deleted and what is exempt?",
+        "anchors": [
+          "Customer records are removed within 14 calendar days of contract termination.",
+          "The stated deadline excludes records under a documented litigation hold; those remain isolated until release is authorized."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "What starts the incident notification deadline?",
+        "anchors": [
+          "The first customer incident notice is sent within 8 hours of awareness.",
+          "The clock starts with a credible indication affecting customer data, not completion of the root-cause investigation."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Which stored data and temporary copies require encryption?",
+        "anchors": [
+          "Encryption at rest covers the primary store, replicas and recovery copies containing customer data.",
+          "Temporary diagnostic exports containing customer records are also in scope, even when they are deleted after troubleshooting."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Where is production processing and can overseas support access records?",
+        "anchors": [
+          "Primary application processing and storage are located in the European Union.",
+          "Specialist support in Canada may access the minimum necessary records under a separately approved task; the primary location statement does not exclude that access."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Does the independent audit cover the acquired support portal?",
+        "anchors": [
+          "The independent assurance report covers the established production platform for the current review year.",
+          "It excludes the recently acquired support portal; an extension review is planned but has not been completed."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-policy-markdown.md",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "markdown",
+    "sha256": "d2cf232deeb48145eb845e52f199bdd86110107df6ad882359ca52a63c6588d7",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-policy-prose.txt",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "prose",
+    "sha256": "72d95b29a02d33bcc857f013a3100db0ae00a35a0df0c71bf77e7e3b113843ca",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-policy-wrapped.txt",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "wrapped",
+    "sha256": "f02ecca60f47d8cc258fcbb6a09c95c1fc1563bad23d01092e7db89ccf7a0eaf",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-policy-mixed.md",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "policy",
+    "layout": "mixed",
+    "sha256": "893b83dbb3091fa71d5c25446780b93703e989b27a0a7d11ab251cf883ab4a66",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów muszą używać uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta należy usunąć w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta musi nastąpić w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-evidence-markdown.md",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "markdown",
+    "sha256": "8717f7351d51c5e7d3353a8a39a6ef25ad298fafdc35714e76cf0d29f5bde187",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-evidence-prose.txt",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "prose",
+    "sha256": "f727f46af4d489eb8a9f095cdf74f710ed15d06237a7af04cef82c51f477f370",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-evidence-wrapped.txt",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "wrapped",
+    "sha256": "2a4c4fc9f750c03df433876fd691a70dc3590a9f104acceff968a221763360c2",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "brzeg-evidence-mixed.md",
+    "organization": "Brzeg",
+    "language": "pl",
+    "split": "confirmation",
+    "role": "evidence",
+    "layout": "mixed",
+    "sha256": "b06d2a1a85f1b96123d469ca5725d1ebbc34afcf705a14c70693337f9d17ba1d",
+    "queries": [
+      {
+        "id": "0",
+        "query": "Które konta wymagają uwierzytelniania wieloskładnikowego?",
+        "anchors": [
+          "Administratorzy usługi archiwizacja umów używają uwierzytelniania wieloskładnikowego.",
+          "Ten obowiązek nie obejmuje nieinteraktywnych kont technicznych; dla nich wymagane są ograniczone uprawnienia i rotacja poświadczeń."
+        ]
+      },
+      {
+        "id": "1",
+        "query": "Jaki jest termin usunięcia danych i kiedy obowiązuje wyjątek?",
+        "anchors": [
+          "Dane klienta są usuwane w ciągu 45 dni kalendarzowych od zakończenia umowy.",
+          "Wyjątek stanowią wskazane dokumenty objęte obowiązkiem zabezpieczenia dowodów; pozostają odizolowane do zatwierdzenia zwolnienia blokady."
+        ]
+      },
+      {
+        "id": "2",
+        "query": "Od jakiego zdarzenia biegnie termin pierwszego powiadomienia?",
+        "anchors": [
+          "Pierwsze powiadomienie klienta następuje w ciągu 16 godzin od uzyskania świadomości incydentu.",
+          "Początkiem terminu jest wiarygodny sygnał dotyczący danych klienta, a nie zakończenie ustalania przyczyny źródłowej."
+        ]
+      },
+      {
+        "id": "3",
+        "query": "Czy szyfrowanie obejmuje kopie i tymczasowe eksporty diagnostyczne?",
+        "anchors": [
+          "Szyfrowanie danych w spoczynku obejmuje magazyn główny, repliki i kopie odtworzeniowe zawierające dane klienta.",
+          "Tymczasowe eksporty diagnostyczne z rekordami klientów także podlegają temu obowiązkowi, nawet jeżeli są usuwane po zakończeniu naprawy."
+        ]
+      },
+      {
+        "id": "4",
+        "query": "Gdzie działają systemy i czy wsparcie spoza regionu ma dostęp do danych?",
+        "anchors": [
+          "Główne przetwarzanie i przechowywanie danych usługi odbywa się w Unii Europejskiej.",
+          "Wsparcie specjalistyczne z Kanady może odczytać niezbędne rekordy w ramach odrębnie zatwierdzonego zadania; deklaracja głównej lokalizacji nie wyklucza tego dostępu."
+        ]
+      },
+      {
+        "id": "5",
+        "query": "Czy niezależny audyt obejmuje nowo przejęty portal wsparcia?",
+        "anchors": [
+          "Raport niezależnego audytora obejmuje dotychczasową platformę produkcyjną w bieżącym roku przeglądu.",
+          "Nowo przejęty portal wsparcia jest wyłączony z tego zakresu; rozszerzenie przeglądu zaplanowano, ale nie zostało jeszcze zakończone."
+        ]
+      }
+    ]
+  }
+]

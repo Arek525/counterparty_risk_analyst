@@ -1,0 +1,398 @@
+[
+  {
+    "file": "cedar.md",
+    "contract": "cedar",
+    "layout": "markdown",
+    "sha256": "f15296397fb86cc7cb973ffaff371fbf08b68225c2d47f51a9697c7289a0aa45",
+    "source_chars": 63292,
+    "words": 8814,
+    "pdf_pages": null,
+    "shared_annex_fraction_canonical": 0.798426341401757,
+    "queries": [
+      {
+        "id": "mfa",
+        "cross_reference": false,
+        "query": "Which Cedar payroll identities require a second authentication factor and which are exempt?",
+        "anchors": [
+          "Cedar requires a second authentication factor for every human administrator entering the production payroll console.",
+          "Non-interactive payroll connectors are excluded from the human MFA rule and instead use scoped credentials rotated at least every 45 days."
+        ]
+      },
+      {
+        "id": "deletion",
+        "cross_reference": true,
+        "query": "What removal deadline governs production payroll records after the executed change schedule?",
+        "anchors": [
+          "The ordinary contract rule requires removal of production payroll records within 30 days after service termination.",
+          "CB-7 replaces the ordinary 30-day removal deadline with a 14-day deadline for production payroll records."
+        ]
+      },
+      {
+        "id": "encryption",
+        "cross_reference": false,
+        "query": "Does Cedar payroll storage encryption also cover temporary diagnostic exports?",
+        "anchors": [
+          "Encryption covers production payroll databases, their replicas, event logs and disaster-recovery copies.",
+          "Diagnostic CSV exports containing employee records are included in the encryption obligation even when their intended lifetime is less than one working day."
+        ]
+      },
+      {
+        "id": "incident",
+        "cross_reference": false,
+        "query": "When does Cedar's payroll incident notification clock start and may investigation delay it?",
+        "anchors": [
+          "Cedar sends the first payroll incident notice within 18 hours after a credible service-impact signal reaches the designated response channel.",
+          "Waiting for root-cause confirmation does not postpone the start of the 18-hour notification period."
+        ]
+      },
+      {
+        "id": "support",
+        "cross_reference": true,
+        "query": "Where may Cedar's human support access payroll records under the amended agreement?",
+        "anchors": [
+          "The original support schedule limits human access to personnel working in the European Economic Area.",
+          "CB-7 permits a named Canadian specialist to access masked payroll troubleshooting records for an approved incident task, overriding the earlier EEA-only support restriction for that task alone."
+        ]
+      },
+      {
+        "id": "exit",
+        "cross_reference": true,
+        "query": "What payroll export must Cedar provide on exit and when is it due?",
+        "anchors": [
+          "On termination Cedar makes a tenant-specific payroll export available for customer validation.",
+          "Cedar must deliver the exit export within seven calendar days after Northstar's authenticated request."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "cedar.pdf",
+    "contract": "cedar",
+    "layout": "pdf",
+    "sha256": "c23f1b7162b69ee49aac44290507e61de4d5c7838eabebca805cd3f1276d6e31",
+    "source_chars": 62970,
+    "words": 8763,
+    "pdf_pages": 27,
+    "shared_annex_fraction_canonical": 0.798426341401757,
+    "queries": [
+      {
+        "id": "mfa",
+        "cross_reference": false,
+        "query": "Which Cedar payroll identities require a second authentication factor and which are exempt?",
+        "anchors": [
+          "Cedar requires a second authentication factor for every human administrator entering the production payroll console.",
+          "Non-interactive payroll connectors are excluded from the human MFA rule and instead use scoped credentials rotated at least every 45 days."
+        ]
+      },
+      {
+        "id": "deletion",
+        "cross_reference": true,
+        "query": "What removal deadline governs production payroll records after the executed change schedule?",
+        "anchors": [
+          "The ordinary contract rule requires removal of production payroll records within 30 days after service termination.",
+          "CB-7 replaces the ordinary 30-day removal deadline with a 14-day deadline for production payroll records."
+        ]
+      },
+      {
+        "id": "encryption",
+        "cross_reference": false,
+        "query": "Does Cedar payroll storage encryption also cover temporary diagnostic exports?",
+        "anchors": [
+          "Encryption covers production payroll databases, their replicas, event logs and disaster-recovery copies.",
+          "Diagnostic CSV exports containing employee records are included in the encryption obligation even when their intended lifetime is less than one working day."
+        ]
+      },
+      {
+        "id": "incident",
+        "cross_reference": false,
+        "query": "When does Cedar's payroll incident notification clock start and may investigation delay it?",
+        "anchors": [
+          "Cedar sends the first payroll incident notice within 18 hours after a credible service-impact signal reaches the designated response channel.",
+          "Waiting for root-cause confirmation does not postpone the start of the 18-hour notification period."
+        ]
+      },
+      {
+        "id": "support",
+        "cross_reference": true,
+        "query": "Where may Cedar's human support access payroll records under the amended agreement?",
+        "anchors": [
+          "The original support schedule limits human access to personnel working in the European Economic Area.",
+          "CB-7 permits a named Canadian specialist to access masked payroll troubleshooting records for an approved incident task, overriding the earlier EEA-only support restriction for that task alone."
+        ]
+      },
+      {
+        "id": "exit",
+        "cross_reference": true,
+        "query": "What payroll export must Cedar provide on exit and when is it due?",
+        "anchors": [
+          "On termination Cedar makes a tenant-specific payroll export available for customer validation.",
+          "Cedar must deliver the exit export within seven calendar days after Northstar's authenticated request."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "lumen.md",
+    "contract": "lumen",
+    "layout": "markdown",
+    "sha256": "37789abad9ea924882ebd0aec5bc43718ccd5cada96905a98825d4b5156b7e0a",
+    "source_chars": 63596,
+    "words": 8874,
+    "pdf_pages": null,
+    "shared_annex_fraction_canonical": 0.7946097238820051,
+    "queries": [
+      {
+        "id": "mfa",
+        "cross_reference": false,
+        "query": "Which Live Fleet identities require a second factor and how are device identities treated?",
+        "anchors": [
+          "Interactive administrative access to Live Fleet requires a phishing-resistant second factor.",
+          "Device ingestion certificates are outside the interactive second-factor requirement, but each certificate is tenant-scoped and must be replaced before its 90-day expiry."
+        ]
+      },
+      {
+        "id": "deletion",
+        "cross_reference": true,
+        "query": "What is the amended post-termination deletion deadline for Live Fleet telemetry?",
+        "anchors": [
+          "The general Live Fleet schedule removes customer telemetry 30 days after termination of the subscription.",
+          "LF-R3 replaces the general 30-day removal window with 45 days for Live Fleet telemetry after subscription termination."
+        ]
+      },
+      {
+        "id": "recovery",
+        "cross_reference": false,
+        "query": "Does the Live Fleet recovery objective also apply to Research Bench?",
+        "anchors": [
+          "The baseline recovery objective for Live Fleet is four hours after the incident commander declares a recovery event.",
+          "Research Bench recovery is best effort and does not inherit the Live Fleet four-hour objective."
+        ]
+      },
+      {
+        "id": "support",
+        "cross_reference": false,
+        "query": "Does Live Fleet's hosting location exclude support access from outside that region?",
+        "anchors": [
+          "Live Fleet primary storage, computation and managed recovery storage operate in Finland and Sweden.",
+          "An Australian incident specialist may view limited Live Fleet diagnostic records through a recorded, customer-approved session."
+        ]
+      },
+      {
+        "id": "incident",
+        "cross_reference": true,
+        "query": "Which initial incident notice deadline applies to Live Fleet after the signed rider?",
+        "anchors": [
+          "Lumen's original operating schedule allows 24 hours for the first notice of an incident affecting Live Fleet.",
+          "LF-R3 reduces the initial Live Fleet incident-notice deadline from 24 hours to six hours after credible evidence of customer impact reaches the response lead."
+        ]
+      },
+      {
+        "id": "assurance",
+        "cross_reference": false,
+        "query": "Does the independent Live Fleet assurance report cover the mobile field gateway?",
+        "anchors": [
+          "The available independent report covers Live Fleet's application tier and managed infrastructure for the first half of 2026.",
+          "The report does not cover the mobile field gateway added in July 2026; its inclusion is planned for the next assessment cycle."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "lumen.pdf",
+    "contract": "lumen",
+    "layout": "pdf",
+    "sha256": "c9ac8dae92ca5f30221e7a9225309cfe99334d139a9b835ee7e3e74428dae8cf",
+    "source_chars": 63281,
+    "words": 8825,
+    "pdf_pages": 27,
+    "shared_annex_fraction_canonical": 0.7946097238820051,
+    "queries": [
+      {
+        "id": "mfa",
+        "cross_reference": false,
+        "query": "Which Live Fleet identities require a second factor and how are device identities treated?",
+        "anchors": [
+          "Interactive administrative access to Live Fleet requires a phishing-resistant second factor.",
+          "Device ingestion certificates are outside the interactive second-factor requirement, but each certificate is tenant-scoped and must be replaced before its 90-day expiry."
+        ]
+      },
+      {
+        "id": "deletion",
+        "cross_reference": true,
+        "query": "What is the amended post-termination deletion deadline for Live Fleet telemetry?",
+        "anchors": [
+          "The general Live Fleet schedule removes customer telemetry 30 days after termination of the subscription.",
+          "LF-R3 replaces the general 30-day removal window with 45 days for Live Fleet telemetry after subscription termination."
+        ]
+      },
+      {
+        "id": "recovery",
+        "cross_reference": false,
+        "query": "Does the Live Fleet recovery objective also apply to Research Bench?",
+        "anchors": [
+          "The baseline recovery objective for Live Fleet is four hours after the incident commander declares a recovery event.",
+          "Research Bench recovery is best effort and does not inherit the Live Fleet four-hour objective."
+        ]
+      },
+      {
+        "id": "support",
+        "cross_reference": false,
+        "query": "Does Live Fleet's hosting location exclude support access from outside that region?",
+        "anchors": [
+          "Live Fleet primary storage, computation and managed recovery storage operate in Finland and Sweden.",
+          "An Australian incident specialist may view limited Live Fleet diagnostic records through a recorded, customer-approved session."
+        ]
+      },
+      {
+        "id": "incident",
+        "cross_reference": true,
+        "query": "Which initial incident notice deadline applies to Live Fleet after the signed rider?",
+        "anchors": [
+          "Lumen's original operating schedule allows 24 hours for the first notice of an incident affecting Live Fleet.",
+          "LF-R3 reduces the initial Live Fleet incident-notice deadline from 24 hours to six hours after credible evidence of customer impact reaches the response lead."
+        ]
+      },
+      {
+        "id": "assurance",
+        "cross_reference": false,
+        "query": "Does the independent Live Fleet assurance report cover the mobile field gateway?",
+        "anchors": [
+          "The available independent report covers Live Fleet's application tier and managed infrastructure for the first half of 2026.",
+          "The report does not cover the mobile field gateway added in July 2026; its inclusion is planned for the next assessment cycle."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "warta.md",
+    "contract": "warta",
+    "layout": "markdown",
+    "sha256": "4cea75a55edec30d77c979227a4b3ac1ac368a09919bb65337c072315ecc2d55",
+    "source_chars": 62026,
+    "words": 8397,
+    "pdf_pages": null,
+    "shared_annex_fraction_canonical": 0.814722858156257,
+    "queries": [
+      {
+        "id": "mfa",
+        "cross_reference": false,
+        "query": "Które tożsamości Archiwum Aktywnego wymagają MFA i jaki wyjątek dotyczy integracji?",
+        "anchors": [
+          "Każdy człowiek administrujący Archiwum Aktywnym musi używać uwierzytelniania wieloskładnikowego.",
+          "Nieinteraktywne integracje skanujące używają oddzielnych certyfikatów ważnych najwyżej 60 dni i są wyłączone z obowiązku drugiego składnika dla ludzi."
+        ]
+      },
+      {
+        "id": "deletion",
+        "cross_reference": true,
+        "query": "Jaki termin usunięcia dokumentów Archiwum Aktywnego obowiązuje po uwzględnieniu protokołu zmian?",
+        "anchors": [
+          "Standardowy termin usunięcia danych Archiwum Aktywnego wynosi 30 dni od zakończenia świadczenia usługi.",
+          "WD-9 skraca standardowy trzydziestodniowy termin usunięcia dokumentów Archiwum Aktywnego do dziesięciu dni kalendarzowych od zakończenia usługi."
+        ]
+      },
+      {
+        "id": "encryption",
+        "cross_reference": false,
+        "query": "Czy szyfrowanie Archiwum Aktywnego obejmuje także paczki eksportowe?",
+        "anchors": [
+          "Szyfrowanie w spoczynku obejmuje dokumenty, indeksy wyszukiwania, dzienniki dostępu oraz kopie odtworzeniowe Archiwum Aktywnego.",
+          "Paczki eksportowe zawierające dokumenty klienta podlegają temu samemu obowiązkowi szyfrowania aż do ich potwierdzonego usunięcia."
+        ]
+      },
+      {
+        "id": "incident",
+        "cross_reference": false,
+        "query": "Od kiedy biegnie termin zgłoszenia incydentu Archiwum Aktywnego i czy można czekać na ustalenie przyczyny?",
+        "anchors": [
+          "Dostawca wysyła pierwsze powiadomienie o incydencie Archiwum Aktywnego w ciągu 12 godzin od wiarygodnego sygnału o wpływie na dane klienta.",
+          "Oczekiwanie na potwierdzenie przyczyny źródłowej nie przesuwa początku dwunastogodzinnego terminu."
+        ]
+      },
+      {
+        "id": "support",
+        "cross_reference": true,
+        "query": "Skąd personel może uzyskać dostęp do Archiwum Aktywnego po zmianie harmonogramu wsparcia?",
+        "anchors": [
+          "Pierwotny harmonogram wsparcia ogranicza dostęp człowieka do personelu pracującego na terenie Europejskiego Obszaru Gospodarczego.",
+          "WD-9 dopuszcza specjalistę z Wielkiej Brytanii do podglądu zminimalizowanych metadanych podczas zatwierdzonego zadania awaryjnego, zmieniając wcześniejsze ograniczenie wsparcia do EOG tylko w tym zakresie."
+        ]
+      },
+      {
+        "id": "exit",
+        "cross_reference": true,
+        "query": "Co obejmuje eksport Archiwum Aktywnego na zakończenie usługi i kiedy trzeba go dostarczyć?",
+        "anchors": [
+          "Po zakończeniu usługi dostawca przygotowuje eksport wskazanej kolekcji z mapą metadanych i liczbą dokumentów.",
+          "Eksport Archiwum Aktywnego musi zostać udostępniony w ciągu pięciu dni kalendarzowych od uwierzytelnionej dyspozycji klienta."
+        ]
+      }
+    ]
+  },
+  {
+    "file": "warta.txt",
+    "contract": "warta",
+    "layout": "wrapped",
+    "sha256": "fb1093844a9a8f9d8e59b5e8cd6a0c9f442feba5e2fb8eb0989bdea51a10b943",
+    "source_chars": 61887,
+    "words": 8348,
+    "pdf_pages": null,
+    "shared_annex_fraction_canonical": 0.814722858156257,
+    "queries": [
+      {
+        "id": "mfa",
+        "cross_reference": false,
+        "query": "Które tożsamości Archiwum Aktywnego wymagają MFA i jaki wyjątek dotyczy integracji?",
+        "anchors": [
+          "Każdy człowiek administrujący Archiwum Aktywnym musi używać uwierzytelniania wieloskładnikowego.",
+          "Nieinteraktywne integracje skanujące używają oddzielnych certyfikatów ważnych najwyżej 60 dni i są wyłączone z obowiązku drugiego składnika dla ludzi."
+        ]
+      },
+      {
+        "id": "deletion",
+        "cross_reference": true,
+        "query": "Jaki termin usunięcia dokumentów Archiwum Aktywnego obowiązuje po uwzględnieniu protokołu zmian?",
+        "anchors": [
+          "Standardowy termin usunięcia danych Archiwum Aktywnego wynosi 30 dni od zakończenia świadczenia usługi.",
+          "WD-9 skraca standardowy trzydziestodniowy termin usunięcia dokumentów Archiwum Aktywnego do dziesięciu dni kalendarzowych od zakończenia usługi."
+        ]
+      },
+      {
+        "id": "encryption",
+        "cross_reference": false,
+        "query": "Czy szyfrowanie Archiwum Aktywnego obejmuje także paczki eksportowe?",
+        "anchors": [
+          "Szyfrowanie w spoczynku obejmuje dokumenty, indeksy wyszukiwania, dzienniki dostępu oraz kopie odtworzeniowe Archiwum Aktywnego.",
+          "Paczki eksportowe zawierające dokumenty klienta podlegają temu samemu obowiązkowi szyfrowania aż do ich potwierdzonego usunięcia."
+        ]
+      },
+      {
+        "id": "incident",
+        "cross_reference": false,
+        "query": "Od kiedy biegnie termin zgłoszenia incydentu Archiwum Aktywnego i czy można czekać na ustalenie przyczyny?",
+        "anchors": [
+          "Dostawca wysyła pierwsze powiadomienie o incydencie Archiwum Aktywnego w ciągu 12 godzin od wiarygodnego sygnału o wpływie na dane klienta.",
+          "Oczekiwanie na potwierdzenie przyczyny źródłowej nie przesuwa początku dwunastogodzinnego terminu."
+        ]
+      },
+      {
+        "id": "support",
+        "cross_reference": true,
+        "query": "Skąd personel może uzyskać dostęp do Archiwum Aktywnego po zmianie harmonogramu wsparcia?",
+        "anchors": [
+          "Pierwotny harmonogram wsparcia ogranicza dostęp człowieka do personelu pracującego na terenie Europejskiego Obszaru Gospodarczego.",
+          "WD-9 dopuszcza specjalistę z Wielkiej Brytanii do podglądu zminimalizowanych metadanych podczas zatwierdzonego zadania awaryjnego, zmieniając wcześniejsze ograniczenie wsparcia do EOG tylko w tym zakresie."
+        ]
+      },
+      {
+        "id": "exit",
+        "cross_reference": true,
+        "query": "Co obejmuje eksport Archiwum Aktywnego na zakończenie usługi i kiedy trzeba go dostarczyć?",
+        "anchors": [
+          "Po zakończeniu usługi dostawca przygotowuje eksport wskazanej kolekcji z mapą metadanych i liczbą dokumentów.",
+          "Eksport Archiwum Aktywnego musi zostać udostępniony w ciągu pięciu dni kalendarzowych od uwierzytelnionej dyspozycji klienta."
+        ]
+      }
+    ]
+  }
+]
