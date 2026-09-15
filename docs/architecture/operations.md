@@ -68,3 +68,34 @@ backups, browser traces/screenshots and externally retained provider data. Exter
 provider retention depends on the chosen account's terms; local deletion cannot
 erase data already sent to it. Do not enable real-document use until those terms
 and a project-specific deletion policy have been chosen.
+
+
+## Local embedding cache and reindex
+
+Only the worker mounts `model-cache` at `/app/model-cache`; API startup does not
+load model weights. The worker downloads two fixed public artifacts under a pinned
+revision, verifies byte lengths and SHA256, and atomically renames complete files.
+A filesystem lock serializes cache writers. Partial/corrupt files are retried; a
+valid cache is read without a network request, even after process restart.
+
+The document page shows index and model status, reports errors and offers **Reindex
+document**. A repeated pending request is idempotent. Reindex preserves every source
+chunk ID/location; retained reports and retrieval snapshots do not change. Indexing
+has at most three automatic attempts. A crash recovers after its 150-second claim
+lease; each work command is killed after 120 seconds. Reindex resets an exhausted
+index for an explicit retry. Model preparation has a 600-second command budget and
+60-second retry delay, independent of analysis attempts. The supervisor refreshes
+its model heartbeat while commands run; status is stale after 30 seconds without it.
+One worker is the supported deployment: status describes that single supervised child.
+
+`MODEL_CACHE_PATH`, `MODEL_PREPARE_TIMEOUT_SECONDS`, and `MODEL_RETRY_SECONDS` can
+be overridden in the worker environment. Changing the model requires a versioned
+contract/migration and reindex; the revision is deliberately not a runtime switch.
+No learned-to-hash or paid fallback exists. Lexical analysis, source viewing and
+human-review finalization remain available when preparation fails.
+
+Cache files are reproducible public artifacts and contain no source documents.
+They need not accompany the mandatory database+document backup, but retaining
+`model-cache` enables offline recovery. `down --volumes` also removes this cache.
+To reproduce a real-model check without a provider key, see
+[embedding verification](../verification/embeddings.md).

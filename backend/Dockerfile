@@ -9,8 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 RUN groupadd --gid 10001 app \
     && useradd --uid 10001 --gid app --create-home app \
-    && mkdir -p /app/storage \
-    && chown app:app /app/storage
+    && mkdir -p /app/storage /app/model-cache \
+    && chown app:app /app/storage /app/model-cache
 COPY pyproject.toml uv.lock ./
 
 FROM base AS runtime

@@ -67,6 +67,27 @@ def domain_setup(database_url, migration_config, tmp_path):
     engine.dispose()
 
 
+class OfflineEncoder:
+    """Test-only normalized vectors; never wired into runtime model configuration."""
+
+    def embed(self, texts, role):
+        import math
+
+        values = []
+        for value in texts:
+            n = 1 + sum(value.encode()) % 11
+            norm = math.sqrt(1 + n * n)
+            values.append([1 / norm, n / norm] + [0.0] * 382)
+        return values
+
+
+def index_all(engine, settings):
+    from counterparty.indexing import index_one
+
+    while index_one(engine, settings, OfflineEncoder()):
+        pass
+
+
 async def login(client, name="analyst"):
     response = await client.post(
         "/api/auth/login", json={"email": f"{name}@example.test", "password": PASSWORD}
@@ -193,7 +214,8 @@ async def test_upload_validation_hash_dedup_versions_and_deletion(domain_setup, 
             chunk = session.scalar(
                 select(DocumentChunk).where(DocumentChunk.document_id == UUID(first["id"]))
             )
-            assert len(chunk.embedding) == 128
+            assert chunk.embedding is None
+            assert first["index_status"] == "pending"
         for name, content, expected in (
             ("evil.html", b"<script>alert(1)</script>", 422),
             ("binary.txt", b"abc\x00def", 422),
@@ -281,6 +303,7 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         await login(client, "reviewer")
         assert (await client.post(f"/api/policies/{policy['id']}/approve")).status_code == 200
         await login(client)
+        index_all(engine, settings)
         response = await client.post(f"/api/cases/{created['id']}/runs", json=body)
         assert response.status_code == 201, response.text
         run = response.json()
@@ -308,14 +331,14 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         from counterparty.worker import process_one, setup_checkpoints
 
         setup_checkpoints(engine)
-        assert process_one(engine, settings)
+        assert process_one(engine, settings, OfflineEncoder())
         completed = await client.post(f"/api/runs/{run['id']}/decision", json=decision)
         assert completed.status_code == 201, completed.text
         assert completed.json()["decision"]["decision"] == "needs_information"
         assert (
             await client.post(f"/api/runs/{run['id']}/decision", json=decision)
         ).status_code == 409
-        assert process_one(engine, settings)
+        assert process_one(engine, settings, OfflineEncoder())
         assert (await client.get(f"/api/runs/{run['id']}")).json()["report"]["workflow_complete"]
         await login(client, "foreign")
         assert (await client.get(f"/api/runs/{run['id']}")).status_code == 404
@@ -454,9 +477,10 @@ async def test_policy_mode_uses_app_settings_and_model_errors_are_json(
 async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
     domain_setup, client_factory
 ):
-    from counterparty.analysis import embed_text
+    from counterparty.embedding_config import requirement_query
+    from counterparty.worker import process_one, setup_checkpoints
 
-    settings, _ = domain_setup
+    settings, engine = domain_setup
     async with client_factory(settings) as client:
         await login(client)
         created = await case(client)
@@ -468,6 +492,7 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
         unrelated = await upload(client, EVIDENCE, "other.md", other_case["id"])
         await login(client, "reviewer")
         assert (await client.post(f"/api/policies/{policy['id']}/approve")).status_code == 200
+        index_all(engine, settings)
         run = (
             await client.post(
                 f"/api/cases/{created['id']}/runs",
@@ -475,15 +500,25 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
             )
         ).json()
         snapshot = run["input_snapshot"]
-        scores = snapshot["retrieval_scores"]
+        assert "retrieval_scores" not in snapshot
+        assert run["retrieval_snapshot"] is None
+        setup_checkpoints(engine)
+        assert process_one(engine, settings, OfflineEncoder())
+        result = (await client.get(f"/api/runs/{run['id']}")).json()
+        scores = result["retrieval_snapshot"]["scores"]
         assert snapshot["retrieval_config"]["backend"] == "pgvector-exact"
         evidence = [chunk for chunk in snapshot["chunks"] if chunk["kind"] == "evidence"]
         assert {chunk["document_id"] for chunk in evidence} == {current["id"]}
         for requirement in snapshot["requirements"]:
-            query = embed_text(requirement["title"] + " " + requirement["field"])
+            query = OfflineEncoder().embed([requirement_query(requirement)], "query")[0]
             assert set(scores[requirement["id"]]) == {chunk["id"] for chunk in evidence}
             for chunk in evidence:
-                expected = sum(a * b for a, b in zip(query, embed_text(chunk["text"]), strict=True))
+                expected = sum(
+                    a * b
+                    for a, b in zip(
+                        query, OfflineEncoder().embed([chunk["text"]], "passage")[0], strict=True
+                    )
+                )
                 assert scores[requirement["id"]][chunk["id"]] == pytest.approx(expected, abs=1e-6)
         for excluded in (previous, unrelated, document):
             details = (await client.get(f"/api/documents/{excluded['id']}")).json()
@@ -494,3 +529,52 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
             )
         await upload(client, EVIDENCE + b" Changed new version.", "evidence.md", created["id"])
         assert (await client.get(f"/api/runs/{run['id']}")).json()["input_snapshot"] == snapshot
+
+
+async def test_index_readiness_reindex_authorization_and_lexical_availability(
+    domain_setup, client_factory
+):
+    from counterparty.models import Document
+
+    settings, engine = domain_setup
+    async with client_factory(settings) as client:
+        await login(client)
+        created = await case(client)
+        policy_doc = await upload(client)
+        policy = await proposed(client, policy_doc["id"])
+        doc = await upload(client, EVIDENCE, "evidence.md", created["id"])
+        await login(client, "reviewer")
+        await client.post(f"/api/policies/{policy['id']}/approve")
+        body = {"policy_version_id": policy["id"], "retrieval_variant": "hybrid"}
+        assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 409
+        body["retrieval_variant"] = "lexical"
+        assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 201
+        status = (await client.get("/api/embedding-status")).json()
+        assert status["status"] == "unavailable" and status["fresh"] is False
+        from counterparty.models import WorkerModelState
+
+        with Session(engine) as session:
+            session.add(
+                WorkerModelState(
+                    id="local-embeddings",
+                    status="ready",
+                    config="old-config",
+                    heartbeat_at=datetime.now(UTC),
+                )
+            )
+            session.commit()
+        status = (await client.get("/api/embedding-status")).json()
+        assert status["status"] == "unavailable" and status["fresh"] is False
+        index_all(engine, settings)
+        assert (await client.post(f"/api/documents/{doc['id']}/reindex")).json()[
+            "index_status"
+        ] == "pending"
+        assert (await client.post(f"/api/documents/{doc['id']}/reindex")).json()[
+            "index_attempts"
+        ] == 0
+        await login(client, "auditor")
+        assert (await client.post(f"/api/documents/{doc['id']}/reindex")).status_code == 403
+        await login(client, "foreign")
+        assert (await client.post(f"/api/documents/{doc['id']}/reindex")).status_code == 404
+        with Session(engine) as session:
+            assert session.get(Document, UUID(doc["id"])).index_status == "pending"

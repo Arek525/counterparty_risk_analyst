@@ -7,7 +7,8 @@ require their own explicit approval.
 
 The local MVP includes an English Next.js interface, FastAPI, PostgreSQL/pgvector,
 a durable LangGraph worker and a local REST ticket simulator. **The default demo
-uses deterministic extraction and hash embeddings; it does not call an LLM.** No
+uses deterministic English fact extraction; it does not call an LLM.** A local
+pretrained multilingual E5 model runs semantic retrieval on CPU. No
 API key is required. An optional Gemini adapter and separate evaluation runner
 are included; real-model quality remains unverified without credentials and a
 reviewed evaluation. All bundled organizations and documents are synthetic.
@@ -46,8 +47,10 @@ seeded account login; this is not a production identity-management system.
 The frontend and API bind to loopback; the database and ticket simulator stay on
 the Docker network. `FRONTEND_PORT`/`API_PORT` can change exposed ports; also adjust
 `ALLOWED_ORIGINS` for a nondefault frontend origin. First build requires network
-access to public image/package registries; subsequent operation in demo mode
-uses local services. Database passwords are passed separately from the URL. In
+access to public image/package registries. On first indexing, the worker also
+automatically downloads 487 MB of pinned public model artifacts (no account/key)
+into the persistent `model-cache` volume. A verified cache supports offline reuse;
+subsequent demo operation uses local services. Database passwords are passed separately from the URL. In
 `.env`, single-quote values containing `$` to avoid Compose interpolation.
 
 ## Walk through the application
@@ -58,7 +61,9 @@ uses local services. Database passwords are passed separately from the URL. In
 2. Open **Cases**. Create a case with relationship context:
    personal data, privileged access, purpose and business criticality.
 3. Add evidence and label its provenance as a declaration or independent support.
-   Start an analysis against an approved policy version.
+   Wait for **Semantic index: ready**, then start an analysis against an approved
+   policy version. Semantic retrieval is the default; weighted hybrid and lexical
+   variants are available. Lexical analysis works while indexing is unavailable.
 4. Inspect risk, evidence completeness and individual findings separately. Open a
    citation to see its exact source fragment. Missing evidence produces questions;
    it does not prove compliance. A possible discrepancy is not automatically a
@@ -96,7 +101,8 @@ flowchart LR
 ```
 
 The API captures immutable input versions before queuing a run. pgvector computes
-scoped similarities; the snapshot retains candidates and scores. The worker
+scoped similarities in the worker. A separate write-once retrieval snapshot retains
+queries, scores, exact eligible chunks and the full model configuration. The worker
 extracts facts and evaluates allowlisted rules, writes a report, then pauses at a
 persisted human-review checkpoint. Rules in application code calculate risk;
 neither a document nor a model grants permissions or authorizes a write.
@@ -105,7 +111,8 @@ See [architecture and tradeoffs](docs/architecture/mvp.md),
 [API and persistence contract](docs/architecture/mvp-contract.md),
 [verification record](docs/verification/mvp.md) and
 [evaluation methodology/results](evaluations/README.md) and
-[Northstar corpus acceptance](docs/verification/northstar.md).
+[Northstar corpus acceptance](docs/verification/northstar.md) and
+[local semantic retrieval](docs/verification/embeddings.md).
 
 ## Verification
 
@@ -175,13 +182,13 @@ docker compose run --rm migrate alembic check
 docker compose down
 ```
 
-`down` preserves both database and document volumes. See
+`down` preserves database, document and model-cache volumes. See
 [backup, restore and retention](docs/architecture/operations.md) before deleting
 volumes. The migrations build/update database structure; they do not analyze files.
 
 This is a local portfolio MVP, not legal certification or production assurance.
 OCR, real business integrations, public hosting, enterprise administration,
-PDF report export, MCP and trained local embeddings are outside this release.
+PDF report export and MCP are outside this release.
 Scanned PDFs receive an unsupported-input error. The app database account owns
 its schema; public deployment needs separate restricted credentials, managed
 identity, TLS, shared quota controls and operational review.
@@ -191,7 +198,7 @@ identity, TLS, shared quota controls and operational review.
 - `backend/src/counterparty/`: API/domain, ingestion, adapters, assessment rules,
   worker, ticket integration and packaged database migrations.
 - `frontend/`: Next.js UI and browser tests.
-- `datasets/synthetic/`: two development policies and five scenario document sets.
-- `evaluations/`: separate held-out corpus, runner and honest demo/provider reports.
+- `datasets/synthetic/`: four substantial policies, an Atlas assurance pack and historical regression fixtures.
+- `evaluations/`: frozen synthetic retrieval corpus and explicitly labelled demo/provider regression reports.
 - `docs/`: architecture, contract and verification evidence.
 - `.github/workflows/ci.yml`: reproducible checks without paid model calls.

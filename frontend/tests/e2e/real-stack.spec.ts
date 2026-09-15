@@ -42,6 +42,7 @@ test("the complete MVP journey works on the real local stack", async ({
     page.locator(".document-row .subtle").filter({ hasText: "Counterparty declaration" }),
   ).toBeVisible();
 
+  await expect(page.getByText("Semantic index: ready")).toBeVisible({ timeout: 120_000 });
   await page.getByRole("button", { name: "Run analysis" }).first().click();
   await expect(
     page.getByRole("dialog", { name: "Run analysis" }),

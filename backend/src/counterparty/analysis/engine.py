@@ -76,24 +76,64 @@ def retrieve(
     variant="hybrid",
     top_k=8,
     semantic_scores: dict[str, float] | None = None,
+    algorithm="historical-hash-v1",
 ) -> list[dict]:
-    if variant not in {"lexical", "hybrid"}:
+    if variant not in {"lexical", "hybrid", "semantic"}:
         raise ValueError("Unsupported retrieval variant")
-    query_tokens = set(tokens(query))
-    query_vector = embed_text(query)
-    scores = []
+    # Historical offline regressions explicitly retain their original ASCII/hash scoring.
+    tokenizer = tokens if algorithm == "historical-hash-v1" else unicode_tokens
+    query_tokens = set(tokenizer(query))
+    lexical = {}
     for chunk in chunks:
-        counts = Counter(tokens(chunk["text"]))
-        lexical = sum(math.log1p(counts[token]) for token in query_tokens)
-        semantic = (
-            float(semantic_scores.get(str(chunk["id"]), 0))
-            if semantic_scores is not None
-            else sum(a * b for a, b in zip(query_vector, embed_text(chunk["text"]), strict=True))
-        )
-        score = lexical if variant == "lexical" else lexical + 2 * max(0, semantic)
-        if score > 0:
-            scores.append((score, str(chunk["id"]), chunk))
-    return [item[2] for item in sorted(scores, key=lambda x: (-x[0], x[1]))[:top_k]]
+        counts = Counter(tokenizer(chunk["text"]))
+        lexical[str(chunk["id"])] = sum(math.log1p(counts[token]) for token in query_tokens)
+    if variant == "lexical":
+        scores = lexical
+    elif algorithm == "e5-v1":
+        ids = {str(chunk["id"]) for chunk in chunks}
+        if (
+            semantic_scores is None
+            or set(semantic_scores) != ids
+            or not all(math.isfinite(value) for value in semantic_scores.values())
+        ):
+            raise ValueError("Runtime hybrid retrieval requires complete finite semantic scores")
+        if variant == "semantic":
+            scores = semantic_scores
+        else:
+            scores = dict.fromkeys(ids, 0.0)
+            for weight, ranking in (
+                (3, semantic_scores),
+                (1, {key: value for key, value in lexical.items() if value > 0}),
+            ):
+                for rank, key in enumerate(
+                    sorted(ranking, key=lambda key: (-ranking[key], key)), 1
+                ):
+                    scores[key] += weight / (5 + rank)
+    elif algorithm == "historical-hash-v1":
+        # Offline historical baseline only. The worker always supplies its versioned algorithm.
+        if semantic_scores is None:
+            query_vector = embed_text(query)
+            semantic_scores = {
+                str(chunk["id"]): sum(
+                    a * b for a, b in zip(query_vector, embed_text(chunk["text"]), strict=True)
+                )
+                for chunk in chunks
+            }
+        scores = {
+            key: value + 2 * max(0, semantic_scores.get(key, 0)) for key, value in lexical.items()
+        }
+    else:
+        raise ValueError("Unsupported retrieval algorithm")
+    ranked = sorted(chunks, key=lambda chunk: (-scores[str(chunk["id"])], str(chunk["id"])))
+    return (
+        ranked[:top_k]
+        if variant == "semantic"
+        else [chunk for chunk in ranked if scores[str(chunk["id"])] > 0][:top_k]
+    )
+
+
+def unicode_tokens(text):
+    return re.findall(r"[^\W_]+", text.casefold().replace("_", " "))
 
 
 def source(chunk: dict, quote: str) -> dict:
@@ -476,7 +516,7 @@ def compare(value, operator, expected) -> bool | None:
 
 def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
     start = time.monotonic()
-    if variant not in {"lexical", "hybrid"}:
+    if variant not in {"lexical", "hybrid", "semantic"}:
         raise ValueError("Unsupported retrieval variant")
     mode = snapshot.get("model_mode", "demo")
     if mode not in {"demo", "gemini"}:
@@ -498,6 +538,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 chunks,
                 variant,
                 semantic_scores=snapshot.get("retrieval_scores", {}).get(req["id"]),
+                algorithm=snapshot.get("retrieval_algorithm", "historical-hash-v1"),
             ):
                 chosen[str(c["id"])] = c
         selected = source_order(list(chosen.values()))
@@ -593,6 +634,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 chunks,
                 variant,
                 semantic_scores=snapshot.get("retrieval_scores", {}).get(req["id"]),
+                algorithm=snapshot.get("retrieval_algorithm", "historical-hash-v1"),
             )
             ids = {str(c["id"]) for c in retrieved}
             relevant = [

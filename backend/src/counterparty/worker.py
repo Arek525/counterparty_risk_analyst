@@ -7,6 +7,7 @@ import os
 import time
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
+from functools import partial
 from typing import TypedDict
 from uuid import UUID, uuid4
 
@@ -21,7 +22,15 @@ from sqlalchemy.orm import Session
 from counterparty.analysis.adapters import ModelError
 from counterparty.config import Settings
 from counterparty.database import create_engine_for_settings
-from counterparty.models import AnalysisRun, AuditEvent, Decision
+from counterparty.embeddings import EmbeddingError
+from counterparty.indexing import (
+    index_eligible,
+    index_one,
+    needs_embeddings,
+    prepare_retrieval,
+    set_model_state,
+)
+from counterparty.models import AnalysisRun, AuditEvent, Decision, Document
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +125,7 @@ def _eligible(now):
     )
 
 
-def process_one(engine: Engine, settings: Settings) -> bool:
+def process_one(engine: Engine, settings: Settings, model=None) -> bool:
     """Claim one eligible job; return False if no job can be exclusively claimed."""
     with Session(engine) as session:
         candidates = list(
@@ -124,7 +133,6 @@ def process_one(engine: Engine, settings: Settings) -> bool:
                 select(AnalysisRun.id)
                 .where(_eligible(datetime.now(UTC)))
                 .order_by(AnalysisRun.created_at)
-                .limit(20)
             )
         )
     for run_id in candidates:
@@ -139,14 +147,15 @@ def process_one(engine: Engine, settings: Settings) -> bool:
             if not acquired:
                 continue
             try:
-                return _execute_claim(engine, settings, run_id, saver)
+                if _execute_claim(engine, settings, run_id, saver, model):
+                    return True
             finally:
                 if not owner.closed and not owner.broken:
                     owner.execute("SELECT pg_advisory_unlock(%s)", (key,))
     return False
 
 
-def _execute_claim(engine, settings, run_id, saver):
+def _execute_claim(engine, settings, run_id, saver, model=None):
     owner = saver.conn
     with Session(engine) as session:
         run = session.scalar(
@@ -154,7 +163,7 @@ def _execute_claim(engine, settings, run_id, saver):
             .where(AnalysisRun.id == run_id, _eligible(datetime.now(UTC)))
             .with_for_update(skip_locked=True)
         )
-        if run is None:
+        if run is None or (model is None and needs_embeddings(run)):
             return False
         decision = session.scalar(select(Decision).where(Decision.run_id == run_id))
         attempt_limit = settings.worker_max_attempts + (3 if decision else 0)
@@ -173,6 +182,7 @@ def _execute_claim(engine, settings, run_id, saver):
         run.lease_owner = claim_token
         run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=settings.worker_lease_seconds)
         snapshot, variant = run.input_snapshot, run.retrieval_variant
+        retrieval = run.retrieval_snapshot
         decision_data = (
             {
                 "decision": decision.decision,
@@ -190,6 +200,29 @@ def _execute_claim(engine, settings, run_id, saver):
         config = {"configurable": {"thread_id": str(run_id)}, "recursion_limit": 8}
         state = graph.get_state(config)
         if not state.values:
+            if (
+                variant in {"hybrid", "semantic"}
+                and snapshot.get("requirements")
+                and any(chunk.get("kind") == "evidence" for chunk in snapshot["chunks"])
+                and "retrieval_config" not in snapshot
+                and "retrieval_scores" not in snapshot
+            ):
+                raise EmbeddingError(
+                    "Run retrieval configuration is missing. Create a new analysis."
+                )
+            if (
+                variant in {"hybrid", "semantic"}
+                and "retrieval_config" in snapshot
+                and "retrieval_scores" not in snapshot
+            ):
+                retrieval = retrieval or prepare_retrieval(
+                    engine, run_id, claim_token, snapshot, model, owner
+                )
+                snapshot = {
+                    **snapshot,
+                    "retrieval_scores": retrieval["scores"],
+                    "retrieval_algorithm": retrieval["config"]["retrieval"],
+                }
             result = graph.invoke(
                 {"run_id": str(run_id), "snapshot": snapshot, "variant": variant}, config
             )
@@ -249,11 +282,13 @@ def _execute_claim(engine, settings, run_id, saver):
                 return True
             # The adapter already bounds transient retries. Never retry exhausted
             # quota, missing configuration or rejected output at the job layer.
-            terminal = isinstance(error, ModelError) or run.attempts >= attempt_limit
+            terminal = (
+                isinstance(error, (ModelError, EmbeddingError)) or run.attempts >= attempt_limit
+            )
             run.status = "failed" if terminal else "running"
             run.error = (
                 str(error)
-                if isinstance(error, ModelError)
+                if isinstance(error, (ModelError, EmbeddingError))
                 else (
                     f"{type(error).__name__}: analysis could not finish. "
                     "Check provider configuration."
@@ -274,38 +309,138 @@ def _execute_claim(engine, settings, run_id, saver):
     return True
 
 
-def _child():
+def _child(pipe):
     settings = Settings()
     engine = create_engine_for_settings(settings)
+    model = None
     try:
-        did_work = process_one(engine, settings)
+        while True:
+            command = pipe.recv()
+            if command == "prepare":
+                try:
+                    from counterparty.embeddings import LocalEmbedder
+
+                    model = LocalEmbedder(settings.model_cache_path)
+                    pipe.send("ready")
+                except Exception:
+                    model = None
+                    pipe.send("model_error")
+            elif command == "work":
+                if process_one(engine, settings, model) or index_one(engine, settings, model):
+                    pipe.send("worked")
+                else:
+                    with Session(engine) as session:
+                        pending = session.scalar(
+                            select(Document.id).where(index_eligible(datetime.now(UTC))).limit(1)
+                        )
+                        semantic = any(
+                            needs_embeddings(run)
+                            for run in session.scalars(
+                                select(AnalysisRun).where(_eligible(datetime.now(UTC)))
+                            )
+                        )
+                    pipe.send("needs_model" if model is None and (pending or semantic) else "idle")
+            elif command == "stop":
+                break
+            else:
+                raise ValueError("Unknown worker command")
+    except (EOFError, BrokenPipeError):
+        pass
     finally:
         engine.dispose()
-    raise SystemExit(0 if did_work else 3)
+        pipe.close()
+
+
+class ChildSupervisor:
+    """One spawn child reuses its model; each command has a hard wall-clock budget."""
+
+    def __init__(self, target=_child):
+        context = multiprocessing.get_context("spawn")
+        self.pipe, child_pipe = context.Pipe()
+        self.process = context.Process(target=target, args=(child_pipe,))
+        self.process.start()
+        child_pipe.close()
+
+    def command(self, command, timeout, heartbeat=None):
+        deadline = time.monotonic() + timeout
+        try:
+            self.pipe.send(command)
+            while remaining := max(0, deadline - time.monotonic()):
+                if self.pipe.poll(min(remaining, 5)):
+                    return self.pipe.recv()
+                if heartbeat:
+                    heartbeat()
+            raise TimeoutError("Worker command deadline exceeded")
+        except (EOFError, BrokenPipeError, OSError, TimeoutError):
+            self.close()
+            raise
+
+    def close(self):
+        if self.process.is_alive():
+            self.process.terminate()
+        self.process.join(5)
+        if self.process.is_alive():
+            self.process.kill()
+            self.process.join(5)
+        self.pipe.close()
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
     settings = Settings()
     engine = create_engine_for_settings(settings)
+    setup_checkpoints(engine)
+    child = None
+    state, error, retry_after = "pending", None, 0
     try:
-        setup_checkpoints(engine)
+        while True:
+            try:
+                if child is None:
+                    child = ChildSupervisor()
+                    state = "pending"
+                set_model_state(engine, state, error)
+                result = child.command(
+                    "work",
+                    settings.worker_max_runtime_seconds,
+                    heartbeat=partial(set_model_state, engine, state, error),
+                )
+                if result == "needs_model" and time.monotonic() >= retry_after:
+                    state, error = "preparing", None
+                    set_model_state(engine, state)
+                    result = child.command(
+                        "prepare",
+                        settings.model_prepare_timeout_seconds,
+                        heartbeat=partial(set_model_state, engine, state),
+                    )
+                    state = "ready" if result == "ready" else "error"
+                    error = (
+                        None
+                        if state == "ready"
+                        else (
+                            "Local model preparation failed; check network and cache space. "
+                            "Retrying automatically."
+                        )
+                    )
+                    retry_after = time.monotonic() + settings.model_retry_seconds
+                    set_model_state(engine, state, error)
+                if result != "worked":
+                    time.sleep(settings.worker_poll_seconds)
+            except (EOFError, BrokenPipeError, OSError, TimeoutError):
+                if child:
+                    child.close()
+                child = None
+                state, error = (
+                    "error",
+                    "Worker command stopped or exceeded its deadline; recovering.",
+                )
+                set_model_state(engine, state, error)
+                retry_after = time.monotonic() + settings.model_retry_seconds
+                logger.warning("Worker child stopped; leased work will recover")
+                time.sleep(settings.worker_poll_seconds)
     finally:
+        if child:
+            child.close()
         engine.dispose()
-    context = multiprocessing.get_context("spawn")
-    while True:
-        job = context.Process(target=_child)
-        job.start()
-        job.join(settings.worker_max_runtime_seconds)
-        if job.is_alive():
-            job.terminate()
-            job.join(5)
-            if job.is_alive():
-                job.kill()
-                job.join()
-            logger.warning("Worker execution budget exceeded; lease will allow recovery")
-        if job.exitcode != 0:
-            time.sleep(settings.worker_poll_seconds)
 
 
 if __name__ == "__main__":

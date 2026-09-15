@@ -65,6 +65,10 @@ export interface DocumentChunk {
 }
 
 export interface DocumentRecord {
+  index_status?: "pending" | "indexing" | "ready" | "error";
+  index_error?: string | null;
+  index_config?: string;
+  indexed_at?: string | null;
   id: string;
   case_id?: string | null;
   kind: "policy" | "evidence";
@@ -172,7 +176,7 @@ export interface AnalysisRun {
   case_id: string;
   policy_version_id: string;
   status: "queued" | "running" | "awaiting_review" | "completed" | "failed";
-  retrieval_variant: "lexical" | "hybrid";
+  retrieval_variant: "lexical" | "hybrid" | "semantic";
   model_mode: string;
   error?: string | null;
   report?: Report | null;

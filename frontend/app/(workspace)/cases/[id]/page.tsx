@@ -61,6 +61,13 @@ export default function CaseDetailPage() {
     void load();
   }, [id]);
 
+  useEffect(() => {
+    if (!documents.some((doc) => ["pending", "indexing"].includes(doc.index_status ?? ""))) return;
+    const timer = setInterval(() => {
+      void api<DocumentRecord[]>(`/api/documents?case_id=${encodeURIComponent(id)}`).then(setDocuments).catch(() => {});
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [id, documents]);
   async function upload(event: React.FormEvent) {
     event.preventDefault();
     if (!file) return;
@@ -137,6 +144,7 @@ export default function CaseDetailPage() {
                       <Link href={`/documents/${document.id}`}>
                         <strong>{document.filename}</strong>
                       </Link>
+                      <span className="subtle">Semantic index: {document.index_status ?? "pending"}</span>
                       <span className="subtle">
                         {document.evidence_type === "independent"
                           ? "Independent evidence"
@@ -248,7 +256,9 @@ export default function CaseDetailPage() {
                           </StatusBadge>
                         </td>
                         <td>
-                          {run.retrieval_variant === "hybrid"
+                          {run.retrieval_variant === "semantic"
+                            ? "Semantic"
+                            : run.retrieval_variant === "hybrid"
                             ? "Hybrid"
                             : "Lexical"}
                         </td>
@@ -501,7 +511,7 @@ function StartRunModal({
   created: (run: AnalysisRun) => void;
 }) {
   const [policyId, setPolicyId] = useState(policies[0]?.id ?? "");
-  const [variant, setVariant] = useState<"lexical" | "hybrid">("hybrid");
+  const [variant, setVariant] = useState<"lexical" | "hybrid" | "semantic">("semantic");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function submit(event: React.FormEvent) {
@@ -559,9 +569,10 @@ function StartRunModal({
                 className="select"
                 value={variant}
                 onChange={(e) =>
-                  setVariant(e.target.value as "lexical" | "hybrid")
+                  setVariant(e.target.value as "lexical" | "hybrid" | "semantic")
                 }
               >
+                <option value="semantic">Semantic (local multilingual model)</option>
                 <option value="hybrid">
                   Hybrid — keywords and similarity
                 </option>

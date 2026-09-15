@@ -83,11 +83,18 @@ def main():
         timeout=30,
     ) as response:
         assert response.status == 201
+        document = json.load(response)
+    deadline = time.monotonic() + 720
+    while document["index_status"] != "ready":
+        assert document["index_status"] != "error", document.get("index_error")
+        assert time.monotonic() < deadline, "Evidence indexing did not finish within 720 seconds"
+        time.sleep(1)
+        document = api(f"/documents/{document['id']}")
     run = api(
         f"/cases/{case['id']}/runs",
         {
             "policy_version_id": policy["id"],
-            "retrieval_variant": "hybrid",
+            "retrieval_variant": "semantic",
         },
     )
     deadline = time.monotonic() + 90

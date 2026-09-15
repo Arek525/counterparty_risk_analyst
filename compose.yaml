@@ -72,6 +72,9 @@ services:
   worker:
     <<: *backend
     command: ["python", "-m", "counterparty.worker"]
+    volumes:
+      - document-storage:/app/storage
+      - model-cache:/app/model-cache
     init: true
     restart: unless-stopped
     depends_on:
@@ -110,3 +113,4 @@ services:
 volumes:
   postgres-data:
   document-storage:
+  model-cache:

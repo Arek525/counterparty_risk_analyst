@@ -16,6 +16,8 @@ export default function DocumentPage() {
   const [document, setDocument] = useState<DocumentRecord | null>(null);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [indexing, setIndexing] = useState(false);
+  const [modelStatus, setModelStatus] = useState<{status: string; error?: string | null} | null>(null);
   async function load() {
     setError("");
     try {
@@ -37,7 +39,28 @@ export default function DocumentPage() {
           .getElementById(`chunk-${chunk}`)
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [document]);
+  }, [document?.id]);
+  useEffect(() => {
+    const refresh = () => {
+      void api<{status: string; error?: string | null}>("/api/embedding-status").then(setModelStatus).catch(() => {});
+      void api<DocumentRecord>(`/api/documents/${id}`).then(setDocument).catch(() => {});
+    };
+    refresh();
+    const timer = setInterval(refresh, 3000);
+    return () => clearInterval(timer);
+  }, [id]);
+  async function reindex() {
+    setIndexing(true);
+    setError("");
+    try {
+      await api(`/api/documents/${id}/reindex`, {method: "POST"});
+      await load();
+    } catch (reason) {
+      setError(errorMessage(reason));
+    } finally {
+      setIndexing(false);
+    }
+  }
   async function remove() {
     if (
       !confirm(
@@ -88,6 +111,13 @@ export default function DocumentPage() {
         }
       />
       {error && <ErrorNotice message={error} />}
+      <div className="notice notice-info" style={{marginBottom: 18}}>
+        <p aria-live="polite">Semantic index: <strong>{document.index_status ?? "pending"}</strong> · Local model: {modelStatus?.status ?? "checking"}</p>
+        {document.index_error && <p>{document.index_error}</p>}
+        {modelStatus?.error && <p>{modelStatus.error}</p>}
+        <p>Indexing runs in the background. Source text and lexical analysis remain available.</p>
+        {user?.role !== "auditor" && <button className="button button-small button-secondary" disabled={indexing} onClick={reindex}>{indexing ? "Queuing…" : "Reindex document"}</button>}
+      </div>
       {document.kind === "evidence" && (
         <div className="notice notice-info" style={{ marginBottom: 18 }}>
           <p>

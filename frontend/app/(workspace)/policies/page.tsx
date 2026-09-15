@@ -45,6 +45,13 @@ export default function PoliciesPage() {
   useEffect(() => {
     void load();
   }, []);
+  useEffect(() => {
+    if (!documents.some((doc) => ["pending", "indexing"].includes(doc.index_status ?? ""))) return;
+    const timer = setInterval(() => {
+      void api<DocumentRecord[]>("/api/documents").then(setDocuments).catch(() => {});
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [documents]);
   async function upload(event: React.FormEvent) {
     event.preventDefault();
     if (!file) return;
@@ -156,6 +163,7 @@ export default function PoliciesPage() {
                     <Link href={`/documents/${document.id}`}>
                       <strong>{document.filename}</strong>
                     </Link>
+                      <span className="subtle">Semantic index: {document.index_status ?? "pending"}</span>
                     <span className="subtle">version {document.version}</span>
                   </div>
                 </div>

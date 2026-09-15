@@ -23,14 +23,24 @@ cannot be edited. A run freezes its relationship context, approved requirements,
 current document versions and exact chunks. Later edits affect new runs only.
 That snapshot also makes historical citations resolvable after new uploads.
 
-Document vectors use the versioned `demo-hash-v1` representation (128 dimensions,
-explicit aliases). pgvector executes exact cosine search restricted to eligible
-organization/case/document versions and compatible embeddings, with a maximum of
-500 chunks. Scores are frozen in the snapshot; hybrid retrieval adds lexical
-matching to those scores. This is a transparent small-data demonstration, not a
-trained semantic embedding model. Offline evaluation computes equivalent cosine
-scores in Python and does not measure database latency. An embedding-model change
-requires re-embedding documents and queries together.
+Document vectors use pinned `intfloat/multilingual-e5-small` (384 dimensions).
+The API stores originals/chunks and pending index status without loading the model.
+A persistent spawned worker child owns ONNX Runtime and the tokenizer, streams
+verified public artifacts into a shared cache, and publishes each complete document
+index atomically under a claim token. Reindex invalidates any older claim while
+preserving source IDs, text and citations. Failed/crashed indexing is bounded and visible.
+
+Exact pgvector cosine search restricts organization, case, document IDs AND chunk
+IDs captured at enqueue time, plus the full configuration fingerprint. At most 500
+evidence chunks participate. API input snapshots are immutable; the worker publishes
+queries/config/scores once in a separate retrieval snapshot and reuses it on retry.
+Database triggers reject changes to input snapshots or an already populated retrieval
+snapshot. New documents and reindex requests cannot silently enter a queued run.
+
+Semantic ranking is the default for new analyses; weighted reciprocal rank fusion
+is an explicit hybrid option and Unicode lexical retrieval remains available without
+the model. Historical hash-based reports and offline regressions remain historical.
+See [model contract, evaluation and limits](../verification/embeddings.md).
 
 ## Analysis and trust
 
@@ -59,7 +69,10 @@ expiration allows recovery after a dead process; the advisory lock prevents anot
 worker claiming a live execution. The lock and checkpoint saver share one physical
 connection, so loss of ownership also stops checkpoint writes. A claim token fences final business writes if
 an old worker loses its connection. A supervisor terminates a job that exceeds its
-active runtime budget. Retried extraction nodes have no external write effects.
+active runtime budget. The persistent child reuses its loaded model across commands;
+model preparation has a separate 600-second budget, ordinary work retains 120 seconds.
+A failed preparation does not consume analysis attempts or block lexical/no-evidence
+jobs and review finalization. Retried extraction nodes have no external write effects.
 
 LangGraph saves checkpoints in PostgreSQL using the run UUID as thread ID. Its
 review node interrupts after the report. A human Decision is an immutable business

@@ -1,3 +1,15 @@
+# Evaluation scope
+
+The existing `run.py`, demo/Gemini reports and gates below are **historical
+hash-retrieval regressions**, even when their extractor is Gemini. Their variant
+name `hybrid` describes the historical lexical-plus-hash algorithm, not current
+runtime E5 retrieval. Do not compare their finding accuracy with retrieval recall.
+
+Current pretrained multilingual retrieval is evaluated separately by
+`semantic_retrieval.py` against frozen `multilingual-retrieval.json`; results live
+in `results-semantic.json`. See [method and measurements](../docs/verification/embeddings.md).
+Routine tests do not download a model or call paid providers.
+
 # Analysis evaluation
 
 Run from the repository root in the backend Python environment:
