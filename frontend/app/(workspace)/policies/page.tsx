@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import {
@@ -129,13 +130,17 @@ export default function PoliciesPage() {
                       <td className="subtle">
                         {formatDate(policy.approved_at ?? policy.created_at)}
                       </td>
-                      <td>
+                      <td className="actions-cell">
+                        <div className="row-actions">
                         <Link
                           href={`/policies/${policy.id}`}
                           className="arrow-link"
                         >
                           Open <Icon name="arrow" />
                         </Link>
+                        <DeleteButton endpoint={`/api/policies/${policy.id}`} label="Delete" ariaLabel="Delete policy set" onDeleted={load}
+                          confirmation={`Permanently delete “${policy.name}” v${policy.version} and its requirements? Source documents remain. Referencing reports must be deleted first.`} />
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -163,9 +168,10 @@ export default function PoliciesPage() {
                     <Link href={`/documents/${document.id}`}>
                       <strong>{document.filename}</strong>
                     </Link>
-                      <span className="subtle">Semantic index: {document.index_status ?? "pending"}</span>
                     <span className="subtle">version {document.version}</span>
                   </div>
+                  <DeleteButton endpoint={`/api/documents/${document.id}`} label="Delete" ariaLabel={`Delete ${document.filename}`} onDeleted={load}
+                    confirmation={`Permanently delete “${document.filename}” and its search index? Referencing reports or policy sets must be deleted first.`} />
                 </div>
               ))
             )}
@@ -281,8 +287,7 @@ function ProposePolicyModal({
           )}
         </div>
         <p className="field-help">
-          The adapter will propose requirements with citations. Before approval,
-          you can revise them.
+          Extraction reads every selected document in full and saves a draft for review. Existing extraction results are reused. Regeneration is available explicitly on the saved version.
         </p>
         <div className="form-actions">
           <button type="button" className="button button-quiet" onClick={close}>

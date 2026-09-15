@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from counterparty.config import Settings
 from counterparty.database import create_engine_for_settings
 from counterparty.documents import ingest
-from counterparty.models import PolicySetVersion, User
+from counterparty.models import AuditEvent, PolicySetVersion, User
 from counterparty.organizations import Organization
 from counterparty.security import audit, hash_password
 
@@ -112,7 +112,15 @@ def bootstrap(engine, settings: Settings, fixture_root: Path) -> dict:
                 PolicySetVersion.version == 1,
             )
         )
-        if existing is None:
+        seeded = session.scalar(
+            select(AuditEvent.id)
+            .where(
+                AuditEvent.organization_id == analyst.organization_id,
+                AuditEvent.event.in_(("synthetic.bootstrap_completed", "synthetic.policy_seeded")),
+            )
+            .limit(1)
+        )
+        if existing is None and seeded is None:
             documents = []
             for name, raw in policies.items():
                 document, created = ingest(
@@ -144,13 +152,15 @@ def bootstrap(engine, settings: Settings, fixture_root: Path) -> dict:
                 },
             )
             counts["policies"] += 1
+        if seeded is None and existing is not None:
+            audit(session, reviewer, "synthetic.bootstrap_completed")
     return counts
 
 
 def resolve_manifest(manifest: dict, chunks: list[dict]) -> list[dict]:
     """Resolve curated literal citations; ambiguous edits fail the entire transaction."""
     from counterparty.analysis import validate_requirements
-    from counterparty.analysis.engine import source
+    from counterparty.analysis.sources import source
 
     requirements = []
     for entry in manifest["requirements"]:

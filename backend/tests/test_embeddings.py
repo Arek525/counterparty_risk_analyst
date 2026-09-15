@@ -133,13 +133,13 @@ def test_api_import_never_loads_native_model_runtime():
     assert result.returncode == 0, result.stderr.decode()
 
 
-def test_semantic_default_ignores_keyword_distractors():
+def test_hybrid_default_and_explicit_semantic_ignores_keyword_distractors():
     from uuid import uuid4
 
     from counterparty.analysis.engine import retrieve
     from counterparty.schemas import RunCreate
 
-    assert RunCreate(policy_version_id=uuid4()).retrieval_variant == "semantic"
+    assert RunCreate(policy_version_id=uuid4()).retrieval_variant == "hybrid"
     chunks = [
         {"id": "relevant", "text": "Wymagamy dodatkowego czynnika logowania."},
         {"id": "distractor", "text": "MFA MFA marketing MFA"},

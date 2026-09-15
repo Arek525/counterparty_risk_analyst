@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
@@ -107,6 +108,8 @@ export default function CaseDetailPage() {
         description={`Created ${formatDate(caseItem.created_at)}`}
         actions={
           <>
+            <DeleteButton endpoint={`/api/cases/${id}`} label="Delete case" redirect="/cases"
+              confirmation={`Permanently delete “${caseItem.name}”, all its documents, reports, decisions and local ticket records? Shared policy documents remain. This cannot be undone.`} />
             <Link className="button button-quiet" href={`/audit?case_id=${id}`}>
               Activity
             </Link>
@@ -144,7 +147,6 @@ export default function CaseDetailPage() {
                       <Link href={`/documents/${document.id}`}>
                         <strong>{document.filename}</strong>
                       </Link>
-                      <span className="subtle">Semantic index: {document.index_status ?? "pending"}</span>
                       <span className="subtle">
                         {document.evidence_type === "independent"
                           ? "Independent evidence"
@@ -153,12 +155,16 @@ export default function CaseDetailPage() {
                         {formatDate(document.created_at)}
                       </span>
                     </div>
+                    <div className="row-actions document-actions">
                     <Link
                       className="arrow-link"
                       href={`/documents/${document.id}`}
                     >
                       Source <Icon name="arrow" />
                     </Link>
+                    <DeleteButton endpoint={`/api/documents/${document.id}`} label="Delete" ariaLabel={`Delete ${document.filename}`} onDeleted={load}
+                      confirmation={`Permanently delete “${document.filename}” and its search index? Referencing reports or policy sets must be deleted first.`} />
+                    </div>
                   </div>
                 ))
               )}
@@ -264,7 +270,8 @@ export default function CaseDetailPage() {
                         </td>
                         <td className="subtle">{run.model_mode}</td>
                         <td className="subtle">{formatDate(run.created_at)}</td>
-                        <td>
+                        <td className="actions-cell">
+                          <div className="row-actions">
                           <Link
                             className="arrow-link"
                             aria-label={`Open analysis ${formatDate(run.created_at)}`}
@@ -272,6 +279,9 @@ export default function CaseDetailPage() {
                           >
                             Open <Icon name="arrow" />
                           </Link>
+                          <DeleteButton endpoint={`/api/runs/${run.id}`} label="Delete" ariaLabel="Delete report" onDeleted={load}
+                            confirmation="Permanently delete this report, its decision, saved analysis progress and local ticket records? Source documents remain. This cannot be undone." />
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -511,7 +521,7 @@ function StartRunModal({
   created: (run: AnalysisRun) => void;
 }) {
   const [policyId, setPolicyId] = useState(policies[0]?.id ?? "");
-  const [variant, setVariant] = useState<"lexical" | "hybrid" | "semantic">("semantic");
+  const [variant, setVariant] = useState<"lexical" | "hybrid" | "semantic">("hybrid");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function submit(event: React.FormEvent) {
@@ -563,6 +573,7 @@ function StartRunModal({
                 ))}
               </select>
             </label>
+            <details><summary>Advanced retrieval options</summary>
             <label className="field">
               <span>Evidence retrieval variant</span>
               <select
@@ -582,6 +593,7 @@ function StartRunModal({
                 The variant is saved with the run so results can be compared.
               </small>
             </label>
+            </details>
             <div className="notice notice-info">
               <div>
                 <strong>Immutable input snapshot</strong>

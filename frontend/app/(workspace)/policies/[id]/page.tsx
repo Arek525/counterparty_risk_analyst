@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
@@ -13,24 +14,27 @@ import {
 } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
 import { api, errorMessage } from "@/lib/api";
-import { formatDate, formatLocation, statusLabels } from "@/lib/format";
-import type { PolicyVersion, Requirement } from "@/lib/types";
+import { formatApplicability, formatDate, statusLabels } from "@/lib/format";
+import { sourceHref } from "@/lib/source";
+import type { DocumentRecord, PolicyVersion, Requirement } from "@/lib/types";
 
 export default function PolicyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
   const [policy, setPolicy] = useState<PolicyVersion | null>(null);
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
-  const [editing, setEditing] = useState(false);
+  const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function load() {
     setError("");
     try {
-      const value = await api<PolicyVersion>(`/api/policies/${id}`);
+      const [value, sources] = await Promise.all([
+        api<PolicyVersion>(`/api/policies/${id}`),
+        api<DocumentRecord[]>("/api/documents"),
+      ]);
       setPolicy(value);
-      setRequirements(value.requirements ?? []);
+      setDocuments(sources);
     } catch (reason) {
       setError(errorMessage(reason));
     }
@@ -38,22 +42,20 @@ export default function PolicyDetailPage() {
   useEffect(() => {
     void load();
   }, [id]);
-  async function save() {
+  useEffect(() => {
+    if (policy?.extraction_status !== "extracting" && (policy?.status !== "approved" || policy.requirement_index_status !== "pending")) return;
+    const timer = setInterval(() => void load(), 2500);
+    return () => clearInterval(timer);
+  }, [policy?.status, policy?.requirement_index_status, policy?.extraction_status, id]);
+  async function regenerate() {
+    if (!policy || !confirm("Regenerate requirements from all source documents? This makes new model API calls and creates a new draft. Saved versions remain available.")) return;
     setPending(true);
     setError("");
     try {
-      const value = await api<PolicyVersion>(
-        `/api/policies/${id}/requirements`,
-        { method: "PUT", body: JSON.stringify({ requirements }) },
-      );
-      setPolicy(value);
-      setRequirements(value.requirements ?? requirements);
-      setEditing(false);
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      setPending(false);
-    }
+      const value = await api<PolicyVersion>("/api/policies/propose", { method: "POST", body: JSON.stringify({name: policy.name, document_ids: policy.document_ids, regenerate: true}) });
+      router.push(`/policies/${value.id}`);
+    } catch (reason) { setError(errorMessage(reason)); }
+    finally { setPending(false); }
   }
   async function approve() {
     setPending(true);
@@ -67,24 +69,12 @@ export default function PolicyDetailPage() {
       setPending(false);
     }
   }
-  async function clone() {
-    setPending(true);
-    setError("");
-    try {
-      const value = await api<PolicyVersion>(`/api/policies/${id}/clone`, {
-        method: "POST",
-      });
-      router.push(`/policies/${value.id}`);
-    } catch (reason) {
-      setError(errorMessage(reason));
-      setPending(false);
-    }
-  }
   if (!policy && !error) return <Spinner label="Loading policy…" />;
   if (!policy) return <ErrorNotice message={error} retry={load} />;
-  const canEdit = policy.status === "draft" && user?.role !== "auditor";
+  const extractionReady = !policy.extraction_status || policy.extraction_status === "ready";
+  const requirements = policy.requirements ?? [];
   const canApprove =
-    policy.status === "draft" &&
+    extractionReady && policy.status === "draft" &&
     (user?.role === "reviewer" || user?.role === "administrator");
   return (
     <>
@@ -94,43 +84,13 @@ export default function PolicyDetailPage() {
         description={`Created ${formatDate(policy.created_at)}`}
         actions={
           <>
+            <DeleteButton endpoint={`/api/policies/${id}`} label="Delete policy set" redirect="/policies"
+              confirmation={`Permanently delete “${policy.name}” v${policy.version}, its requirements and their embeddings? Source documents remain. Referencing reports must be deleted first.`} />
             <StatusBadge value={policy.status}>
               {statusLabels[policy.status]}
             </StatusBadge>
-            {policy.status === "approved" && user?.role !== "auditor" && (
-              <button
-                className="button button-secondary"
-                onClick={clone}
-                disabled={pending}
-              >
-                Clone for editing
-              </button>
-            )}
-            {canEdit && !editing && (
-              <button
-                className="button button-secondary"
-                onClick={() => setEditing(true)}
-              >
-                Edit requirements
-              </button>
-            )}
-            {editing && (
-              <button
-                className="button button-quiet"
-                onClick={() => {
-                  setRequirements(policy.requirements);
-                  setEditing(false);
-                }}
-              >
-                Cancel editing
-              </button>
-            )}
-            {editing && (
-              <button className="button" onClick={save} disabled={pending}>
-                {pending ? "Saving…" : "Save requirements"}
-              </button>
-            )}
-            {canApprove && !editing && (
+            {user?.role !== "auditor" && <button className="button button-quiet" disabled={pending} onClick={regenerate}>Regenerate requirements</button>}
+            {canApprove && (
               <button className="button" onClick={approve} disabled={pending}>
                 <Icon name="check" />
                 Approve version
@@ -149,11 +109,29 @@ export default function PolicyDetailPage() {
           </strong>
           <p>
             {policy.status === "approved"
-              ? "Analyses reference this exact version. Changes require a new draft version."
-              : "Review the meaning and source quote of every requirement before approval."}
+              ? "Analyses reference this exact version. To change the rules, upload a revised source document and extract a new set."
+              : "Review the extracted requirements against their sources before approval. If extraction is incorrect, regenerate or delete this draft. Requirements cannot be edited manually."}
           </p>
         </div>
       </div>
+      {policy.extraction_status === "extracting" && <Spinner label="Extracting requirements from the full source documents…" />}
+      {policy.extraction_status === "error" && <ErrorNotice message={policy.extraction_error ?? "Extraction failed. Regenerate requirements to try again."} />}
+      {policy.status === "draft" && extractionReady && requirements.length > 0 && (
+        <details className="card card-body" style={{marginBottom: 18}}>
+          <summary>Review full extracted wording</summary>
+          <p className="subtle">This is the exact requirement text used in analysis. It is read-only.</p>
+          {requirements.map((requirement) => (
+            <div key={requirement.id}>
+              <h3>{requirement.title}</h3>
+              <p>{requirement.description ?? requirement.source.quote}</p>
+              <Link className="arrow-link" href={sourceHref(requirement.source)}>View quoted passage <Icon name="arrow" /></Link>
+            </div>
+          ))}
+        </details>
+      )}
+      {policy.status === "approved" && policy.requirement_index_status && policy.requirement_index_status !== "ready" && (
+        <div className="notice notice-info" style={{marginBottom: 18}} aria-live="polite"><p>{policy.requirement_index_status === "error" ? "Requirement preparation failed. " + (policy.requirement_index_error ?? "") : "Preparing approved requirements for analysis in the background…"}</p></div>
+      )}
       {requirements.length === 0 ? (
         <div className="card">
           <EmptyState
@@ -163,248 +141,48 @@ export default function PolicyDetailPage() {
         </div>
       ) : (
         <div className="requirements">
-          {requirements.map((requirement, index) =>
-            editing ? (
-              <RequirementEditor
-                key={requirement.id}
-                value={requirement}
-                change={(value) =>
-                  setRequirements((current) =>
-                    current.map((entry, i) => (i === index ? value : entry)),
-                  )
-                }
-                remove={() =>
-                  setRequirements((current) =>
-                    current.filter((_, i) => i !== index),
-                  )
-                }
-              />
-            ) : (
-              <RequirementCard key={requirement.id} requirement={requirement} />
-            ),
-          )}
+          <p className="subtle">
+            Requirement IDs identify individual rules, not scores or risk levels.
+            In the Northstar sample policies, SEC means Information Security,
+            PRI means Privacy, GOV means Supplier Governance, and IR means Incident Response.
+            The number identifies a rule within that group. Other policies may use different IDs.
+          </p>
+          {requirements.map((requirement) => (
+            <RequirementCard key={requirement.id} requirement={requirement}
+              document={documents.find((document) => document.id === requirement.source.document_id)} />
+          ))}
         </div>
       )}
     </>
   );
 }
 
-function RequirementCard({ requirement }: { requirement: Requirement }) {
+function RequirementCard({ requirement, document }: { requirement: Requirement; document?: DocumentRecord }) {
   return (
     <article className="card requirement">
       <div className="requirement-head">
         <div>
           <h3>{requirement.title}</h3>
-          <span className="mono">{requirement.id}</span>
+          <span className="subtle">Requirement ID: <span className="mono">{requirement.id}</span></span>
         </div>
         <StatusBadge value={requirement.severity}>
           {requirement.severity}
         </StatusBadge>
       </div>
-      <div className="requirement-grid">
-        <div>
-          <label>Condition</label>
-          <strong>
-            {requirement.field} {requirement.operator}{" "}
-            {String(requirement.expected)}
-          </strong>
-        </div>
-        <div>
-          <label>Evaluation</label>
-          <strong>{requirement.evaluation_method}</strong>
-        </div>
-        <div>
-          <label>Applicability</label>
-          <strong>
-            {Object.keys(requirement.applicability).length
-              ? JSON.stringify(requirement.applicability)
-              : "Always"}
-          </strong>
-        </div>
+      <div className="requirement-scope">
+        <span className="requirement-label">Applies when</span>
+        <p>{requirement.applicability_text ?? formatApplicability(requirement.applicability)}</p>
       </div>
       <div className="source-box">
-        <q>{requirement.source.quote}</q>
         <small>
           <Link
             className="arrow-link"
-            href={`/documents/${requirement.source.document_id}?chunk=${requirement.source.chunk_id}`}
+            href={sourceHref(requirement.source)}
           >
-            Open source · {formatLocation(requirement.source.location)}{" "}
+            {document ? `${document.filename} · v${document.version}` : "Source document unavailable"} · View quoted passage{" "}
             <Icon name="arrow" />
           </Link>
         </small>
-      </div>
-    </article>
-  );
-}
-
-function RequirementEditor({
-  value,
-  change,
-  remove,
-}: {
-  value: Requirement;
-  change: (value: Requirement) => void;
-  remove: () => void;
-}) {
-  const update = <K extends keyof Requirement>(key: K, next: Requirement[K]) =>
-    change({ ...value, [key]: next });
-  const [expectedText, setExpectedText] = useState(
-    typeof value.expected === "string"
-      ? value.expected
-      : JSON.stringify(value.expected),
-  );
-  const [applicabilityText, setApplicabilityText] = useState(
-    JSON.stringify(value.applicability),
-  );
-  const [applicabilityError, setApplicabilityError] = useState("");
-
-  function changeExpected(raw: string) {
-    setExpectedText(raw);
-    if (value.operator === "lte" || value.operator === "gte") {
-      const parsed = Number(raw);
-      if (Number.isFinite(parsed)) update("expected", parsed);
-      return;
-    }
-    if (
-      raw === "true" ||
-      raw === "false" ||
-      raw === "null" ||
-      raw.startsWith("[")
-    ) {
-      try {
-        update("expected", JSON.parse(raw));
-        return;
-      } catch {}
-    }
-    update("expected", raw);
-  }
-
-  function changeApplicability(raw: string) {
-    setApplicabilityText(raw);
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
-        throw new Error("not an object");
-      }
-      update("applicability", parsed as Record<string, unknown>);
-      setApplicabilityError("");
-    } catch {
-      setApplicabilityError(
-        'Enter a valid JSON object, for example {"personal_data":true}.',
-      );
-    }
-  }
-  return (
-    <article className="card requirement">
-      <div className="requirement-edit-grid">
-        <label className="field">
-          <span>Title</span>
-          <input
-            className="input"
-            value={value.title}
-            onChange={(e) => update("title", e.target.value)}
-          />
-        </label>
-        <label className="field">
-          <span>Severity</span>
-          <select
-            className="select"
-            value={value.severity}
-            onChange={(e) =>
-              update("severity", e.target.value as Requirement["severity"])
-            }
-          >
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>Method</span>
-          <select
-            className="select"
-            value={value.evaluation_method}
-            onChange={(e) =>
-              update(
-                "evaluation_method",
-                e.target.value as Requirement["evaluation_method"],
-              )
-            }
-          >
-            <option value="deterministic">deterministic</option>
-            <option value="llm">llm</option>
-            <option value="manual">manual</option>
-          </select>
-        </label>
-      </div>
-      <div className="requirement-edit-grid">
-        <label className="field">
-          <span>Field</span>
-          <input
-            className="input"
-            value={value.field}
-            onChange={(e) => update("field", e.target.value)}
-          />
-        </label>
-        <label className="field">
-          <span>Operator</span>
-          <select
-            className="select"
-            value={value.operator}
-            onChange={(e) =>
-              update("operator", e.target.value as Requirement["operator"])
-            }
-          >
-            {["eq", "lte", "gte", "contains", "present", "manual"].map(
-              (entry) => (
-                <option key={entry}>{entry}</option>
-              ),
-            )}
-          </select>
-        </label>
-        <label className="field">
-          <span>Expected value</span>
-          <input
-            className="input"
-            inputMode={
-              value.operator === "lte" || value.operator === "gte"
-                ? "decimal"
-                : "text"
-            }
-            value={expectedText}
-            onChange={(e) => changeExpected(e.target.value)}
-          />
-        </label>
-      </div>
-      <label className="field">
-        <span>Applicability conditions (JSON)</span>
-        <input
-          className="input mono"
-          value={applicabilityText}
-          onChange={(e) => changeApplicability(e.target.value)}
-          aria-invalid={Boolean(applicabilityError)}
-        />
-        {applicabilityError && (
-          <small className="field-help" style={{ color: "var(--red)" }}>
-            {applicabilityError}
-          </small>
-        )}
-      </label>
-      <div className="source-box">
-        <q>{value.source.quote}</q>
-        <small>
-          The quote remains linked to {formatLocation(value.source.location)}.
-        </small>
-      </div>
-      <div className="form-actions">
-        <button
-          className="button button-small button-danger"
-          type="button"
-          onClick={remove}
-        >
-          Remove requirement
-        </button>
       </div>
     </article>
   );

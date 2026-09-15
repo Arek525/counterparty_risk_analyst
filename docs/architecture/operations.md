@@ -53,15 +53,24 @@ on a backup. Local ticket receipts restore with the database, retaining idempote
 ## Explicit MVP retention policy
 
 There is no automatic time-based expiry of business evidence or analysis history.
-Referenced policy/document versions, reports, decisions, audit events and graph
-checkpoints are retained indefinitely on this local installation. This is a
-transparent MVP policy, not a claim of regulatory compliance.
+The UI supports explicit permanent deletion of reports, counterparty cases,
+policy sets, documents and local ticket records. Each delete requires confirmation.
+Deleting a report removes its saved progress, decision, workflow checkpoints,
+local ticket records and related activity content. Deleting a case also removes
+its documents, files, chunks and embeddings. Shared organization policies remain.
+A minimal deletion event records the actor and removed resource ID, without the
+removed content. File removal is retried by the worker if a filesystem error
+occurs; a durable cleanup record survives restart. The UI reports when original
+file cleanup is still pending.
 
-Deleting an **unreferenced** document through the API removes its file, chunks and
-embeddings. A document used by a policy or run cannot be deleted through that API,
-because old reports must remain inspectable. Superseded versions remain accessible
-under the same access rules. Session cookies expire, while stale session database
-records currently remain until a deliberate database reset.
+A policy set can be deleted after reports referring to it have been deleted.
+A source document can be deleted after its referencing policy sets and reports.
+Deleting a policy set removes its requirements and requirement embeddings, but
+keeps its source files until separately deleted. Active processing blocks deletion;
+read-only auditors cannot delete data. Removing a local ticket record does not
+cancel or delete a ticket already created in another service. Deleted demo seed
+content is not recreated by an application restart.
+
 
 Full deletion requires a deliberate removal of both Compose volumes plus any
 backups, browser traces/screenshots and externally retained provider data. External

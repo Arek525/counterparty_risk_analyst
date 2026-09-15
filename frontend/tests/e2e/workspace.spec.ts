@@ -316,10 +316,47 @@ test("report separates risk, completeness and decision and opens its source", as
   ).toBeVisible();
   await expect(page.getByText("Missing information:")).toHaveCount(0);
   await expect(page.getByText("Run.awaiting review")).toHaveCount(0);
-  await page.getByRole("button", { name: /sekcja 4/ }).click();
+  await expect(page.getByRole("button", { name: /security-questionnaire.md/ })).toBeVisible();
+  await page.getByRole("button", { name: /Kopie są przechowywane przez 30 dni/ }).click();
   await expect(
     page.getByRole("dialog", { name: "Evidence source" }),
   ).toContainText("Kopie są przechowywane przez 30 dni.");
+});
+
+test("policy cards show scope and sources without duplicate descriptions or obsolete assessment modes", async ({ page }) => {
+  await mockApi(page);
+  const source = { document_id: "doc-policy", chunk_id: "chunk-policy", location: { line_start: 47, line_end: 55 }, quote: "Stored customer records must be encrypted." };
+  await page.route("**/api/policies/policy-1", (route) => json(route, {
+    id: "policy-1", name: "Northstar policy", version: 1, status: "approved", created_at: now,
+    document_ids: ["doc-policy"], requirements: [
+      { id: "SEC-02", title: "Storage protection", field: "encryption_at_rest", operator: "eq", expected: true,
+        severity: "High", evaluation_method: "deterministic", applicability: { personal_data: true, privileged_access: false }, source },
+      { id: "CUSTOM-2", title: "Data removal", field: "retention_days", operator: "lte", expected: 30,
+        severity: "High", evaluation_method: "deterministic", applicability: {}, source },
+      { id: "CUSTOM-3", title: "Contract interpretation", field: "custom_obligation", operator: "manual", expected: null,
+        severity: "Medium", evaluation_method: "manual", applicability: {}, source },
+    ],
+  }));
+  await page.route("**/api/documents", (route) => json(route, [
+    { id: "doc-policy", filename: "information-security.md", version: 2, kind: "policy", created_at: now },
+  ]));
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Marta Recenzent/ }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.goto("/policies/policy-1");
+  await expect(page.getByText("Stored customer records must be encrypted.", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Automatic rule check", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("The counterparty processes personal data; The counterparty does not have privileged access")).toBeVisible();
+
+  await expect(page.getByText("Reviewer assessment", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", {name: "Storage protection"})).toBeVisible();
+  await expect(page.getByText("Requirement ID: SEC-02")).toBeVisible();
+  await expect(page.getByText(/SEC means Information Security/)).toBeVisible();
+  const link = page.getByRole("link", { name: /information-security.md · v2/ }).first();
+  await expect(link).toHaveAttribute("href", "/documents/doc-policy#chunk=chunk-policy&quote=Stored+customer+records+must+be+encrypted.");
+  await expect(link).toContainText("View quoted passage");
+  await expect(page.getByText(/lines 47–55/)).toHaveCount(0);
+  await expect(page.getByText("encryption_at_rest eq true")).toHaveCount(0);
 });
 
 test("ticket requires preview, approval and separate execution", async ({
@@ -347,4 +384,119 @@ test("ticket requires preview, approval and separate execution", async ({
   await expect(
     page.getByText(/Ticket 60000000-0000-4000-8000-000000000001/),
   ).toBeVisible();
+});
+
+test("policy extraction is read-only, approved after review, and regenerated only explicitly", async ({ page }) => {
+  await mockApi(page);
+  const source = {document_id: "policy-doc", chunk_id: "policy-chunk", location: {line_start: 2}, quote: "Encrypt all customer records."};
+  const document = {id: "policy-doc", kind: "policy", filename: "security.md", version: 1, created_at: now, index_status: "ready", text: "Security policy\nEncrypt all customer records.\nEnd of policy.", chunks: [{id: "policy-chunk", text: source.quote, location: source.location}]};
+  let policy = {id: "natural-policy", name: "Security", version: 1, status: "draft", extraction_status: "ready", requirement_index_status: "ready", created_at: now, document_ids: [document.id], requirements: [{id: "SEC-1", title: "Encryption", description: "Customer records must be encrypted.", applicability_text: "When customer records are stored", severity: "High", source}]};
+  let extractions = 0;
+  let regenerate = false;
+  await page.route("**/api/documents/policy-doc", route => json(route, document));
+  await page.route("**/api/documents", route => json(route, [document]));
+  await page.route("**/api/policies", route => json(route, extractions ? [policy] : []));
+  await page.route("**/api/policies/propose", route => {
+    extractions++;
+    regenerate = route.request().postDataJSON().regenerate === true;
+    return json(route, policy);
+  });
+  await page.route("**/api/policies/natural-policy", route => json(route, policy));
+  await page.route("**/api/policies/natural-policy/approve", route => { policy = {...policy, status: "approved"}; return json(route, policy); });
+  await page.goto("/login");
+  await page.getByRole("button", {name: /Marta Recenzent/}).click();
+  await page.getByRole("button", {name: "Sign in"}).click();
+  await page.goto("/documents/policy-doc");
+  await expect(page.getByRole("heading", {name: "Full document"})).toBeVisible();
+  await expect(page.getByText(/End of policy/)).toBeVisible();
+  expect(extractions).toBe(0);
+  await page.getByRole("button", {name: "Extract requirements", exact: true}).click();
+  await expect(page).toHaveURL(/policies\/natural-policy/);
+  await expect(page.getByRole("button", {name: "Edit requirements"})).toHaveCount(0);
+  await expect(page.getByRole("button", {name: "Clone for editing"})).toHaveCount(0);
+  await expect(page.getByText("When customer records are stored", {exact: true})).toBeVisible();
+  await page.getByText("Review full extracted wording", {exact: true}).click();
+  await expect(page.getByText("Customer records must be encrypted.", {exact: true})).toBeVisible();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  await page.getByRole("button", {name: "Approve version"}).click();
+  await expect(page.getByText("Immutable approved version")).toBeVisible();
+  await expect(page.getByRole("button", {name: "Clone for editing"})).toHaveCount(0);
+  await page.goto("/documents/policy-doc");
+  await page.getByRole("link", {name: /Security · v1/}).click();
+  expect(extractions).toBe(1);
+  page.once("dialog", dialog => dialog.dismiss());
+  await page.getByRole("button", {name: "Regenerate requirements"}).click();
+  expect(extractions).toBe(1);
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", {name: "Regenerate requirements"}).click();
+  await expect.poll(() => extractions).toBe(2);
+  expect(regenerate).toBe(true);
+});
+
+test("failed semantic analysis resumes unfinished requirements and pairs policy with counterparty sources", async ({page}) => {
+  await mockApi(page);
+  const requirementSource = {document_id: "policy-doc", chunk_id: "policy-chunk", location: "section 2", quote: "Encrypt customer records."};
+  await page.route("**/api/documents/policy-doc", route => json(route, {id: "policy-doc", filename: "security.md", chunks: [{id: "policy-chunk", text: requirementSource.quote, location: requirementSource.location}]}));
+  const evidence = {document_id: "doc-1", chunk_id: "chunk-1", location: "section 3", quote: "Our stored records use AES-256."};
+  const report = {risk: "Low", completeness: 100, summary: "Requirement assessed.", questions: [], discrepancies: [], model_name: "mock-semantic", model_mode: "demo", rules_version: "semantic-v2", prompt_version: "v2", metrics: {input_tokens: 10, output_tokens: 10, duration_ms: 100, cost_usd: null}, findings: [{requirement_id: "SEC-1", title: "Encryption", severity: "High", status: "pass", explanation: "The declaration supports the encryption requirement.", requirement_description: "Customer records must be encrypted.", requirement_source: requirementSource, evidence: [evidence]}]};
+  let retries = 0;
+  let completed = false;
+  await page.route("**/api/runs/resume-run", route => json(route, {id: "resume-run", case_id: "case-1", status: completed ? "awaiting_review" : retries ? "running" : "failed", retrieval_variant: "hybrid", created_at: now, progress: {completed: completed ? 2 : 1, total: 2, current_requirement_id: completed ? null : "SEC-2"}, error: retries ? null : "Provider request failed", report}));
+  await page.route("**/api/runs/resume-run/tickets", route => json(route, []));
+  await page.route("**/api/runs/resume-run/retry", route => {retries++; return json(route, {});});
+  await page.goto("/login");
+  await page.getByRole("button", {name: /Marta Recenzent/}).click();
+  await page.getByRole("button", {name: "Sign in"}).click();
+  await page.goto("/runs/resume-run");
+  await expect(page.getByText("1 of 2 requirements assessed")).toBeVisible();
+  await expect(page.getByText("Risk", {exact: true})).toHaveCount(0);
+  await page.getByRole("button", {name: "Resume unfinished requirements"}).click();
+  await expect(page.getByText("Retrieving evidence and evaluating requirements…")).toBeVisible();
+  expect(retries).toBe(1);
+  await expect(page.getByText("Risk", {exact: true})).toHaveCount(0);
+  completed = true;
+  await expect(page.getByText("2 of 2 requirements assessed")).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Policy requirement"})).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Counterparty evidence"})).toBeVisible();
+  await expect(page.getByText("Encrypt customer records.", {exact: true})).toHaveCount(0);
+  await page.getByRole("button", {name: /Policy source · View quoted passage/}).click();
+  await expect(page.getByRole("dialog", {name: "Evidence source"})).toBeVisible();
+  await expect(page.getByRole("dialog").getByText("Encrypt customer records.", {exact: true})).toBeVisible();
+  await page.getByRole("button", {name: "Close"}).click();
+  await expect(page.getByRole("button", {name: /Our stored records use AES-256/})).toBeVisible();
+});
+
+test("deletion requires confirmation, shows dependency errors and removes saved reports", async ({page}) => {
+  await mockApi(page);
+  const deletions: string[] = [];
+  let blocked = true;
+  await page.route("**/api/runs/run-1", async route => {
+    if (route.request().method() !== "DELETE") return route.fallback();
+    deletions.push("run-1");
+    return blocked ? json(route, {detail: "Analysis is running. Wait until it finishes."}, 409) : json(route, {ok: true});
+  });
+  await page.goto("/login");
+  await page.getByRole("button", {name: /Marta Recenzent/}).click();
+  await page.getByRole("button", {name: "Sign in"}).click();
+  await page.goto("/runs/run-1");
+  page.once("dialog", dialog => dialog.dismiss());
+  await page.getByRole("button", {name: "Delete report", exact: true}).click();
+  expect(deletions).toEqual([]);
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", {name: "Delete report", exact: true}).click();
+  await expect(page.getByText("Analysis is running. Wait until it finishes.")).toBeVisible();
+  expect(deletions).toEqual(["run-1"]);
+  blocked = false;
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", {name: "Delete report", exact: true}).click();
+  await expect(page).toHaveURL(/\/cases\/case-1$/);
+  await expect(page.getByRole("button", {name: "Delete case", exact: true})).toBeVisible();
+  await expect(page.getByRole("button", {name: "Delete security-questionnaire.md"})).toBeVisible();
+  await page.route("**/api/cases/case-1", route => route.request().method() === "DELETE"
+    ? json(route, {ok: true, cleanup_pending: true}) : route.fallback());
+  const messages: string[] = [];
+  page.on("dialog", async dialog => { messages.push(dialog.message()); await dialog.accept(); });
+  await page.getByRole("button", {name: "Delete case", exact: true}).click();
+  await expect(page).toHaveURL(/\/cases$/);
+  expect(messages).toContain("The record was deleted. Original file cleanup is pending and will retry automatically.");
 });

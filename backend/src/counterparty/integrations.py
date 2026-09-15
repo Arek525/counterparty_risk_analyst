@@ -261,6 +261,7 @@ def execute(approval_id: UUID, request: Request, session: DB, user: Actor):
 def reconcile(approval_id: UUID, request: Request, session: DB, user: Actor):
     """Recover a lost receipt using a read only; never repeat an expired write."""
     require_roles(user, "reviewer", "administrator")
+    reference_lock(session, user)
     approval, run = get_approval(session, user, approval_id, lock=True)
     if approval.approved_by != user.id:
         raise HTTPException(403, "Only the approving actor may reconcile this action")

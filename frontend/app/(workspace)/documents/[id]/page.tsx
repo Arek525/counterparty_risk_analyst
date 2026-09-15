@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ErrorNotice, PageHeader, Spinner, StatusBadge } from "@/components/ui";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ErrorNotice, PageHeader, Spinner } from "@/components/ui";
 import { useAuth } from "@/context/auth-context";
 import { api, errorMessage } from "@/lib/api";
-import { formatDate, formatLocation } from "@/lib/format";
-import type { DocumentRecord } from "@/lib/types";
+import { formatDate } from "@/lib/format";
+import { locateSource } from "@/lib/source";
+import type { DocumentRecord, PolicyVersion } from "@/lib/types";
 
 export default function DocumentPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,13 +16,20 @@ export default function DocumentPage() {
   const { user } = useAuth();
   const [document, setDocument] = useState<DocumentRecord | null>(null);
   const [error, setError] = useState("");
+  const [policies, setPolicies] = useState<PolicyVersion[]>([]);
+  const [source, setSource] = useState<{chunk: string | null; quote: string | null}>({chunk: null, quote: null});
+  const highlight = useRef<HTMLElement>(null);
+  const selection = useMemo(() => document ? locateSource(document, source.chunk, source.quote) : {}, [document, source]);
+  const [extracting, setExtracting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [indexing, setIndexing] = useState(false);
   const [modelStatus, setModelStatus] = useState<{status: string; error?: string | null} | null>(null);
   async function load() {
     setError("");
     try {
-      setDocument(await api<DocumentRecord>(`/api/documents/${id}`));
+      const value = await api<DocumentRecord>(`/api/documents/${id}`);
+      setDocument(value);
+      if (value.kind === "policy") setPolicies((await api<PolicyVersion[]>("/api/policies")).filter((policy) => policy.document_ids.includes(id)));
     } catch (reason) {
       setError(errorMessage(reason));
     }
@@ -30,16 +38,22 @@ export default function DocumentPage() {
     void load();
   }, [id]);
   useEffect(() => {
-    if (document) {
-      const chunk = new URLSearchParams(globalThis.location.search).get(
-        "chunk",
-      );
-      if (chunk)
-        globalThis.document
-          .getElementById(`chunk-${chunk}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [document?.id]);
+    const readSource = () => {
+      const query = new URLSearchParams(window.location.search);
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      setSource({chunk: fragment.get("chunk") ?? query.get("chunk"), quote: fragment.get("quote") ?? query.get("quote")});
+    };
+    readSource();
+    window.addEventListener("hashchange", readSource);
+    window.addEventListener("popstate", readSource);
+    return () => {
+      window.removeEventListener("hashchange", readSource);
+      window.removeEventListener("popstate", readSource);
+    };
+  }, [id]);
+  useEffect(() => {
+    highlight.current?.scrollIntoView({block: "center"});
+  }, [selection.start, selection.end]);
   useEffect(() => {
     const refresh = () => {
       void api<{status: string; error?: string | null}>("/api/embedding-status").then(setModelStatus).catch(() => {});
@@ -49,6 +63,16 @@ export default function DocumentPage() {
     const timer = setInterval(refresh, 3000);
     return () => clearInterval(timer);
   }, [id]);
+  async function extract() {
+    if (!document) return;
+    setExtracting(true);
+    setError("");
+    try {
+      const policy = await api<PolicyVersion>("/api/policies/propose", {method: "POST", body: JSON.stringify({name: document.filename, document_ids: [id]})});
+      router.push(`/policies/${policy.id}`);
+    } catch (reason) { setError(errorMessage(reason)); }
+    finally { setExtracting(false); }
+  }
   async function reindex() {
     setIndexing(true);
     setError("");
@@ -71,7 +95,8 @@ export default function DocumentPage() {
     setDeleting(true);
     setError("");
     try {
-      await api(`/api/documents/${id}`, { method: "DELETE" });
+      const result = await api<{cleanup_pending?: boolean}>(`/api/documents/${id}`, { method: "DELETE" });
+      if (result.cleanup_pending) alert("The record was deleted. Original file cleanup is pending and will retry automatically.");
       router.push(
         document?.case_id ? `/cases/${document.case_id}` : "/policies",
       );
@@ -111,13 +136,12 @@ export default function DocumentPage() {
         }
       />
       {error && <ErrorNotice message={error} />}
-      <div className="notice notice-info" style={{marginBottom: 18}}>
-        <p aria-live="polite">Semantic index: <strong>{document.index_status ?? "pending"}</strong> · Local model: {modelStatus?.status ?? "checking"}</p>
-        {document.index_error && <p>{document.index_error}</p>}
-        {modelStatus?.error && <p>{modelStatus.error}</p>}
-        <p>Indexing runs in the background. Source text and lexical analysis remain available.</p>
-        {user?.role !== "auditor" && <button className="button button-small button-secondary" disabled={indexing} onClick={reindex}>{indexing ? "Queuing…" : "Reindex document"}</button>}
-      </div>
+      {document.kind === "policy" && <section className="card card-body" style={{marginBottom: 18}}>
+        <h2>Requirements</h2>
+        <p>Extract requirements from the full document, then review and approve the saved draft. Reopening saved requirements uses no model API calls.</p>
+        {policies.map((policy) => <p key={policy.id}><Link className="arrow-link" href={`/policies/${policy.id}`}>{policy.name} · v{policy.version} · {policy.status} · {policy.requirements.length} requirements</Link></p>)}
+        {user?.role !== "auditor" && <button className="button" disabled={extracting} onClick={extract}>{extracting ? "Extracting requirements…" : "Extract requirements"}</button>}
+      </section>}
       {document.kind === "evidence" && (
         <div className="notice notice-info" style={{ marginBottom: 18 }}>
           <p>
@@ -128,33 +152,24 @@ export default function DocumentPage() {
           </p>
         </div>
       )}
+      {selection.notice && <p className="notice notice-info" role="status">{selection.notice}</p>}
       <section className="card">
-        <div className="card-header">
-          <h2>Extracted source text</h2>
-          <StatusBadge value="neutral">
-            {document.chunks?.length ?? 0} chunks
-          </StatusBadge>
-        </div>
-        <div className="card-body stack">
-          {document.chunks?.map((chunk) => (
-            <article
-              className="source-document"
-              id={`chunk-${chunk.id}`}
-              key={chunk.id}
-            >
-              <div className="subtle" style={{ marginBottom: 9 }}>
-                {formatLocation(chunk.location)} ·{" "}
-                <span className="mono">{chunk.id}</span>
-              </div>
-              <div>{chunk.text}</div>
-            </article>
-          )) ?? (
-            <p className="subtle">
-              This document contains no text chunks.
-            </p>
-          )}
+        <div className="card-header"><h2>Full document</h2></div>
+        <div className="card-body source-document" style={{whiteSpace: "pre-wrap"}}>
+          {selection.start !== undefined && document.text ? <>
+            {document.text.slice(0, selection.start)}
+            <mark ref={highlight} className="source-highlight" aria-label="Cited quote">{document.text.slice(selection.start, selection.end)}</mark>
+            {document.text.slice(selection.end)}
+          </> : document.text ?? "Full document text is unavailable. Download the original to read it."}
         </div>
       </section>
+      <details className="card card-body" style={{marginTop: 18}}><summary>Technical details</summary>
+        <p aria-live="polite">Semantic index: <strong>{document.index_status ?? "pending"}</strong> · Local model: {modelStatus?.status ?? "checking"}</p>
+        {document.index_error && <p>{document.index_error}</p>}
+        {modelStatus?.error && <p>{modelStatus.error}</p>}
+        <p>Indexing runs in the background. The full source text remains available.</p>
+        {user?.role !== "auditor" && <button className="button button-small button-secondary" disabled={indexing} onClick={reindex}>{indexing ? "Queuing…" : "Reindex document"}</button>}
+      </details>
       <p style={{ marginTop: 18 }}>
         <Link
           className="arrow-link"

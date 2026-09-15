@@ -13,7 +13,10 @@ from collections import Counter, defaultdict
 from uuid import NAMESPACE_URL, uuid5
 
 from .adapters import GeminiAdapter, ModelError
+from .retrieval import retrieve as retrieve_e5
+from .retrieval import unicode_tokens as unicode_tokens
 from .schemas import FactBatch, RequirementBatch, validate_requirements, validate_source
+from .sources import ground_model_sources, source, source_order
 
 EMBEDDING_MODEL = "demo-hash-v1"
 RULES_VERSION = "risk-rules-v1"
@@ -78,6 +81,8 @@ def retrieve(
     semantic_scores: dict[str, float] | None = None,
     algorithm="historical-hash-v1",
 ) -> list[dict]:
+    if algorithm == "e5-v1":
+        return retrieve_e5(query, chunks, variant, top_k, semantic_scores)
     if variant not in {"lexical", "hybrid", "semantic"}:
         raise ValueError("Unsupported retrieval variant")
     # Historical offline regressions explicitly retain their original ASCII/hash scoring.
@@ -89,26 +94,6 @@ def retrieve(
         lexical[str(chunk["id"])] = sum(math.log1p(counts[token]) for token in query_tokens)
     if variant == "lexical":
         scores = lexical
-    elif algorithm == "e5-v1":
-        ids = {str(chunk["id"]) for chunk in chunks}
-        if (
-            semantic_scores is None
-            or set(semantic_scores) != ids
-            or not all(math.isfinite(value) for value in semantic_scores.values())
-        ):
-            raise ValueError("Runtime hybrid retrieval requires complete finite semantic scores")
-        if variant == "semantic":
-            scores = semantic_scores
-        else:
-            scores = dict.fromkeys(ids, 0.0)
-            for weight, ranking in (
-                (3, semantic_scores),
-                (1, {key: value for key, value in lexical.items() if value > 0}),
-            ):
-                for rank, key in enumerate(
-                    sorted(ranking, key=lambda key: (-ranking[key], key)), 1
-                ):
-                    scores[key] += weight / (5 + rank)
     elif algorithm == "historical-hash-v1":
         # Offline historical baseline only. The worker always supplies its versioned algorithm.
         if semantic_scores is None:
@@ -130,19 +115,6 @@ def retrieve(
         if variant == "semantic"
         else [chunk for chunk in ranked if scores[str(chunk["id"])] > 0][:top_k]
     )
-
-
-def unicode_tokens(text):
-    return re.findall(r"[^\W_]+", text.casefold().replace("_", " "))
-
-
-def source(chunk: dict, quote: str) -> dict:
-    return {
-        "chunk_id": str(chunk["id"]),
-        "document_id": str(chunk["document_id"]),
-        "location": chunk["location"],
-        "quote": quote,
-    }
 
 
 def statements(text: str):
@@ -209,21 +181,6 @@ def extract_facts(chunks: list[dict]) -> list[dict]:
 # preserving document boundaries (the larger corpus has 4–6 obligations per document).
 BATCH_INPUT_CHARS = 25000
 MAX_BATCHES = 8
-
-
-def source_order(chunks: list[dict]) -> list[dict]:
-    """Group documents without letting retrieval rank become source order."""
-
-    def key(chunk):
-        location = chunk.get("location", {})
-        coordinates = (
-            (location.get("page", 0), location.get("line_start", 0), location.get("line_end", 0))
-            if isinstance(location, dict)
-            else (0, 0, 0)
-        )
-        return str(chunk["document_id"]), *coordinates, str(chunk["id"])
-
-    return sorted(chunks, key=key)
 
 
 def policy_contexts(chunks: list[dict]) -> dict[str, dict]:
@@ -363,36 +320,6 @@ POLICY_INSTRUCTION = (
     "Write all generated titles and explanations in natural English, while preserving "
     "every source quote verbatim in its original language."
 )
-
-
-def ground_model_sources(items: list[dict], batch: list[dict]) -> int:
-    """Repair only opaque chunk coordinates for uniquely grounded unchanged quotes."""
-    corrections = 0
-    for item in items:
-        citation = item["source"]
-        try:
-            validate_source(citation, batch)
-        except ValueError:
-            matches = [
-                chunk
-                for chunk in batch
-                if str(chunk["document_id"]) == citation["document_id"]
-                and citation["quote"] in chunk["text"]
-            ]
-            if len(matches) != 1 or (
-                matches[0]["text"].find(citation["quote"])
-                != matches[0]["text"].rfind(citation["quote"])
-            ):
-                raise
-            corrected = {
-                **citation,
-                "chunk_id": str(matches[0]["id"]),
-                "location": matches[0]["location"],
-            }
-            validate_source(corrected, batch)
-            item["source"] = corrected
-            corrections += 1
-    return corrections
 
 
 def propose_requirements(

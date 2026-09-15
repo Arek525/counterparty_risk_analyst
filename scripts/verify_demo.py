@@ -94,7 +94,7 @@ def main():
         f"/cases/{case['id']}/runs",
         {
             "policy_version_id": policy["id"],
-            "retrieval_variant": "semantic",
+            "retrieval_variant": "hybrid",
         },
     )
     deadline = time.monotonic() + 90
@@ -104,12 +104,14 @@ def main():
         time.sleep(0.5)
         run = api(f"/runs/{run['id']}")
     report = run["report"]
-    assert report["risk"] == "Unable to assess" and report["completeness"] == 30
-    assert sum(f["status"] == "pass" for f in report["findings"]) == 6
-    assert sum(f["status"] == "unknown" for f in report["findings"]) == 14
+    assert report["prompt_version"] == "semantic-assessment-v2"
+    assert report["risk"] == "Unable to assess" and report["completeness"] == 0
+    assert len(report["findings"]) == len(policy["requirements"])
+    assert all(f["status"] == "unknown" for f in report["findings"])
+    assert run["progress"]["completed"] == len(policy["requirements"])
     quotes = 0
     for finding in report["findings"]:
-        for citation in finding["evidence"]:
+        for citation in [finding["requirement_source"], *finding["evidence"]]:
             doc = api(f"/documents/{citation['document_id']}")
             chunk = next(c for c in doc["chunks"] if c["id"] == citation["chunk_id"])
             assert citation["quote"] in chunk["text"]

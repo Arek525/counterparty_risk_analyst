@@ -1,6 +1,9 @@
 """Organization/case scoped API for document preparation and immutable assessments."""
 
 import copy
+import hashlib
+import json
+import os
 import secrets
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -30,9 +33,9 @@ from counterparty.schemas import (
     CasePatch,
     DecisionCreate,
     Login,
+    NarrativeRequirement,
     PolicyProposal,
     Requirement,
-    RequirementEdit,
     RunCreate,
 )
 from counterparty.security import (
@@ -110,6 +113,10 @@ def public_policy(policy):
             "approved_by",
             "created_at",
             "approved_at",
+            "extraction_status",
+            "extraction_error",
+            "requirement_index_status",
+            "requirement_index_error",
         )
     }
 
@@ -166,8 +173,15 @@ def chunks_for(session, documents):
 
 def validated_requirements(requirements, chunks):
     from counterparty.analysis import validate_requirements
+    from counterparty.analysis.semantic import validate_narrative_requirements
 
     try:
+        if requirements and all("description" in item for item in requirements):
+            parsed = [
+                NarrativeRequirement.model_validate(item).model_dump(mode="json")
+                for item in requirements
+            ]
+            return validate_narrative_requirements(parsed, chunks)
         parsed = [Requirement.model_validate(item).model_dump(mode="json") for item in requirements]
         validate_requirements(parsed, chunks)
         return parsed
@@ -300,6 +314,7 @@ def case_detail(case_id: UUID, user: Actor, session: DB):
 @router.patch("/cases/{case_id}")
 def patch_case(case_id: UUID, body: CasePatch, user: Actor, session: DB):
     require_roles(user, *WRITE_ROLES)
+    reference_lock(session, user)
     case = get_case(session, user, case_id)
     if body.name is not None:
         case.name = body.name
@@ -375,6 +390,7 @@ def upload_document(
     evidence_type: Annotated[Literal["declaration", "independent"], Form()] = "declaration",
 ):
     require_roles(user, *WRITE_ROLES)
+    reference_lock(session, user)
     if (kind == "policy" and case_id is not None) or (kind == "evidence" and case_id is None):
         raise HTTPException(
             422, "Policy documents are organization scoped; evidence requires a case"
@@ -408,9 +424,15 @@ def upload_document(
 
 
 @router.get("/documents/{document_id}")
-def document_detail(document_id: UUID, user: Actor, session: DB):
+def document_detail(document_id: UUID, request: Request, user: Actor, session: DB):
     document = document_for(session, user, document_id)
-    return {**public_document(document), "chunks": chunks_for(session, [document])}
+    from counterparty.documents import original_text
+
+    return {
+        **public_document(document),
+        "chunks": chunks_for(session, [document]),
+        "text": original_text(document, request.app.state.settings.storage_path),
+    }
 
 
 @router.get("/documents/{document_id}/download")
@@ -431,14 +453,24 @@ def download_document(document_id: UUID, request: Request, user: Actor, session:
 @router.delete("/documents/{document_id}")
 def delete_document(document_id: UUID, request: Request, user: Actor, session: DB):
     require_roles(user, *WRITE_ROLES)
+    from counterparty.deletion import (
+        cleanup_files,
+        deletion_lock,
+        guard_document,
+        purge_events,
+        queue_file_cleanup,
+    )
+
+    deletion_lock(session, user)
     document = document_for(session, user, document_id)
-    # A lock prevents deletion during new policy/run snapshot creation.
-    reference_lock(session, user)
+    guard_document(session, document)
     policies = session.scalars(
         select(PolicySetVersion).where(PolicySetVersion.organization_id == user.organization_id)
     )
     if any(str(document.id) in policy.document_ids for policy in policies):
-        raise HTTPException(409, "Document version retained by a policy")
+        raise HTTPException(
+            409, "Delete policy versions using this document first, then delete the document."
+        )
     snapshots = session.scalars(
         select(AnalysisRun.input_snapshot).where(
             AnalysisRun.organization_id == user.organization_id
@@ -449,19 +481,22 @@ def delete_document(document_id: UUID, request: Request, user: Actor, session: D
         for snapshot in snapshots
     ):
         # Every checkpoint is tied to a retained AnalysisRun, so this protects it too.
-        raise HTTPException(409, "Document version retained by an analysis or checkpoint")
-    path = Path(request.app.state.settings.storage_path) / document.storage_key
+        raise HTTPException(
+            409, "Delete analyses using this document first, then delete the document."
+        )
+    cleanup_id = queue_file_cleanup(session, user, [document.storage_key])
+    purge_events(session, user, "document_id", document.id)
     audit(
         session,
         user,
         "document.deleted",
         case_id=document.case_id,
-        details={"document_id": str(document.id), "sha256": document.sha256},
+        details={"resource_id": str(document.id)},
     )
     session.delete(document)
     session.commit()
-    path.unlink(missing_ok=True)
-    return {"ok": True}
+    pending = cleanup_files(request.app.state.engine, request.app.state.settings.storage_path)
+    return {"ok": True, "cleanup_pending": cleanup_id in pending}
 
 
 @router.get("/policies")
@@ -499,34 +534,75 @@ def next_policy_version(session, user, name):
 def propose_policy(body: PolicyProposal, request: Request, user: Actor, session: DB):
     require_roles(user, *WRITE_ROLES)
     reference_lock(session, user)
-    from counterparty.analysis import propose_requirements
+    from counterparty.analysis.adapters import ModelError
+    from counterparty.analysis.semantic import propose_narrative_requirements
 
     documents = [document_for(session, user, value) for value in dict.fromkeys(body.document_ids)]
-    if any(document.kind != "policy" for document in documents):
+    if any(document.kind != "policy" or document.case_id is not None for document in documents):
         raise HTTPException(422, "Only policy documents can define requirements")
-    chunks = chunks_for(session, documents)
-    proposal_metrics = {}
-    requirements = validated_requirements(
-        propose_requirements(
-            chunks, mode=request.app.state.settings.model_mode, metrics=proposal_metrics
-        ),
-        chunks,
+    extraction_key = hashlib.sha256(
+        json.dumps(sorted(str(d.id) for d in documents)).encode()
+    ).hexdigest()
+    cached = session.scalar(
+        select(PolicySetVersion)
+        .where(
+            PolicySetVersion.organization_id == user.organization_id,
+            PolicySetVersion.extraction_key == extraction_key,
+        )
+        .order_by(PolicySetVersion.created_at.desc())
     )
+    if cached is not None:
+        if not body.regenerate:
+            return public_policy(cached)
+        if cached.extraction_status == "extracting" and datetime.now(
+            UTC
+        ) - cached.created_at < timedelta(seconds=180):
+            raise HTTPException(409, "Extraction is still running. Wait before regenerating.")
+    chunks = chunks_for(session, documents)
     policy = PolicySetVersion(
         organization_id=user.organization_id,
         name=body.name,
         version=next_policy_version(session, user, body.name),
         status="draft",
         document_ids=[str(document.id) for document in documents],
-        requirements=requirements,
+        requirements=[],
+        extraction_key=extraction_key,
+        extraction_status="extracting",
         created_by=user.id,
     )
     session.add(policy)
     session.flush()
+    audit(session, user, "policy.extraction_started", details={"policy_id": str(policy.id)})
+    session.commit()
+    # The saved placeholder deduplicates concurrent clicks, including a disconnected client.
+    # Failed/abandoned attempts are visible and require explicit regeneration.
+    proposal_metrics = {}
+    # Hold the row through inference: deletion can distinguish a live call from
+    # an abandoned extracting placeholder after its existing 180-second timeout.
+    session.refresh(policy, with_for_update=True)
+    try:
+        requirements = validated_requirements(
+            propose_narrative_requirements(
+                chunks,
+                mode=request.app.state.settings.model_mode,
+                metrics=proposal_metrics,
+            ),
+            chunks,
+        )
+        session.refresh(policy, with_for_update=True)
+        policy.requirements = requirements
+        policy.extraction_status = "ready"
+    except (ModelError, HTTPException, ValueError, TypeError) as error:
+        policy.extraction_status = "error"
+        policy.extraction_error = (
+            str(error)
+            if isinstance(error, ModelError)
+            else "Extraction failed validation. Review the source and explicitly regenerate."
+        )
     audit(
         session,
         user,
-        "policy.proposed",
+        "policy.proposed" if policy.extraction_status == "ready" else "policy.extraction_failed",
         details={"policy_id": str(policy.id), "model_metrics": proposal_metrics},
     )
     session.commit()
@@ -538,26 +614,11 @@ def policy_detail(policy_id: UUID, user: Actor, session: DB):
     return public_policy(policy_for(session, user, policy_id))
 
 
-@router.put("/policies/{policy_id}/requirements")
-def edit_requirements(policy_id: UUID, body: RequirementEdit, user: Actor, session: DB):
-    require_roles(user, *WRITE_ROLES)
-    policy = policy_for(session, user, policy_id, lock=True)
-    if policy.status != "draft":
-        raise HTTPException(409, "Approved policy versions are immutable; clone to edit")
-    chunks = chunks_for(session, policy_documents(session, user, policy))
-    policy.requirements = validated_requirements(
-        [requirement.model_dump(mode="json") for requirement in body.requirements], chunks
-    )
-    audit(session, user, "policy.edited", details={"policy_id": str(policy.id)})
-    session.commit()
-    return public_policy(policy)
-
-
 @router.post("/policies/{policy_id}/approve")
 def approve_policy(policy_id: UUID, user: Actor, session: DB):
     require_roles(user, *REVIEW_ROLES)
     policy = policy_for(session, user, policy_id, lock=True)
-    if policy.status != "draft":
+    if policy.status != "draft" or policy.extraction_status != "ready":
         raise HTTPException(409, "Policy version already approved")
     validated_requirements(
         policy.requirements, chunks_for(session, policy_documents(session, user, policy))
@@ -566,32 +627,6 @@ def approve_policy(policy_id: UUID, user: Actor, session: DB):
     policy.approved_by = user.id
     policy.approved_at = datetime.now(UTC)
     audit(session, user, "policy.approved", details={"policy_id": str(policy.id)})
-    session.commit()
-    return public_policy(policy)
-
-
-@router.post("/policies/{policy_id}/clone", status_code=201)
-def clone_policy(policy_id: UUID, user: Actor, session: DB):
-    require_roles(user, *WRITE_ROLES)
-    reference_lock(session, user)
-    source = policy_for(session, user, policy_id)
-    policy = PolicySetVersion(
-        organization_id=user.organization_id,
-        name=source.name,
-        version=next_policy_version(session, user, source.name),
-        status="draft",
-        document_ids=copy.deepcopy(source.document_ids),
-        requirements=copy.deepcopy(source.requirements),
-        created_by=user.id,
-    )
-    session.add(policy)
-    session.flush()
-    audit(
-        session,
-        user,
-        "policy.cloned",
-        details={"policy_id": str(policy.id), "source_policy_id": str(source.id)},
-    )
     session.commit()
     return public_policy(policy)
 
@@ -634,6 +669,13 @@ def public_run(session, run):
             select(AuditEvent).where(AuditEvent.run_id == run.id).order_by(AuditEvent.created_at)
         )
     ]
+    progress = run.assessment_progress or {}
+    value["progress"] = {
+        "completed": progress.get("completed", 0),
+        "total": progress.get("total", len(run.input_snapshot.get("requirements", []))),
+        "current_requirement_id": progress.get("current_requirement_id"),
+        "error": run.error,
+    }
     return value
 
 
@@ -688,7 +730,15 @@ def create_run(case_id: UUID, body: RunCreate, request: Request, user: Actor, se
         "requirements": copy.deepcopy(policy.requirements),
         "chunks": chunks,
         "model_mode": request.app.state.settings.model_mode,
+        "assessment_version": "semantic-v2",
+        "model_name": os.getenv("GEMINI_MODEL", "")
+        if request.app.state.settings.model_mode == "gemini"
+        else "semantic-demo-v2",
+        "requirement_embeddings": copy.deepcopy(policy.requirement_embeddings),
     }
+    from counterparty.analysis.semantic import normalize_requirement
+
+    snapshot["requirements"] = [normalize_requirement(r) for r in snapshot["requirements"]]
     from counterparty.embedding_config import CONFIG, FINGERPRINT
 
     snapshot["retrieval_algorithm"] = CONFIG["retrieval"]
@@ -735,6 +785,40 @@ def create_run(case_id: UUID, body: RunCreate, request: Request, user: Actor, se
 @router.get("/runs/{run_id}")
 def run_detail(run_id: UUID, user: Actor, session: DB):
     return public_run(session, run_for(session, user, run_id))
+
+
+@router.post("/runs/{run_id}/retry")
+def retry_run(run_id: UUID, user: Actor, session: DB):
+    require_roles(user, *WRITE_ROLES)
+    run = run_for(session, user, run_id, lock=True)
+    if run.status != "failed" or run.input_snapshot.get("assessment_version") != "semantic-v2":
+        raise HTTPException(409, "Only a failed semantic assessment can be resumed")
+    if session.scalar(select(Decision).where(Decision.run_id == run.id)):
+        raise HTTPException(409, "A reviewed assessment cannot be resumed")
+    progress = run.assessment_progress or {}
+    if any(
+        count >= 3 and key not in progress.get("completed_ids", [])
+        for key, count in progress.get("attempts", {}).items()
+    ):
+        raise HTTPException(
+            409,
+            "Requirement attempt limit reached; review the cause before creating a new analysis",
+        )
+    run.status = "queued"
+    run.error = None
+    run.attempts = 0
+    run.lease_owner = None
+    run.lease_expires_at = None
+    audit(
+        session,
+        user,
+        "analysis.resumed",
+        case_id=run.case_id,
+        run_id=run.id,
+        details={"completed": progress.get("completed", 0)},
+    )
+    session.commit()
+    return public_run(session, run)
 
 
 @router.post("/runs/{run_id}/decision", status_code=201)

@@ -25,6 +25,18 @@ def safe_filename(value: str) -> str:
     return name[:240] or "document.txt"
 
 
+def original_text(document: Document, storage_path: str) -> str:
+    path = Path(storage_path) / document.storage_key
+    if not path.is_file():
+        raise HTTPException(404, "Original file unavailable")
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != document.sha256:
+        raise HTTPException(409, "Original document integrity check failed")
+    if document.media_type == "application/pdf":
+        return "\n\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(raw)).pages)
+    return raw.decode("utf-8-sig")
+
+
 def extract(raw: bytes, filename: str) -> tuple[list[dict], str]:
     suffix = Path(filename).suffix.lower()
     pages = []

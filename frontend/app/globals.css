@@ -455,11 +455,16 @@ a {
 }
 .header-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  justify-content: flex-end;
+  max-width: 100%;
 }
 
 .card {
+  min-width: 0;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -504,6 +509,8 @@ a {
 }
 .case-card-top {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
@@ -525,6 +532,34 @@ a {
   padding-top: 23px;
   color: var(--muted);
   font-size: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.case-card-content {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  white-space: nowrap;
+}
+.delete-control {
+  flex-shrink: 0;
+}
+.delete-button {
+  white-space: nowrap;
+  border-color: #e4d9d5;
+  background: transparent;
+}
+.delete-button:hover {
+  background: #f9eeeb;
+  border-color: var(--red);
+  color: var(--red);
 }
 .arrow-link {
   color: var(--pine);
@@ -589,7 +624,10 @@ a {
 .data-table td {
   padding: 15px 16px;
   border-bottom: 1px solid #e9eae5;
-  vertical-align: top;
+  vertical-align: middle;
+}
+.data-table .actions-cell {
+  width: 1%;
 }
 .data-table tr:last-child td {
   border-bottom: 0;
@@ -613,6 +651,7 @@ a {
   align-items: start;
 }
 .stack {
+  min-width: 0;
   display: grid;
   gap: 18px;
 }
@@ -634,7 +673,8 @@ a {
   margin: 0;
 }
 .document-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
   align-items: center;
   gap: 13px;
   padding: 13px 0;
@@ -664,6 +704,7 @@ a {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .upload-zone {
   border: 1px dashed var(--line-dark);
@@ -917,10 +958,17 @@ a {
   gap: 12px;
   margin-top: 16px;
 }
-.requirement-grid label {
+.requirement-label {
+  display: block;
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
+}
+.requirement-scope {
+  margin-top: 18px;
+}
+.requirement-scope p {
+  margin: 4px 0 0;
 }
 .requirement-grid strong {
   display: block;
@@ -940,11 +988,6 @@ a {
   display: block;
   color: var(--muted);
   margin-top: 5px;
-}
-.requirement-edit-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 10px;
 }
 
 .timeline {
@@ -1162,8 +1205,7 @@ a {
   .stat-grid,
   .split-list,
   .form-grid,
-  .requirement-grid,
-  .requirement-edit-grid {
+  .requirement-grid {
     grid-template-columns: 1fr;
   }
   .decision-options {
@@ -1172,5 +1214,14 @@ a {
   .definition-list div {
     grid-template-columns: 1fr;
     gap: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .document-actions {
+    grid-column: 2 / -1;
+  }
+  .header-actions {
+    justify-content: flex-start;
   }
 }

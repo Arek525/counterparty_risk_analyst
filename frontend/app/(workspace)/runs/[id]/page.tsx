@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import {
-  EmptyState,
   ErrorNotice,
   Modal,
   PageHeader,
@@ -17,10 +17,10 @@ import { api, errorMessage } from "@/lib/api";
 import {
   findingLabels,
   formatDate,
-  formatLocation,
   statusLabels,
   titleCase,
 } from "@/lib/format";
+import { sourceHref } from "@/lib/source";
 import type {
   AnalysisRun,
   ApprovalRequest,
@@ -37,6 +37,9 @@ export default function RunPage() {
   const [tickets, setTickets] = useState<ApprovalRequest[]>([]);
   const [error, setError] = useState("");
   const [source, setSource] = useState<Citation | null>(null);
+  const [documents, setDocuments] = useState<DocumentRecord[]>([]);
+  const [retrying, setRetrying] = useState(false);
+  const [sourceError, setSourceError] = useState("");
   const load = useCallback(async () => {
     try {
       const [runValue, ticketValue] = await Promise.all([
@@ -54,24 +57,49 @@ export default function RunPage() {
     void load();
   }, [load]);
   useEffect(() => {
+    if (!run?.case_id) return;
+    let active = true;
+    setDocuments([]);
+    setSourceError("");
+    Promise.allSettled([api<DocumentRecord[]>("/api/documents"), api<DocumentRecord[]>(`/api/documents?case_id=${encodeURIComponent(run.case_id)}`)])
+      .then((results) => {
+        if (!active) return;
+        setDocuments(results.flatMap((result) => result.status === "fulfilled" ? result.value : []));
+        if (results.some((result) => result.status === "rejected")) setSourceError("Some source filenames could not be loaded. You can still open each citation.");
+      })
+      .catch(() => { if (active) setSourceError("Source filenames could not be loaded. You can still open each citation."); });
+    return () => { active = false; };
+  }, [run?.case_id]);
+  useEffect(() => {
     if (!run || !(run.status === "queued" || run.status === "running")) return;
     const timer = setInterval(() => void load(), 1800);
     return () => clearInterval(timer);
   }, [load, run]);
+  async function retry() {
+    setRetrying(true);
+    try { await api(`/api/runs/${id}/retry`, {method: "POST"}); await load(); }
+    catch (reason) { setError(errorMessage(reason)); }
+    finally { setRetrying(false); }
+  }
   const decision = run?.decision ?? null;
   if (!run && !error) return <Spinner label="Loading analysis…" />;
   if (!run) return <ErrorNotice message={error} retry={load} />;
   const processing = run.status === "queued" || run.status === "running";
   return (
     <>
+      {sourceError && <ErrorNotice message={sourceError} />}
       <PageHeader
-        eyebrow={`Analysis · ${run.retrieval_variant}`}
+        eyebrow="Analysis"
         title="Assessment report"
         description={`Run ${run.id}`}
         actions={
-          <Link className="button button-quiet" href={`/cases/${run.case_id}`}>
-            Back to case
-          </Link>
+          <>
+            <DeleteButton endpoint={`/api/runs/${id}`} label="Delete report" redirect={`/cases/${run.case_id}`}
+              confirmation="Permanently delete this report, its decision, saved analysis progress and local ticket records? Source documents remain. This cannot be undone." />
+            <Link className="button button-quiet" href={`/cases/${run.case_id}`}>
+              Back to case
+            </Link>
+          </>
         }
       />
       {error && <ErrorNotice message={error} />}
@@ -88,9 +116,13 @@ export default function RunPage() {
         </section>
       )}
       {run.status === "failed" && (
-        <ErrorNotice message={run.error || "The analysis failed."} />
+        <div style={{marginBottom: 18}}>
+          <ErrorNotice message={run.error || run.progress?.error || "The analysis failed."} />
+          {user?.role !== "auditor" && <button className="button" disabled={retrying} onClick={retry}>{retrying ? "Resuming…" : "Resume unfinished requirements"}</button>}
+          <p className="subtle">Completed requirement assessments are preserved.</p>
+        </div>
       )}{" "}
-      {run.report && (
+      {run.report && !processing && run.status !== "failed" && (
         <>
           {run.report.workflow_error && (
             <div style={{ marginBottom: 18 }}>
@@ -168,6 +200,15 @@ export default function RunPage() {
                             </p>
                           </div>
                         )}
+                        <div className="requirement-grid">
+                          <div><h4>Policy requirement</h4>
+                            <p>{finding.requirement_description ?? finding.requirement_source?.quote ?? "See the approved policy version for this requirement."}</p>
+                            {finding.requirement_source && <button className="evidence-quote" onClick={() => setSource(finding.requirement_source!)}>
+                              <span>{documents.find((document) => document.id === finding.requirement_source?.document_id)?.filename ?? "Policy source"} · View quoted passage</span>
+                            </button>}
+                          </div>
+                          <div><h4>Counterparty evidence</h4>
+                          {finding.evidence.length === 0 && <p className="subtle">No supporting evidence was found.</p>}
                         {finding.evidence.map((evidence) => (
                           <button
                             className="evidence-quote"
@@ -183,10 +224,13 @@ export default function RunPage() {
                               {evidence.evidence_type === "independent"
                                 ? "independent evidence"
                                 : "declaration"}{" "}
-                              · {formatLocation(evidence.location)} · open source
+                              · {documents.find((document) => document.id === evidence.document_id)?.filename ?? "Source document"}
+                              {" · "}View quoted passage
                             </span>
                           </button>
                         ))}
+                          </div>
+                        </div>
                       </div>
                     </article>
                   ))}
@@ -223,7 +267,7 @@ export default function RunPage() {
                       </dd>
                     </div>
                     <div>
-                      <dt>Rules</dt>
+                      <dt>Assessment version</dt>
                       <dd className="mono">{run.report.rules_version}</dd>
                     </div>
                     <div>
@@ -232,7 +276,7 @@ export default function RunPage() {
                     </div>
                     <div>
                       <dt>Duration</dt>
-                      <dd>{run.report.metrics.duration_ms} ms</dd>
+                      <dd>{run.report.metrics.duration_ms == null ? "Not recorded" : `${run.report.metrics.duration_ms} ms`}</dd>
                     </div>
                     <div>
                       <dt>Tokens</dt>
@@ -313,6 +357,11 @@ function RunProgress({ run }: { run: AnalysisRun }) {
             </div>
           ))}
         </div>
+        {run.progress && <div aria-live="polite" style={{marginTop: 18}}>
+          <p>{run.progress.completed} of {run.progress.total} requirements assessed</p>
+          <progress aria-label="Requirement assessment progress" value={run.progress.completed} max={Math.max(run.progress.total, 1)} style={{width: "100%"}} />
+          {run.progress.current_requirement_id && <p className="subtle">Current requirement: {run.progress.current_requirement_id}</p>}
+        </div>}
         {run.events && run.events.length > 0 && (
           <p
             className="subtle"
@@ -657,6 +706,8 @@ function TicketPanel({
                   </p>
                 )}
                 <div className="form-actions">
+                  <DeleteButton endpoint={`/api/approvals/${approval.id}`} label="Delete local ticket record" onDeleted={saved}
+                    confirmation="Permanently delete this local proposal and execution record? This does not cancel or delete a ticket already created in another service." />
                   {approval.status === "proposed" &&
                     (user?.role === "reviewer" ||
                       user?.role === "administrator") && (
@@ -736,7 +787,6 @@ function SourceModal({
       .then(setDocument)
       .catch((reason) => setError(errorMessage(reason)));
   }, [citation.document_id]);
-  const chunk = document?.chunks?.find((item) => item.id === citation.chunk_id);
   return (
     <Modal title="Evidence source" close={close}>
       <div className="modal-content">
@@ -748,22 +798,15 @@ function SourceModal({
               <strong>{document.filename}</strong>
               <br />
               <span className="subtle">
-                {formatLocation(citation.location)}
+                Quoted passage
               </span>
             </p>
             <blockquote className="source-document">
               <mark className="source-highlight">{citation.quote}</mark>
-              {chunk && chunk.text !== citation.quote && (
-                <>
-                  <br />
-                  <br />
-                  {chunk.text}
-                </>
-              )}
             </blockquote>
             <Link
               className="arrow-link"
-              href={`/documents/${citation.document_id}?chunk=${citation.chunk_id}`}
+              href={sourceHref(citation)}
             >
               Open full document <Icon name="arrow" />
             </Link>
