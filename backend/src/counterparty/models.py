@@ -97,6 +97,12 @@ class PolicySetVersion(Identity, Tenant, Created, Base):
     created_by: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     approved_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    extraction_key: Mapped[str | None] = mapped_column(String(64), index=True)
+    extraction_status: Mapped[str] = mapped_column(String(20), default="ready")
+    extraction_error: Mapped[str | None] = mapped_column(Text)
+    requirement_embeddings: Mapped[dict | None] = mapped_column(JSONB)
+    requirement_index_status: Mapped[str] = mapped_column(String(20), default="pending")
+    requirement_index_error: Mapped[str | None] = mapped_column(Text)
 
 
 class AnalysisRun(Identity, Tenant, Created, Base):
@@ -107,6 +113,7 @@ class AnalysisRun(Identity, Tenant, Created, Base):
     status: Mapped[str] = mapped_column(String(30), default="queued", index=True)
     input_snapshot: Mapped[dict] = mapped_column(JSONB)
     retrieval_snapshot: Mapped[dict | None] = mapped_column(JSONB)
+    assessment_progress: Mapped[dict | None] = mapped_column(JSONB)
     report: Mapped[dict | None] = mapped_column(JSONB)
     retrieval_variant: Mapped[str] = mapped_column(String(30), default="semantic")
     model_mode: Mapped[str] = mapped_column(String(30), default="demo")

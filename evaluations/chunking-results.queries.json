@@ -1,0 +1,326 @@
+{
+  "atlas": [
+    {
+      "id": "SEC-01",
+      "query": "Privileged account MFA mfa",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "MFA is enabled for every privileged account, including supplier support accounts."
+      }
+    },
+    {
+      "id": "SEC-02",
+      "query": "Personal data encrypted at rest encryption at rest",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Encryption at rest is enabled across production storage, replicas, logs and backups containing Northstar data."
+      }
+    },
+    {
+      "id": "SEC-03",
+      "query": "Security owner and current inventory security ownership",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Atlas has assigned the Head of Platform Security as the security owner for this service."
+      }
+    },
+    {
+      "id": "SEC-04",
+      "query": "Approved least-privilege access and revocation access lifecycle",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "When duties change or employment ends, the personnel event initiates an access review and removal workflow."
+      }
+    },
+    {
+      "id": "SEC-05",
+      "query": "Risk-based vulnerability and patch process vulnerability management",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Platform Security triages each finding using severity, exposure and the affected service function."
+      }
+    },
+    {
+      "id": "SEC-06",
+      "query": "Scoped independent assurance independent assurance",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "The latest independent assurance report covers the production platform and its established operational controls. It excludes the newly acquired support portal."
+      }
+    },
+    {
+      "id": "PRI-01",
+      "query": "Signed data processing agreement dpa signed",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "DPA is signed for the assessed service before processing begins."
+      }
+    },
+    {
+      "id": "PRI-02",
+      "query": "Personal data deletion within 30 days retention days",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Retention period is 21 days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles."
+      }
+    },
+    {
+      "id": "PRI-03",
+      "query": "Primary hosting and processing in EU hosting region",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Hosting region is EU for primary storage and processing of the assessed service."
+      }
+    },
+    {
+      "id": "PRI-04",
+      "query": "Subprocessor inventory and advance notice subprocessor governance",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Assurance Operations routes proposed material changes to the customer contact before they take effect under the agreed schedule."
+      }
+    },
+    {
+      "id": "PRI-05",
+      "query": "Documented purposes and minimized data purpose limitation",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "The service schedule limits the assessed use to customer operations analytics for Northstar."
+      }
+    },
+    {
+      "id": "PRI-06",
+      "query": "Individual request assistance data subject support",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Atlas's operations team can locate an account's service records and support access, correction, removal or export instructions."
+      }
+    },
+    {
+      "id": "GOV-01",
+      "query": "Accountable supplier relationship owner supplier accountability",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Assurance Operations maintains the contact route and coordinates evidence requests."
+      }
+    },
+    {
+      "id": "GOV-02",
+      "query": "Accurate dated assurance responses assurance accuracy",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Items in this register are described rather than attached. A reviewer does not have their full content merely because their titles appear here."
+      }
+    },
+    {
+      "id": "GOV-03",
+      "query": "Applicable contractual duties flow down contractual flow down",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Access approval, session records and the relevant contractual safeguards are available for a Privacy review."
+      }
+    },
+    {
+      "id": "GOV-04",
+      "query": "Continuity and tested exit plan continuity exit plan",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Atlas completed a service recovery exercise and an exit walkthrough during the stated coverage period."
+      }
+    },
+    {
+      "id": "IR-01",
+      "query": "Incident notification within 24 hours notification hours",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Incident notification is 12 hours after awareness of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery."
+      }
+    },
+    {
+      "id": "IR-02",
+      "query": "Incident evidence and timestamped timeline incident evidence preservation",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "The incident workspace records observations, actions and decision times. Relevant operational evidence is isolated through a restricted route with an identified custodian."
+      }
+    },
+    {
+      "id": "IR-03",
+      "query": "Containment and recovery updates incident updates",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "Containment and recovery updates describe material changes in impact and unresolved risks."
+      }
+    },
+    {
+      "id": "IR-04",
+      "query": "Root-cause and corrective-action report root cause report",
+      "target": {
+        "filename": "atlas-assurance-pack.md",
+        "quote": "For confirmed incidents, the closure package includes contributing factors, corrective actions, owners and verification status."
+      }
+    }
+  ],
+  "policy_diagnostic": [
+    {
+      "id": "SEC-01",
+      "query": "Privileged account MFA mfa",
+      "target": {
+        "filename": "information-security.md",
+        "quote": "For relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service."
+      }
+    },
+    {
+      "id": "SEC-02",
+      "query": "Personal data encrypted at rest encryption at rest",
+      "target": {
+        "filename": "information-security.md",
+        "quote": "For relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups."
+      }
+    },
+    {
+      "id": "SEC-03",
+      "query": "Security owner and current inventory security ownership",
+      "target": {
+        "filename": "information-security.md",
+        "quote": "The supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service."
+      }
+    },
+    {
+      "id": "SEC-04",
+      "query": "Approved least-privilege access and revocation access lifecycle",
+      "target": {
+        "filename": "information-security.md",
+        "quote": "For relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end."
+      }
+    },
+    {
+      "id": "SEC-05",
+      "query": "Risk-based vulnerability and patch process vulnerability management",
+      "target": {
+        "filename": "information-security.md",
+        "quote": "The supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions."
+      }
+    },
+    {
+      "id": "SEC-06",
+      "query": "Scoped independent assurance independent assurance",
+      "target": {
+        "filename": "information-security.md",
+        "quote": "For high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions."
+      }
+    },
+    {
+      "id": "PRI-01",
+      "query": "Signed data processing agreement dpa signed",
+      "target": {
+        "filename": "privacy-data-handling.md",
+        "quote": "For relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins."
+      }
+    },
+    {
+      "id": "PRI-02",
+      "query": "Personal data deletion within 30 days retention days",
+      "target": {
+        "filename": "privacy-data-handling.md",
+        "quote": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles."
+      }
+    },
+    {
+      "id": "PRI-03",
+      "query": "Primary hosting and processing in EU hosting region",
+      "target": {
+        "filename": "privacy-data-handling.md",
+        "quote": "For relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU."
+      }
+    },
+    {
+      "id": "PRI-04",
+      "query": "Subprocessor inventory and advance notice subprocessor governance",
+      "target": {
+        "filename": "privacy-data-handling.md",
+        "quote": "For relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards."
+      }
+    },
+    {
+      "id": "PRI-05",
+      "query": "Documented purposes and minimized data purpose limitation",
+      "target": {
+        "filename": "privacy-data-handling.md",
+        "quote": "For relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need."
+      }
+    },
+    {
+      "id": "PRI-06",
+      "query": "Individual request assistance data subject support",
+      "target": {
+        "filename": "privacy-data-handling.md",
+        "quote": "For relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process."
+      }
+    },
+    {
+      "id": "GOV-01",
+      "query": "Accountable supplier relationship owner supplier accountability",
+      "target": {
+        "filename": "supplier-governance.md",
+        "quote": "The supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service."
+      }
+    },
+    {
+      "id": "GOV-02",
+      "query": "Accurate dated assurance responses assurance accuracy",
+      "target": {
+        "filename": "supplier-governance.md",
+        "quote": "The supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations."
+      }
+    },
+    {
+      "id": "GOV-03",
+      "query": "Applicable contractual duties flow down contractual flow down",
+      "target": {
+        "filename": "supplier-governance.md",
+        "quote": "The supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery."
+      }
+    },
+    {
+      "id": "GOV-04",
+      "query": "Continuity and tested exit plan continuity exit plan",
+      "target": {
+        "filename": "supplier-governance.md",
+        "quote": "For high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities."
+      }
+    },
+    {
+      "id": "IR-01",
+      "query": "Incident notification within 24 hours notification hours",
+      "target": {
+        "filename": "incident-response.md",
+        "quote": "The supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery."
+      }
+    },
+    {
+      "id": "IR-02",
+      "query": "Incident evidence and timestamped timeline incident evidence preservation",
+      "target": {
+        "filename": "incident-response.md",
+        "quote": "The supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar."
+      }
+    },
+    {
+      "id": "IR-03",
+      "query": "Containment and recovery updates incident updates",
+      "target": {
+        "filename": "incident-response.md",
+        "quote": "The supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks."
+      }
+    },
+    {
+      "id": "IR-04",
+      "query": "Root-cause and corrective-action report root cause report",
+      "target": {
+        "filename": "incident-response.md",
+        "quote": "For confirmed incidents, the supplier must deliver a scoped root-cause and corrective-action report identifying contributing factors, accountable remediation owners and verification of closure."
+      }
+    }
+  ]
+}

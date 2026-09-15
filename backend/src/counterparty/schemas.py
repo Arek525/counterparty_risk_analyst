@@ -73,18 +73,24 @@ class Requirement(Input):
         return self
 
 
-class RequirementEdit(Input):
-    requirements: list[Requirement] = Field(min_length=1, max_length=100)
+class NarrativeRequirement(Input):
+    id: str = Field(min_length=1, max_length=100)
+    title: str = Field(min_length=1, max_length=500)
+    description: str = Field(min_length=1, max_length=12000)
+    applicability_text: str = Field(default="All relationships", min_length=1, max_length=6000)
+    severity: Literal["Low", "Medium", "High"]
+    source: Source
 
 
 class PolicyProposal(Input):
     name: str = Field(min_length=1, max_length=200)
     document_ids: list[UUID] = Field(min_length=1, max_length=30)
+    regenerate: bool = False
 
 
 class RunCreate(Input):
     policy_version_id: UUID
-    retrieval_variant: Literal["lexical", "hybrid", "semantic"] = "semantic"
+    retrieval_variant: Literal["lexical", "hybrid", "semantic"] = "hybrid"
 
 
 class DecisionCreate(Input):

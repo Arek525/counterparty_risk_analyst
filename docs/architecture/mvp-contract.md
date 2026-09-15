@@ -24,9 +24,10 @@ Demo credentials are seeded explicitly, documented, and usable only locally.
 - GET /api/documents/{id}/download; DELETE /api/documents/{id}: reject referenced
   versions (retained audit history), delete unreferenced file/chunks/embeddings.
 - GET /api/policies; POST /api/policies/propose {document_ids:[uuid],name}.
-- GET /api/policies/{id}; PUT /api/policies/{id}/requirements {requirements:[...]}
-  only drafts; POST /api/policies/{id}/approve reviewer only. Edits to approved
-  policies require POST /api/policies/{id}/clone, producing a draft new version.
+- GET /api/policies/{id}; POST /api/policies/{id}/approve reviewer only.
+  Extracted requirements are read-only, including drafts. There are no manual
+  requirement-edit or clone endpoints. Explicit regeneration creates a new draft
+  from the source documents; policy changes require uploading revised sources.
 - GET/POST /api/cases/{id}/runs: POST {policy_version_id,retrieval_variant:'semantic'|'hybrid'|'lexical' (default semantic)}.
 - GET /api/runs/{id}: status, report, timestamps, events, model and input version.
 - POST /api/runs/{id}/decision {decision:'accepted'|'rejected'|'needs_information',rationale}.

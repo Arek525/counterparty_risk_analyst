@@ -9,7 +9,13 @@ from sqlalchemy.orm import Session
 
 from counterparty.embedding_config import CONFIG, FINGERPRINT, requirement_query
 from counterparty.embeddings import EmbeddingError, validate_vectors
-from counterparty.models import AnalysisRun, Document, DocumentChunk, WorkerModelState
+from counterparty.models import (
+    AnalysisRun,
+    Document,
+    DocumentChunk,
+    PolicySetVersion,
+    WorkerModelState,
+)
 
 
 def request_reindex(session, document):
@@ -30,6 +36,20 @@ def index_eligible(now):
         Document.index_config == FINGERPRINT,
         Document.index_status.in_(["pending", "indexing"]),
         or_(Document.index_lease_expires_at.is_(None), Document.index_lease_expires_at < now),
+    )
+
+
+def document_chunks(session, document):
+    return list(
+        session.scalars(
+            select(DocumentChunk)
+            .where(
+                DocumentChunk.document_id == document.id,
+                DocumentChunk.organization_id == document.organization_id,
+                DocumentChunk.case_id == document.case_id,
+            )
+            .order_by(DocumentChunk.id)
+        )
     )
 
 
@@ -56,17 +76,7 @@ def claim_document(engine, settings):
         doc.index_lease_expires_at = datetime.now(UTC) + timedelta(
             seconds=settings.worker_max_runtime_seconds + 30
         )
-        chunks = list(
-            session.scalars(
-                select(DocumentChunk)
-                .where(
-                    DocumentChunk.document_id == doc.id,
-                    DocumentChunk.organization_id == doc.organization_id,
-                    DocumentChunk.case_id == doc.case_id,
-                )
-                .order_by(DocumentChunk.id)
-            )
-        )
+        chunks = document_chunks(session, doc)
         claim = {
             "id": doc.id,
             "owner": doc.index_owner,
@@ -88,17 +98,7 @@ def publish_document(engine, claim, vectors):
             claim["config"],
         ):
             return False
-        chunks = list(
-            session.scalars(
-                select(DocumentChunk)
-                .where(
-                    DocumentChunk.document_id == doc.id,
-                    DocumentChunk.organization_id == doc.organization_id,
-                    DocumentChunk.case_id == doc.case_id,
-                )
-                .order_by(DocumentChunk.id)
-            )
-        )
+        chunks = document_chunks(session, doc)
         if [chunk.id for chunk in chunks] != claim["ids"]:
             raise EmbeddingError("Document chunks changed during indexing")
         for chunk, vector in zip(chunks, values, strict=True):
@@ -144,7 +144,79 @@ def index_one(engine, settings, model):
     return True
 
 
+def narrative_queries(requirements):
+    from counterparty.analysis.semantic import requirement_query as semantic_query
+
+    return {item["id"]: semantic_query(item) for item in requirements}
+
+
+def compatible_requirement_cache(cache, queries):
+    return bool(
+        cache
+        and cache.get("fingerprint") == FINGERPRINT
+        and cache.get("query_version") == "narrative-v1"
+        and cache.get("queries") == queries
+        and set(cache.get("vectors", {})) == set(queries)
+    )
+
+
+def publish_requirement_cache(policy, queries, vectors):
+    policy.requirement_embeddings = {
+        "fingerprint": FINGERPRINT,
+        "query_version": "narrative-v1",
+        "queries": queries,
+        "vectors": {key: vector.tolist() for key, vector in zip(queries, vectors, strict=True)},
+    }
+    policy.requirement_index_status = "ready"
+    policy.requirement_index_error = None
+
+
+def policy_index_eligible():
+    return and_(
+        PolicySetVersion.status == "approved",
+        PolicySetVersion.requirement_index_status == "pending",
+    )
+
+
+def index_policy_one(engine, model):
+    """Hold one row lock through local inference; concurrent workers skip that policy."""
+    if model is None:
+        return False
+    with Session(engine) as session:
+        policy = session.scalar(
+            select(PolicySetVersion)
+            .where(policy_index_eligible())
+            .order_by(PolicySetVersion.created_at)
+            .with_for_update(skip_locked=True)
+            .limit(1)
+        )
+        if policy is None:
+            return False
+        try:
+            queries = narrative_queries(policy.requirements)
+            vectors = (
+                validate_vectors(model.embed(list(queries.values()), "query"), len(queries))
+                if queries
+                else []
+            )
+            publish_requirement_cache(policy, queries, vectors)
+        except Exception:
+            policy.requirement_index_status = "error"
+            policy.requirement_index_error = (
+                "Local requirement embedding failed. Check worker model status and retry indexing."
+            )
+        session.commit()
+    return True
+
+
 def needs_embeddings(run):
+    if run.input_snapshot.get(
+        "assessment_version"
+    ) == "semantic-v2" and compatible_requirement_cache(
+        run.input_snapshot.get("requirement_embeddings"),
+        narrative_queries(run.input_snapshot.get("requirements", [])),
+    ):
+        return False
     return (
         run.retrieval_variant in {"hybrid", "semantic"}
         and run.report is None
@@ -168,12 +240,26 @@ def prepare_retrieval(engine, run_id, claim_token, snapshot, model, owner):
     chunks = [chunk for chunk in snapshot["chunks"] if chunk["kind"] == "evidence"]
     ids = {chunk["id"] for chunk in chunks}
     documents = {chunk["document_id"] for chunk in chunks}
-    queries = {req["id"]: requirement_query(req) for req in snapshot["requirements"]}
+    semantic_v2 = snapshot.get("assessment_version") == "semantic-v2"
+    queries = (
+        narrative_queries(snapshot["requirements"])
+        if semantic_v2
+        else {req["id"]: requirement_query(req) for req in snapshot["requirements"]}
+    )
+    cache = snapshot.get("requirement_embeddings") if semantic_v2 else None
+    if semantic_v2 and not compatible_requirement_cache(cache, queries):
+        with Session(engine) as session:
+            run = session.get(AnalysisRun, run_id)
+            policy = session.get(PolicySetVersion, run.policy_version_id)
+            cache = policy.requirement_embeddings if policy else None
     if chunks and queries:
-        if model is None:
-            raise EmbeddingError("Local embedding model is unavailable")
-        vectors = model.embed(list(queries.values()), "query")
-        validate_vectors(vectors, len(queries))
+        if semantic_v2 and compatible_requirement_cache(cache, queries):
+            vectors = [cache["vectors"][key] for key in queries]
+        else:
+            if model is None:
+                raise EmbeddingError("Local embedding model is unavailable")
+            vectors = model.embed(list(queries.values()), "query")
+        vectors = validate_vectors(vectors, len(queries))
     else:
         vectors = []
     result = {
@@ -233,6 +319,22 @@ def prepare_retrieval(engine, run_id, claim_token, snapshot, model, owner):
         # Recheck ownership immediately before committing the separately fenced business write.
         owner.execute(text("SELECT 1") if hasattr(owner, "dialect") else "SELECT 1")
         result["variant"] = run.retrieval_variant
+        if semantic_v2 and queries and chunks:
+            result["query_version"] = "narrative-v1"
+            policy = session.scalar(
+                select(PolicySetVersion)
+                .where(
+                    PolicySetVersion.id == run.policy_version_id,
+                    PolicySetVersion.organization_id == run.organization_id,
+                )
+                .with_for_update()
+            )
+            if (
+                policy
+                and policy.status == "approved"
+                and narrative_queries(policy.requirements) == queries
+            ):
+                publish_requirement_cache(policy, queries, vectors)
         run.retrieval_snapshot = result
         session.commit()
     return result

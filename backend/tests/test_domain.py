@@ -1,6 +1,5 @@
 """Domain acceptance tests against isolated, real PostgreSQL databases."""
 
-import copy
 import hashlib
 import io
 from datetime import UTC, datetime, timedelta
@@ -250,27 +249,21 @@ async def test_upload_validation_hash_dedup_versions_and_deletion(domain_setup, 
             )
 
 
-async def test_policy_citations_roles_approval_and_clone(domain_setup, client_factory):
+async def test_policy_review_roles_and_removed_editing_endpoints(domain_setup, client_factory):
     settings, _ = domain_setup
     async with client_factory(settings) as client:
         await login(client)
         document = await upload(client)
         policy = await proposed(client, document["id"])
-        assert policy["status"] == "draft" and len(policy["requirements"]) == 2
-        bad = copy.deepcopy(policy["requirements"])
-        bad[0]["source"]["quote"] = "invented policy sentence"
+        assert policy["status"] == "draft" and len(policy["requirements"]) == 1
+        assert policy["requirements"][0]["title"].startswith("Demo:")
         assert (
             await client.put(
-                f"/api/policies/{policy['id']}/requirements", json={"requirements": bad}
+                f"/api/policies/{policy['id']}/requirements",
+                json={"requirements": policy["requirements"]},
             )
-        ).status_code == 422
-        bad = copy.deepcopy(policy["requirements"])
-        bad[0]["operator"] = "exec"
-        assert (
-            await client.put(
-                f"/api/policies/{policy['id']}/requirements", json={"requirements": bad}
-            )
-        ).status_code == 422
+        ).status_code == 404
+        assert (await client.post(f"/api/policies/{policy['id']}/clone")).status_code == 404
         assert (await client.post(f"/api/policies/{policy['id']}/approve")).status_code == 403
         await login(client, "foreign")
         assert (await client.get(f"/api/policies/{policy['id']}")).status_code == 404
@@ -282,10 +275,9 @@ async def test_policy_citations_roles_approval_and_clone(domain_setup, client_fa
                 f"/api/policies/{policy['id']}/requirements",
                 json={"requirements": policy["requirements"]},
             )
-        ).status_code == 409
+        ).status_code == 404
         clone = await client.post(f"/api/policies/{policy['id']}/clone")
-        assert clone.status_code == 201
-        assert clone.json()["status"] == "draft" and clone.json()["version"] == 2
+        assert clone.status_code == 404
         assert (await client.delete(f"/api/documents/{document['id']}")).status_code == 409
 
 
@@ -465,19 +457,24 @@ async def test_policy_mode_uses_app_settings_and_model_errors_are_json(
         await login(client)
         response = await client.post(
             "/api/policies/propose",
-            json={"name": "Must not silently fall back", "document_ids": [document["id"]]},
+            json={
+                "name": "Must not silently fall back",
+                "document_ids": [document["id"]],
+                "regenerate": True,
+            },
         )
-        assert response.status_code == 503
+        assert response.status_code == 201
         assert response.headers["content-type"] == "application/json"
-        assert "GEMINI_API_KEY missing" in response.json()["detail"]
+        assert response.json()["extraction_status"] == "error"
+        assert "GEMINI_API_KEY missing" in response.json()["extraction_error"]
         with Session(engine) as session:
-            assert session.scalar(select(func.count()).select_from(PolicySetVersion)) == 1
+            assert session.scalar(select(func.count()).select_from(PolicySetVersion)) == 2
 
 
 async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
     domain_setup, client_factory
 ):
-    from counterparty.embedding_config import requirement_query
+    from counterparty.analysis.semantic import requirement_query
     from counterparty.worker import process_one, setup_checkpoints
 
     settings, engine = domain_setup

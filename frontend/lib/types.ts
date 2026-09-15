@@ -5,7 +5,7 @@ export type FindingStatus =
 
 export interface Meta {
   demo_mode: boolean;
-  model_mode: "demo" | "gemini" | string;
+  model_mode: string;
   model_name?: string;
   version?: string;
 }
@@ -77,6 +77,7 @@ export interface DocumentRecord {
   sha256?: string;
   created_at: string;
   chunks?: DocumentChunk[];
+  text?: string;
 }
 
 export interface Citation {
@@ -90,16 +91,22 @@ export interface Citation {
 export interface Requirement {
   id: string;
   title: string;
-  field: string;
-  operator: "eq" | "lte" | "gte" | "contains" | "present" | "manual";
-  expected: unknown;
+  description?: string;
+  applicability_text?: string;
+  field?: string;
+  operator?: "eq" | "lte" | "gte" | "contains" | "present" | "manual";
+  expected?: unknown;
   severity: "Low" | "Medium" | "High";
-  applicability: Record<string, unknown>;
+  applicability?: Record<string, unknown>;
   source: Citation;
-  evaluation_method: "deterministic" | "llm" | "manual";
+  evaluation_method?: "deterministic" | "llm" | "manual";
 }
 
 export interface PolicyVersion {
+  extraction_status?: "ready" | "extracting" | "error";
+  extraction_error?: string | null;
+  requirement_index_status?: "pending" | "ready" | "error";
+  requirement_index_error?: string | null;
   id: string;
   name: string;
   version: number;
@@ -111,6 +118,8 @@ export interface PolicyVersion {
 }
 
 export interface Finding {
+  requirement_description?: string;
+  requirement_source?: Citation;
   requirement_id: string;
   title: string;
   status: FindingStatus;
@@ -139,7 +148,7 @@ export interface Report {
     input_tokens: number;
     output_tokens: number;
     cost_usd: number | null;
-    duration_ms: number;
+    duration_ms?: number;
   };
   rules_version: string;
   prompt_version: string;
@@ -156,6 +165,7 @@ export interface Decision {
 }
 
 export interface AnalysisRun {
+  progress?: { completed: number; total: number; current_requirement_id: string | null; error?: string | null };
   id: string;
   case_id: string;
   policy_version_id: string;

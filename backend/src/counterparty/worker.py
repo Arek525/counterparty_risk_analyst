@@ -1,11 +1,12 @@
 """Durable, bounded analysis execution with PostgreSQL and LangGraph checkpoints."""
 
+import copy
 import hashlib
 import logging
 import multiprocessing
 import os
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import UTC, datetime, timedelta
 from functools import partial
 from typing import TypedDict
@@ -26,11 +27,13 @@ from counterparty.embeddings import EmbeddingError
 from counterparty.indexing import (
     index_eligible,
     index_one,
+    index_policy_one,
     needs_embeddings,
+    policy_index_eligible,
     prepare_retrieval,
     set_model_state,
 )
-from counterparty.models import AnalysisRun, AuditEvent, Decision, Document
+from counterparty.models import AnalysisRun, AuditEvent, Decision, Document, PolicySetVersion
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +76,14 @@ def setup_checkpoints(engine: Engine) -> None:
             saver.conn.execute("SELECT pg_advisory_unlock(471932841)")
 
 
-def build_graph(saver):
+def build_graph(saver, assessment=None):
     def assess(state: AnalysisState):
-        from counterparty.analysis import analyze
+        if assessment is not None:
+            report = assessment(state["snapshot"], state["variant"])
+        else:
+            from counterparty.analysis import analyze
 
-        report = analyze(state["snapshot"], state["variant"])
+            report = analyze(state["snapshot"], state["variant"])
         return {"report": report}
 
     def review(state: AnalysisState):
@@ -125,7 +131,7 @@ def _eligible(now):
     )
 
 
-def process_one(engine: Engine, settings: Settings, model=None) -> bool:
+def process_one(engine: Engine, settings: Settings, model=None, heartbeat=None) -> bool:
     """Claim one eligible job; return False if no job can be exclusively claimed."""
     with Session(engine) as session:
         candidates = list(
@@ -147,7 +153,7 @@ def process_one(engine: Engine, settings: Settings, model=None) -> bool:
             if not acquired:
                 continue
             try:
-                if _execute_claim(engine, settings, run_id, saver, model):
+                if _execute_claim(engine, settings, run_id, saver, model, heartbeat):
                     return True
             finally:
                 if not owner.closed and not owner.broken:
@@ -155,7 +161,96 @@ def process_one(engine: Engine, settings: Settings, model=None) -> bool:
     return False
 
 
-def _execute_claim(engine, settings, run_id, saver, model=None):
+MAX_REQUIREMENT_ATTEMPTS = 3
+
+
+def _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock):
+    # Checkpoint writes use this same connection in a background thread.
+    with owner_lock or nullcontext():
+        owner.execute("SELECT 1")
+        with Session(engine) as session:
+            run = session.scalar(
+                select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update()
+            )
+            if run.lease_owner != token or run.status != "running":
+                raise EmbeddingError("Analysis ownership changed before assessment publication")
+            run.assessment_progress = copy.deepcopy(progress)
+            run.lease_expires_at = datetime.now(UTC) + timedelta(
+                seconds=settings.worker_lease_seconds
+            )
+            owner.execute("SELECT 1")
+            session.commit()
+
+
+def assess_sequential(
+    engine, settings, run_id, token, owner, snapshot, variant, heartbeat=None, owner_lock=None
+):
+    from counterparty.analysis.semantic import assess_requirement, build_report
+
+    with Session(engine) as session:
+        progress = copy.deepcopy(session.get(AnalysisRun, run_id).assessment_progress) or {
+            "version": "semantic-v2",
+            "total": len(snapshot["requirements"]),
+            "completed": 0,
+            "completed_ids": [],
+            "findings": [],
+            "attempts": {},
+            "metrics": {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": None},
+        }
+    for requirement in snapshot["requirements"]:
+        requirement_id = requirement["id"]
+        if requirement_id in progress["completed_ids"]:
+            continue
+        expected_model = snapshot.get("model_name")
+        if (
+            snapshot.get("model_mode") == "gemini"
+            and expected_model
+            and expected_model != os.getenv("GEMINI_MODEL", "")
+            and any(
+                chunk.get("kind") == "evidence" and chunk.get("text", "").strip()
+                for chunk in snapshot["chunks"]
+            )
+        ):
+            raise ModelError(
+                "Configured model differs from this analysis snapshot. Restore its model to resume."
+            )
+        attempts = progress["attempts"].get(requirement_id, 0)
+        if attempts >= MAX_REQUIREMENT_ATTEMPTS:
+            raise ModelError("Requirement attempt limit exceeded; create a new analysis to retry.")
+        progress["current_requirement_id"] = requirement_id
+        progress["attempts"][requirement_id] = attempts + 1
+        _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
+        if heartbeat:
+            heartbeat()
+        try:
+            finding = assess_requirement(
+                requirement,
+                snapshot["chunks"],
+                snapshot["case"]["relationship"],
+                mode=snapshot.get("model_mode", "demo"),
+                variant=variant,
+                semantic_scores=snapshot.get("retrieval_scores", {}).get(requirement_id),
+                metrics=progress["metrics"],
+            )
+        except Exception:
+            _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
+            raise
+        progress["findings"].append(finding)
+        progress["completed_ids"].append(requirement_id)
+        progress["completed"] = len(progress["completed_ids"])
+        progress["current_requirement_id"] = None
+        _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
+        if heartbeat:
+            heartbeat()
+    report = build_report(
+        progress["findings"], snapshot.get("model_mode", "demo"), progress["metrics"]
+    )
+    if snapshot.get("model_name"):
+        report["model_name"] = snapshot["model_name"]
+    return report
+
+
+def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
     owner = saver.conn
     with Session(engine) as session:
         run = session.scalar(
@@ -196,7 +291,21 @@ def _execute_claim(engine, settings, run_id, saver, model=None):
         session.commit()
     started = time.monotonic()
     try:
-        graph = build_graph(saver)
+        assessment = (
+            partial(
+                assess_sequential,
+                engine,
+                settings,
+                run_id,
+                claim_token,
+                owner,
+                heartbeat=heartbeat,
+                owner_lock=saver.lock,
+            )
+            if snapshot.get("assessment_version") == "semantic-v2"
+            else None
+        )
+        graph = build_graph(saver, assessment)
         config = {"configurable": {"thread_id": str(run_id)}, "recursion_limit": 8}
         state = graph.get_state(config)
         if not state.values:
@@ -272,6 +381,10 @@ def _execute_claim(engine, settings, run_id, saver, model=None):
         logger.warning("Analysis %s failed (%s)", run_id, type(error).__name__)
         if owner.closed or owner.broken:
             return True
+        try:
+            owner.execute("SELECT 1")
+        except psycopg.Error:
+            return True
         with Session(engine) as session:
             run = session.scalar(
                 select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update()
@@ -324,12 +437,19 @@ def _child(pipe):
                     model = None
                     pipe.send("model_error")
             elif command == "work":
-                if process_one(engine, settings, model) or index_one(engine, settings, model):
+                if (
+                    process_one(engine, settings, model, heartbeat=lambda: pipe.send("progress"))
+                    or index_one(engine, settings, model)
+                    or index_policy_one(engine, model)
+                ):
                     pipe.send("worked")
                 else:
                     with Session(engine) as session:
                         pending = session.scalar(
                             select(Document.id).where(index_eligible(datetime.now(UTC))).limit(1)
+                        )
+                        policy_pending = session.scalar(
+                            select(PolicySetVersion.id).where(policy_index_eligible()).limit(1)
                         )
                         semantic = any(
                             needs_embeddings(run)
@@ -337,7 +457,11 @@ def _child(pipe):
                                 select(AnalysisRun).where(_eligible(datetime.now(UTC)))
                             )
                         )
-                    pipe.send("needs_model" if model is None and (pending or semantic) else "idle")
+                    pipe.send(
+                        "needs_model"
+                        if model is None and (pending or semantic or policy_pending)
+                        else "idle"
+                    )
             elif command == "stop":
                 break
             else:
@@ -361,11 +485,19 @@ class ChildSupervisor:
 
     def command(self, command, timeout, heartbeat=None):
         deadline = time.monotonic() + timeout
+        # At most 100 requirements, two progress notifications per requirement.
+        absolute_deadline = time.monotonic() + timeout * 101
         try:
             self.pipe.send(command)
             while remaining := max(0, deadline - time.monotonic()):
                 if self.pipe.poll(min(remaining, 5)):
-                    return self.pipe.recv()
+                    result = self.pipe.recv()
+                    if result == "progress":
+                        deadline = min(time.monotonic() + timeout, absolute_deadline)
+                        if heartbeat:
+                            heartbeat()
+                        continue
+                    return result
                 if heartbeat:
                     heartbeat()
             raise TimeoutError("Worker command deadline exceeded")
@@ -384,6 +516,8 @@ class ChildSupervisor:
 
 
 def main():
+    from counterparty.deletion import cleanup_files
+
     logging.basicConfig(level=logging.INFO)
     settings = Settings()
     engine = create_engine_for_settings(settings)
@@ -393,6 +527,7 @@ def main():
     try:
         while True:
             try:
+                cleanup_files(engine, settings.storage_path)
                 if child is None:
                     child = ChildSupervisor()
                     state = "pending"

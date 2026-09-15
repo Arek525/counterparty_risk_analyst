@@ -41,4 +41,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(router)
     app.include_router(integrations_router)
+    from counterparty.deletion import router as deletion_router
+
+    app.include_router(deletion_router)
     return app

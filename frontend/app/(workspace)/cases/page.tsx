@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import {
@@ -65,11 +66,8 @@ export default function CasesPage() {
       ) : (
         <div className="card-grid">
           {cases.map((item) => (
-            <Link
-              className="card case-card"
-              href={`/cases/${item.id}`}
-              key={item.id}
-            >
+            <article className="card case-card" key={item.id}>
+              <Link className="case-card-content" href={`/cases/${item.id}`}>
               <div className="case-card-top">
                 <StatusBadge
                   value={
@@ -90,17 +88,20 @@ export default function CasesPage() {
               </div>
               <h2>{item.name}</h2>
               <p className="counterparty">{item.counterparty_name}</p>
+              </Link>
               <div className="case-card-footer">
                 <span>
                   {item.relationship.personal_data
                     ? "Personal data"
                     : "No personal data"}
                 </span>
-                <span className="arrow-link">
-                  Open <Icon name="arrow" />
-                </span>
+                <div className="row-actions">
+                  <Link className="arrow-link" href={`/cases/${item.id}`}>Open <Icon name="arrow" /></Link>
+                  <DeleteButton endpoint={`/api/cases/${item.id}`} label="Delete" ariaLabel={`Delete ${item.name}`} onDeleted={load}
+                    confirmation={`Permanently delete “${item.name}”, its documents, reports, decisions and local ticket records? Shared policies remain. This cannot be undone.`} />
+                </div>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
       )}

@@ -1,0 +1,164 @@
+%PDF-1.3
+%‚„œ”
+1 0 obj
+<<
+/Producer (pypdf)
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Count 2
+/Kids [ 5 0 R 7 0 R ]
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+5 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 3464
+>>
+stream
+BT /F1 10 Tf 12 TL 45 745 Td
+(Synthetic Aster evidence document for payroll hosting. No real) Tj T*
+(organization or customer data. Coverage: production service, 2026-Q3.) Tj T*
+(Rules and qualifications must be read together. The business owner records) Tj T*
+(relationship purpose, data categories and access before assessment. A) Tj T*
+(previous version may describe another service and must not silently) Tj T*
+(replace this version.) Tj T*
+(Aster confirms that its operators use multi-factor authentication when) Tj T*
+(administering the payroll hosting service. The access owner maintains) Tj T*
+(separate registers for people and automation. A person can approve a) Tj T*
+(deployment without receiving standing access to the production database.) Tj T*
+(Requests identify the tenant and the operational task. A quarterly review) Tj T*
+(checks active assignments against those requests. Reviewers must) Tj T*
+(distinguish a technical identity used by a scheduled job from a person) Tj T*
+(signing in to the administrative console. Removing an employee must revoke) Tj T*
+(their access even if the next scheduled review has not yet occurred. This) Tj T*
+(requirement excludes non-interactive service identities, which instead) Tj T*
+(need scoped credentials and rotation.) Tj T*
+(Customer records are removed within 20 calendar days of contract) Tj T*
+(termination. The customer contact authenticates the removal instruction) Tj T*
+(and names the affected tenant. Operations first disables ordinary use,) Tj T*
+(then tracks removal through the stores listed in the service inventory. A) Tj T*
+(completion receipt records the scope and date. The receiving team checks) Tj T*
+(any requested export before deletion proceeds. A downloadable file alone) Tj T*
+(does not prove a successful handover. Requests concerning invoices follow) Tj T*
+(a separate corporate records schedule and must not be confused with the) Tj T*
+(customer-service data covered here. The stated deadline excludes records) Tj T*
+(under a documented litigation hold; those remain isolated until release is) Tj T*
+(authorized.) Tj T*
+(The first customer incident notice is sent within 12 hours of awareness.) Tj T*
+(An on-call coordinator reviews alerts from operators, customers and) Tj T*
+(infrastructure dependencies. The record distinguishes an observation from) Tj T*
+(an unconfirmed hypothesis. Initial communication identifies the affected) Tj T*
+(service, known impact and the next update route. Facts can change while) Tj T*
+(containment continues. Corrections are added to the incident timeline) Tj T*
+(rather than deleting an earlier entry. A tabletop exercise uses synthetic) Tj T*
+(records to rehearse escalation. Completing that exercise does not prove) Tj T*
+(that a real incident occurred or that every future incident will be) Tj T*
+(resolved within the same time. The clock starts with a credible indication) Tj T*
+(affecting customer data, not completion of the root-cause investigation.) Tj T*
+(Encryption at rest covers the primary store, replicas and recovery copies) Tj T*
+(containing customer data. The component register maps storage classes to) Tj T*
+(accountable owners. A managed key service controls access to key material) Tj T*
+(through a separate role. Support staff can request a redacted) Tj T*
+(configuration sample, but the public assurance pack must not contain key) Tj T*
+(identifiers or recovery secrets. The storage baseline covers data while) Tj T*
+ET
+endstream
+endobj
+7 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 8 0 R
+>>
+endobj
+8 0 obj
+<<
+/Length 2171
+>>
+stream
+BT /F1 10 Tf 12 TL 45 745 Td
+(stored; transport protection is reviewed independently. A screenshot) Tj T*
+(showing an enabled setting is a declaration about that configuration, and) Tj T*
+(an assessor may need a broader sample before relying on it across every) Tj T*
+(component. Temporary diagnostic exports containing customer records are) Tj T*
+(also in scope, even when they are deleted after troubleshooting.) Tj T*
+(Primary application processing and storage are located in the European) Tj T*
+(Union. The architecture diagram distinguishes routine computation,) Tj T*
+(disaster recovery and operational support. Corporate office addresses are) Tj T*
+(not used as a substitute for component locations. The supplier register) Tj T*
+(identifies each provider's function and actual access category. Privacy) Tj T*
+(reviewers examine the access route and contractual safeguards together. A) Tj T*
+(provider incorporated abroad need not operate the production database) Tj T*
+(there. Conversely, a database hosted in the agreed region does not) Tj T*
+(establish that every support session originates from that region.) Tj T*
+(Specialist support in Canada may access the minimum necessary records) Tj T*
+(under a separately approved task; the primary location statement does not) Tj T*
+(exclude that access.) Tj T*
+(The independent assurance report covers the established production) Tj T*
+(platform for the current review year. The assurance register records the) Tj T*
+(assessor, covered service, period and known exclusions. A company-wide) Tj T*
+(certificate cannot replace the report's stated boundary. The owner can) Tj T*
+(provide an authorized reviewer copy through the assurance contact.) Tj T*
+(Commercial details may be redacted while retaining the scope statement.) Tj T*
+(Management tracks outstanding actions separately from completed controls.) Tj T*
+(An internal operating procedure is useful supporting material, but its) Tj T*
+(existence does not turn an uncovered component into independently assessed) Tj T*
+(infrastructure. It excludes the recently acquired support portal; an) Tj T*
+(extension review is planned but has not been completed.) Tj T*
+ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000054 00000 n 
+0000000119 00000 n 
+0000000168 00000 n 
+0000000238 00000 n 
+0000000370 00000 n 
+0000003886 00000 n 
+0000004018 00000 n 
+trailer
+<<
+/Size 9
+/Root 3 0 R
+/Info 1 0 R
+>>
+startxref
+6241
+%%EOF

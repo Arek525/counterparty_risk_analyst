@@ -6,12 +6,15 @@ assessment, inspect cited evidence and record a human decision. Follow-up ticket
 require their own explicit approval.
 
 The local MVP includes an English Next.js interface, FastAPI, PostgreSQL/pgvector,
-a durable LangGraph worker and a local REST ticket simulator. **The default demo
-uses deterministic English fact extraction; it does not call an LLM.** A local
-pretrained multilingual E5 model runs semantic retrieval on CPU. No
-API key is required. An optional Gemini adapter and separate evaluation runner
-are included; real-model quality remains unverified without credentials and a
-reviewed evaluation. All bundled organizations and documents are synthetic.
+a durable LangGraph worker and a local REST ticket simulator. New analyses use
+**semantic-v2**: each reviewed requirement is assessed against retrieved evidence
+and relationship context. Gemini performs interpretation when explicitly configured.
+A pinned multilingual E5 model prepares embeddings locally on CPU.
+
+**The default demo calls no LLM and conservatively returns unknown assessments.**
+Its policy proposals are source-review placeholders, not extracted obligations.
+No API key is needed to explore the workflow. Demo results and mocked tests do not
+establish real-model quality. All bundled organizations and documents are synthetic.
 
 ## Start
 
@@ -55,37 +58,50 @@ subsequent demo operation uses local services. Database passwords are passed sep
 
 ## Walk through the application
 
-1. Open **Policies**. Inspect the approved synthetic policy set and their
-   source citations. Upload your own text PDF, Markdown or TXT; propose, edit and
-   approve requirements. Clone approved policies to create a new editable version.
-2. Open **Cases**. Create a case with relationship context:
-   personal data, privileged access, purpose and business criticality.
-3. Add evidence and label its provenance as a declaration or independent support.
-   Wait for **Semantic index: ready**, then start an analysis against an approved
-   policy version. Semantic retrieval is the default; weighted hybrid and lexical
-   variants are available. Lexical analysis works while indexing is unavailable.
-4. Inspect risk, evidence completeness and individual findings separately. Open a
-   citation to see its exact source fragment. Missing evidence produces questions;
-   it does not prove compliance. A possible discrepancy is not automatically a
-   contradiction.
-5. Record acceptance, rejection or a request for information with a rationale.
+1. Open **Policies** and inspect the approved synthetic policy set. Upload a text
+   PDF, Markdown or TXT and open its **Full document** view. Source excerpts and
+   technical indexing controls are secondary details; the original remains downloadable.
+2. Click **Extract requirements**, or select documents through **New policy set**.
+   Extraction reads the complete selected policy text within the limits below and
+   saves its result. Opening that version or repeating the same extraction reuses
+   the saved result. **Regenerate requirements** explicitly confirms new model API
+   calls and creates a new draft; viewing a document never triggers extraction.
+3. Review each requirement's description, applicability, severity and exact source
+   quotation, then approve the version. Requirements cannot be edited or cloned.
+   Regenerate an incorrect extraction, or upload revised source documents and
+   extract a new set when the policy changes. The worker prepares and caches embeddings
+   for the approved requirements in the background.
+4. Open **Cases**, create a relationship context, and upload counterparty evidence.
+   Label each source as a declaration or independent support. Run an analysis
+   against an approved policy once its requirements and evidence are ready.
+   Hybrid retrieval is the default; comparison options sit under advanced settings.
+5. Watch progress as the worker assesses requirements sequentially. A failed run
+   exposes **Resume unfinished requirements**. Saved completed assessments are
+   reused; unfinished work may make additional API calls. Partial results are not
+   presented as a final report.
+6. Inspect risk, evidence completeness and finding status separately. Each finding
+   places the policy requirement and its source next to the counterparty evidence,
+   with an explanation. Open citations to inspect exact excerpts and the full source.
+   Missing evidence does not prove compliance. A possible discrepancy is not
+   automatically a contradiction.
+7. Record acceptance, rejection or a request for information with a rationale.
    The worker resumes its saved workflow after that human decision.
-6. Propose a follow-up ticket, inspect its exact title/body, approve, then execute.
+8. Propose a follow-up ticket, inspect its exact title/body, approve, then execute.
    Read its status in the local ticket service. A lost response can be reconciled
    without creating another ticket. Review the activity history.
 
-Upload `datasets/synthetic/evidence/atlas-assurance-pack.md` as a **Counterparty
-declaration** in a high-criticality case with personal data and privileged access.
-The six supported controls pass; 14 manual controls remain unknown, giving 30%
-completeness and **Unable to assess** risk. Request information about the support
-portal excluded from independent assurance and the US support access boundary.
-The pack is a supplier declaration, not the independent report it describes.
+For a synthetic example, upload
+`datasets/synthetic/evidence/atlas-assurance-pack.md` as a **Counterparty declaration**
+in a high-criticality case with personal data and privileged access. The pack is
+not the independent report it describes. Inspect the support-portal assurance
+exclusion and US support-access boundary. No fixed completeness percentage or
+finding count is promised for a real-model assessment. Demo mode conservatively
+leaves interpretation unresolved.
 
-Historical tiny scenarios remain under `datasets/synthetic/regression` for tests.
-They are never seeded.
-The demo extractor recognizes a documented subset of **English** policy/evidence
-statements. Other requirements remain editable manual checks. An English interface does
-not imply universal policy understanding.
+Historical tiny scenarios remain under `datasets/synthetic/regression` for tests
+and are never seeded. Older approved policy versions and reports remain readable;
+new assessments use the semantic workflow. An English interface does not imply
+universal policy understanding.
 
 ## Architecture and data flow
 
@@ -100,19 +116,28 @@ flowchart LR
     Tickets --> DB
 ```
 
-The API captures immutable input versions before queuing a run. pgvector computes
-scoped similarities in the worker. A separate write-once retrieval snapshot retains
-queries, scores, exact eligible chunks and the full model configuration. The worker
-extracts facts and evaluates allowlisted rules, writes a report, then pauses at a
-persisted human-review checkpoint. Rules in application code calculate risk;
-neither a document nor a model grants permissions or authorizes a write.
+The API captures immutable input versions before queuing a run. The worker retrieves
+scoped evidence using pgvector and the approved requirement embeddings. Saved
+retrieval provenance retains queries, scores, eligible chunks and model configuration.
+For each requirement, the configured model interprets applicability and evidence,
+returning a validated status, explanation and source quotations. The application
+checks quotation grounding and aggregates risk and completeness using versioned
+code. A matching quotation proves source resolution, not semantic entailment.
 
-See [architecture and tradeoffs](docs/architecture/mvp.md),
-[API and persistence contract](docs/architecture/mvp-contract.md),
-[verification record](docs/verification/mvp.md) and
+Each completed requirement assessment is persisted before the next begins. Explicit
+retry resumes unfinished work without repeating saved completed assessments, including
+completed paid model calls. A provider call interrupted before its result is saved
+may still be repeated. The finished report pauses at a durable human-review checkpoint.
+Neither a document nor a model grants permissions or authorizes a write.
+
+The [original architecture](docs/architecture/mvp.md),
+[original API contract](docs/architecture/mvp-contract.md),
+[MVP verification](docs/verification/mvp.md),
 [evaluation methodology/results](evaluations/README.md) and
-[Northstar corpus acceptance](docs/verification/northstar.md) and
-[local semantic retrieval](docs/verification/embeddings.md).
+[Northstar corpus acceptance](docs/verification/northstar.md) describe earlier
+implementations and historical regression evidence. Their deterministic-rule scores
+do not validate semantic-v2. The [local retrieval measurements](docs/verification/embeddings.md)
+cover embedding/retrieval behavior, not correctness of requirement interpretation.
 
 ## Verification
 
@@ -138,13 +163,16 @@ npm run test:e2e
 E2E_REAL_API=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e
 ```
 
-`python3 scripts/verify_demo.py` explicitly creates an Atlas case on a disposable
-demo stack, uploads its declaration, verifies the 6/14 result and source citations,
-and records a request for information through the real API/worker.
+`scripts/verify_demo.py` is a historical deterministic-engine regression helper;
+its fixed 6-pass/14-unknown assertions do not validate the new semantic workflow.
+The evaluation command above also exercises the historical regression pipeline.
+Use current backend/browser checks for workflow behavior and a separately reviewed
+semantic-v2 corpus for model quality; passing mocks are not a model-quality result.
 
 The final browser command needs the running, seeded Compose stack and writes synthetic
 cases to it. Browser boundary tests use mocked HTTP; the real-stack test uses the
-actual API, database, worker and ticket service. CI runs both without model keys.
+actual API, database, worker and ticket service. CI runs both without model keys. When the stack uses Gemini, the real-stack
+journey invokes the configured provider for the entire selected policy set.
 
 ## Optional real model
 
@@ -155,11 +183,13 @@ No billing activation or paid fallback is configured. Never commit the key.
 
 The first live integration used `gemini-3.5-flash-lite`. On 2026-09-14 Google
 rejected `gemini-2.5-flash-lite` for a new account despite listing it in Models.
-The [live verification report](docs/verification/gemini.md) records compatibility
-fixes, before/after measurements and the remaining quality limits. Availability
+The [historical live verification report](docs/verification/gemini.md) records
+compatibility fixes and earlier extraction/rule-pipeline regression measurements;
+it does not validate the new semantic-v2 assessment workflow. Availability
 still depends on the account; there is no automatic model substitution.
 
-Run a separate real-model evaluation before enabling it for normal analyses:
+The earlier extraction/rule pipeline has this explicit real-model regression command
+(which makes provider calls); it is not a semantic-v2 quality evaluation:
 
 ```bash
 docker compose run --rm --no-deps --user "$(id -u):$(id -g)" \
@@ -167,11 +197,25 @@ docker compose run --rm --no-deps --user "$(id -u):$(id -g)" \
 ```
 
 Missing credentials produce a `pending_credentials` report and exit code 2. This
-is an explicit incomplete quality check, not a passing model evaluation. Once
-reviewed, set `MODEL_MODE=gemini` and recreate API/worker via `docker compose up -d`.
+is an explicit incomplete quality check, not a passing model evaluation. For semantic assessment, obtain a separately reviewed evaluation before relying on
+its findings. Set `MODEL_MODE=gemini` and recreate API/worker via `docker compose up -d`.
 Keep `DEMO_MODE=true` for local demo accounts. Configured-provider failures are
-reported; they never silently switch to the deterministic demo. Model extraction
-has bounded requests; pricing is unknown (`null`) until checked externally.
+reported; they never silently switch to demo responses. Requests are bounded;
+pricing is unknown (`null`) until checked externally.
+
+## Removing saved data
+
+Use **Delete report**, **Delete case**, **Delete policy set** or the document's
+**Delete** action. A case deletion includes its reports and evidence documents;
+a report deletion includes its decision and saved analysis progress. Delete
+referencing reports before a policy set, and referencing policy sets before their
+source documents. Local ticket records can also be deleted; this does not remove
+a ticket already sent to another service. Deletion applies to active application
+storage, not existing backups or model-provider records.
+
+Source links open the full original text and highlight the exact cited passage.
+Mechanical search chunks are not shown as excerpts. If the passage cannot be
+located unambiguously, the document view says so instead of highlighting a guess.
 
 ## Operations and limitations
 
@@ -186,6 +230,14 @@ docker compose down
 [backup, restore and retention](docs/architecture/operations.md) before deleting
 volumes. The migrations build/update database structure; they do not analyze files.
 
+Policy extraction accepts at most 100,000 source characters across selected documents,
+with a 125,000-character model payload limit and 16,384 maximum output tokens.
+Each requirement assessment has a 25,000-character input limit and 4,096 maximum
+output tokens. Runs accept at most 100 requirements and 500 evidence chunks, with
+at most three attempts per requirement. Oversized inputs fail explicitly rather
+than silently dropping policy text. Full-document extraction does not guarantee
+that the model identifies every obligation or correctly interprets exceptions.
+
 This is a local portfolio MVP, not legal certification or production assurance.
 OCR, real business integrations, public hosting, enterprise administration,
 PDF report export and MCP are outside this release.
@@ -195,7 +247,7 @@ identity, TLS, shared quota controls and operational review.
 
 ## Repository
 
-- `backend/src/counterparty/`: API/domain, ingestion, adapters, assessment rules,
+- `backend/src/counterparty/`: API/domain, ingestion, adapters, semantic assessment and risk aggregation,
   worker, ticket integration and packaged database migrations.
 - `frontend/`: Next.js UI and browser tests.
 - `datasets/synthetic/`: four substantial policies, an Atlas assurance pack and historical regression fixtures.
