@@ -89,12 +89,17 @@ With an already populated worker cache, the following explicit checks use no
 provider credentials. The first command reuses the runtime cache volume; the second
 creates and drops only a uniquely named database on the disposable test server.
 Replace the Compose-prefixed volume name if using a different project name.
+Keep the default container user so it can open the cache lock. The first command
+writes its JSON inside the container, redirects the summary to stderr, and lets
+the host save the complete JSON at `/tmp/counterparty-retrieval.json`.
 
 ```bash
-docker compose run --rm --no-deps --user "$(id -u):$(id -g)" \
-  -v "$PWD/evaluations:/evaluations" worker \
-  python /evaluations/semantic_retrieval.py --cache /app/model-cache \
-  --output /evaluations/results-semantic.json
+docker compose run --rm --no-deps \
+  -v "$PWD/evaluations:/evaluations:ro" worker sh -c '
+    python /evaluations/semantic_retrieval.py --cache /app/model-cache \
+      --output /tmp/counterparty-retrieval.json >&2 &&
+    cat /tmp/counterparty-retrieval.json
+  ' > /tmp/counterparty-retrieval.json
 
 docker compose -f compose.test.yaml run --rm \
   -v counterparty-risk-analyst_model-cache:/models tests \
