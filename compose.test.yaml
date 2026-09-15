@@ -26,6 +26,7 @@ services:
       LANGCHAIN_TRACING_V2: "false"
     volumes:
       - ./datasets:/datasets:ro
+      - ./evaluations:/evaluations
     depends_on:
       db-test:
         condition: service_healthy

@@ -3,15 +3,15 @@ import { AuthProvider } from "@/context/auth-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aegis · Ocena ryzyka kontrahenta",
-  description: "Obszar roboczy do udokumentowanej oceny ryzyka kontrahentów",
+  title: "Aegis · Counterparty risk assessment",
+  description: "Workspace for evidence-based counterparty risk assessment",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pl">
+    <html lang="en">
       <body>
         <AuthProvider>{children}</AuthProvider>
       </body>

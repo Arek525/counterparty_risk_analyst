@@ -8,7 +8,6 @@ export interface Meta {
   model_mode: "demo" | "gemini" | string;
   model_name?: string;
   version?: string;
-  application_version?: string;
 }
 
 export interface User {
@@ -25,7 +24,6 @@ export interface DemoAccount {
   password: string;
   role: Role;
   name: string;
-  description?: string;
   organization?: string;
 }
 
@@ -65,6 +63,10 @@ export interface DocumentChunk {
 }
 
 export interface DocumentRecord {
+  index_status?: "pending" | "indexing" | "ready" | "error";
+  index_error?: string | null;
+  index_config?: string;
+  indexed_at?: string | null;
   id: string;
   case_id?: string | null;
   kind: "policy" | "evidence";
@@ -115,7 +117,13 @@ export interface Finding {
   severity: "Low" | "Medium" | "High";
   explanation: string;
   evidence: Citation[];
-  missing_information?: string | string[] | null;
+  missing_information?: string[] | null;
+}
+
+export interface Discrepancy {
+  type: string;
+  description: string;
+  evidence?: Citation[];
 }
 
 export interface Report {
@@ -124,17 +132,7 @@ export interface Report {
   completeness: number;
   summary: string;
   questions: string[];
-  discrepancies: Array<
-    | string
-    | {
-        type?: string;
-        description?: string;
-        message?: string;
-        explanation?: string;
-        evidence?: Citation[];
-        [key: string]: unknown;
-      }
-  >;
+  discrepancies: Discrepancy[];
   model_mode: string;
   model_name: string;
   metrics: {
@@ -147,16 +145,6 @@ export interface Report {
   prompt_version: string;
   workflow_complete?: boolean;
   workflow_error?: string | null;
-}
-
-export interface RunEvent {
-  id?: string;
-  event?: string;
-  type?: string;
-  message?: string;
-  created_at?: string;
-  timestamp?: string;
-  details?: Record<string, unknown> | null;
 }
 
 export interface Decision {
@@ -172,13 +160,12 @@ export interface AnalysisRun {
   case_id: string;
   policy_version_id: string;
   status: "queued" | "running" | "awaiting_review" | "completed" | "failed";
-  retrieval_variant: "lexical" | "hybrid";
+  retrieval_variant: "lexical" | "hybrid" | "semantic";
   model_mode: string;
   error?: string | null;
   report?: Report | null;
-  events?: RunEvent[];
+  events?: AuditEvent[];
   decision?: Decision | null;
-  decisions?: Decision[];
   created_at: string;
   started_at?: string | null;
   finished_at?: string | null;
@@ -204,7 +191,6 @@ export interface ApprovalRequest {
   expires_at: string;
   created_at: string;
   approved_at?: string | null;
-  result?: IntegrationCall | null;
   approved_by?: string | null;
   requested_by?: string;
   error?: string | null;
@@ -218,18 +204,3 @@ export interface ApprovalRequest {
     service: string;
   } | null;
 }
-
-export interface IntegrationCall {
-  id: string;
-  approval_id: string;
-  status: "pending" | "succeeded" | "failed";
-  request?: Record<string, unknown>;
-  response?: Record<string, unknown> | null;
-  error?: string | null;
-  attempts?: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export type TicketRecord =
-  ApprovalRequest | IntegrationCall | Record<string, unknown>;

@@ -84,7 +84,7 @@ class PolicyProposal(Input):
 
 class RunCreate(Input):
     policy_version_id: UUID
-    retrieval_variant: Literal["lexical", "hybrid"] = "hybrid"
+    retrieval_variant: Literal["lexical", "hybrid", "semantic"] = "semantic"
 
 
 class DecisionCreate(Input):

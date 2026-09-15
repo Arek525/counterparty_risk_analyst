@@ -18,6 +18,7 @@ class GeminiAdapter:
     # One request at a time per process. Worker leases and API limits add outer bounds.
     _lock = threading.Lock()
     _last_call = 0.0
+    MAX_CALLS = 8
     MAX_INPUT_CHARS = 48000
     MAX_OUTPUT_TOKENS = 4096
     MAX_RESPONSE_BYTES = 250000
@@ -29,7 +30,7 @@ class GeminiAdapter:
             raise ModelError("GEMINI_API_KEY missing; real-model evaluation pending")
         if not re.fullmatch(r"gemini-[a-zA-Z0-9.\-]+", self.model):
             raise ModelError("Set GEMINI_MODEL to an explicitly selected Gemini model")
-        self.metrics = {"input_tokens": 0, "output_tokens": 0, "cost_usd": None}
+        self.metrics = {"input_tokens": 0, "output_tokens": 0, "cost_usd": None, "calls": 0}
 
     def generate(self, instruction: str, payload: dict, schema: type[BaseModel]) -> dict:
         deadline = time.monotonic() + 60
@@ -78,6 +79,9 @@ class GeminiAdapter:
                 timeout=httpx.Timeout(25, connect=5), follow_redirects=False
             ) as client:
                 for attempt in range(2):
+                    if self.metrics["calls"] >= self.MAX_CALLS:
+                        raise ModelError("Model absolute call limit exceeded")
+                    self.metrics["calls"] += 1
                     self.__class__._last_call = time.monotonic()
                     try:
                         with client.stream(
@@ -100,6 +104,11 @@ class GeminiAdapter:
                                     raise ModelError("Model response size limit exceeded")
                         data = json.loads(raw)
                         candidate = data["candidates"][0]
+                        usage = data.get("usageMetadata", {})
+                        self.metrics["input_tokens"] += int(usage.get("promptTokenCount", 0))
+                        self.metrics["output_tokens"] += int(
+                            usage.get("candidatesTokenCount", 0)
+                        ) + int(usage.get("thoughtsTokenCount", 0))
                         if candidate.get("finishReason") != "STOP":
                             raise ModelError("Model response incomplete or blocked")
                         output = "".join(
@@ -108,11 +117,6 @@ class GeminiAdapter:
                             if not p.get("thought")
                         )
                         validated = schema.model_validate_json(output).model_dump()
-                        usage = data.get("usageMetadata", {})
-                        self.metrics["input_tokens"] += int(usage.get("promptTokenCount", 0))
-                        self.metrics["output_tokens"] += int(
-                            usage.get("candidatesTokenCount", 0)
-                        ) + int(usage.get("thoughtsTokenCount", 0))
                         return validated
                     except (httpx.TimeoutException, httpx.NetworkError) as exc:
                         if attempt == 1:

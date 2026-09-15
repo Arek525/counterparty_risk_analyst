@@ -16,6 +16,8 @@ export default function DocumentPage() {
   const [document, setDocument] = useState<DocumentRecord | null>(null);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [indexing, setIndexing] = useState(false);
+  const [modelStatus, setModelStatus] = useState<{status: string; error?: string | null} | null>(null);
   async function load() {
     setError("");
     try {
@@ -37,11 +39,32 @@ export default function DocumentPage() {
           .getElementById(`chunk-${chunk}`)
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [document]);
+  }, [document?.id]);
+  useEffect(() => {
+    const refresh = () => {
+      void api<{status: string; error?: string | null}>("/api/embedding-status").then(setModelStatus).catch(() => {});
+      void api<DocumentRecord>(`/api/documents/${id}`).then(setDocument).catch(() => {});
+    };
+    refresh();
+    const timer = setInterval(refresh, 3000);
+    return () => clearInterval(timer);
+  }, [id]);
+  async function reindex() {
+    setIndexing(true);
+    setError("");
+    try {
+      await api(`/api/documents/${id}/reindex`, {method: "POST"});
+      await load();
+    } catch (reason) {
+      setError(errorMessage(reason));
+    } finally {
+      setIndexing(false);
+    }
+  }
   async function remove() {
     if (
       !confirm(
-        "Usunąć ten dokument? Dokumentu powiązanego z zachowaną wersją nie można usunąć.",
+        "Delete this document? A document retained by a saved version cannot be deleted.",
       )
     )
       return;
@@ -57,23 +80,23 @@ export default function DocumentPage() {
       setDeleting(false);
     }
   }
-  if (!document && !error) return <Spinner label="Ładowanie źródła…" />;
+  if (!document && !error) return <Spinner label="Loading source…" />;
   if (!document) return <ErrorNotice message={error} retry={load} />;
   return (
     <>
       <PageHeader
         eyebrow={
-          document.kind === "policy" ? "Dokument polityki" : "Dowód kontrahenta"
+          document.kind === "policy" ? "Policy document" : "Counterparty evidence"
         }
         title={document.filename}
-        description={`Wersja ${document.version} · ${formatDate(document.created_at)}`}
+        description={`Version ${document.version} · ${formatDate(document.created_at)}`}
         actions={
           <>
             <a
               className="button button-secondary"
               href={`/api/documents/${document.id}/download`}
             >
-              Pobierz oryginał
+              Download original
             </a>
             {user?.role !== "auditor" && (
               <button
@@ -81,28 +104,35 @@ export default function DocumentPage() {
                 disabled={deleting}
                 onClick={remove}
               >
-                {deleting ? "Usuwanie…" : "Usuń"}
+                {deleting ? "Deleting…" : "Delete"}
               </button>
             )}
           </>
         }
       />
       {error && <ErrorNotice message={error} />}
+      <div className="notice notice-info" style={{marginBottom: 18}}>
+        <p aria-live="polite">Semantic index: <strong>{document.index_status ?? "pending"}</strong> · Local model: {modelStatus?.status ?? "checking"}</p>
+        {document.index_error && <p>{document.index_error}</p>}
+        {modelStatus?.error && <p>{modelStatus.error}</p>}
+        <p>Indexing runs in the background. Source text and lexical analysis remain available.</p>
+        {user?.role !== "auditor" && <button className="button button-small button-secondary" disabled={indexing} onClick={reindex}>{indexing ? "Queuing…" : "Reindex document"}</button>}
+      </div>
       {document.kind === "evidence" && (
         <div className="notice notice-info" style={{ marginBottom: 18 }}>
           <p>
-            <strong>Rodzaj źródła:</strong>{" "}
+            <strong>Source type:</strong>{" "}
             {document.evidence_type === "independent"
-              ? "niezależny dowód"
-              : "deklaracja kontrahenta"}
+              ? "independent evidence"
+              : "counterparty declaration"}
           </p>
         </div>
       )}
       <section className="card">
         <div className="card-header">
-          <h2>Wyodrębniony tekst źródłowy</h2>
+          <h2>Extracted source text</h2>
           <StatusBadge value="neutral">
-            {document.chunks?.length ?? 0} fragmentów
+            {document.chunks?.length ?? 0} chunks
           </StatusBadge>
         </div>
         <div className="card-body stack">
@@ -120,7 +150,7 @@ export default function DocumentPage() {
             </article>
           )) ?? (
             <p className="subtle">
-              Dokument nie zawiera fragmentów tekstowych.
+              This document contains no text chunks.
             </p>
           )}
         </div>
@@ -130,7 +160,7 @@ export default function DocumentPage() {
           className="arrow-link"
           href={document.case_id ? `/cases/${document.case_id}` : "/policies"}
         >
-          ← Powrót
+          ← Back
         </Link>
       </p>
     </>

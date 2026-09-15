@@ -1,7 +1,6 @@
 """Organization/case scoped API for document preparation and immutable assessments."""
 
 import copy
-import math
 import secrets
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -88,6 +87,11 @@ def public_document(document):
             "media_type",
             "evidence_type",
             "created_at",
+            "index_status",
+            "index_config",
+            "index_attempts",
+            "index_error",
+            "indexed_at",
         )
     }
 
@@ -165,21 +169,6 @@ def validated_requirements(requirements, chunks):
 
     try:
         parsed = [Requirement.model_validate(item).model_dump(mode="json") for item in requirements]
-        if not parsed or len(parsed) > 100:
-            raise ValueError("A policy needs between 1 and 100 requirements")
-        if len({item["id"] for item in parsed}) != len(parsed):
-            raise ValueError("Requirement identifiers must be unique")
-        sources = {chunk["id"]: chunk for chunk in chunks}
-        for item in parsed:
-            source = item["source"]
-            chunk = sources.get(source["chunk_id"])
-            if (
-                chunk is None
-                or source["document_id"] != chunk["document_id"]
-                or source["location"] != chunk["location"]
-                or source["quote"] not in chunk["text"]
-            ):
-                raise ValueError("Requirement citation does not resolve to the policy source")
         validate_requirements(parsed, chunks)
         return parsed
     except (ValidationError, ValueError, TypeError, KeyError) as exc:
@@ -334,6 +323,47 @@ def documents(user: Actor, session: DB, case_id: UUID | None = None):
     return [public_document(document) for document in session.scalars(query)]
 
 
+@router.get("/embedding-status")
+def embedding_status(user: Actor, session: DB):
+    from counterparty.embedding_config import CONFIG, FINGERPRINT
+    from counterparty.models import WorkerModelState
+
+    state = session.get(WorkerModelState, "local-embeddings")
+    fresh = bool(
+        state
+        and state.config == FINGERPRINT
+        and (datetime.now(UTC) - state.heartbeat_at).total_seconds() < 30
+    )
+    return {
+        "status": state.status if fresh else "unavailable",
+        "fresh": fresh,
+        "config": CONFIG,
+        "fingerprint": FINGERPRINT,
+        "heartbeat_at": state.heartbeat_at if state else None,
+        "error": state.error if state else None,
+    }
+
+
+@router.post("/documents/{document_id}/reindex")
+def reindex_document(document_id: UUID, user: Actor, session: DB):
+    from counterparty.indexing import request_reindex
+
+    require_roles(user, *WRITE_ROLES)
+    reference_lock(session, user)
+    document = document_for(session, user, document_id)
+    session.refresh(document, with_for_update=True)
+    if request_reindex(session, document):
+        audit(
+            session,
+            user,
+            "document.reindex_requested",
+            case_id=document.case_id,
+            details={"document_id": str(document.id), "config": document.index_config},
+        )
+    session.commit()
+    return public_document(document)
+
+
 @router.post("/documents", status_code=201)
 def upload_document(
     request: Request,
@@ -403,10 +433,7 @@ def delete_document(document_id: UUID, request: Request, user: Actor, session: D
     require_roles(user, *WRITE_ROLES)
     document = document_for(session, user, document_id)
     # A lock prevents deletion during new policy/run snapshot creation.
-    session.execute(
-        text("SELECT pg_advisory_xact_lock(hashtextextended(:scope, 0))"),
-        {"scope": f"references:{user.organization_id}"},
-    )
+    reference_lock(session, user)
     policies = session.scalars(
         select(PolicySetVersion).where(PolicySetVersion.organization_id == user.organization_id)
     )
@@ -478,8 +505,12 @@ def propose_policy(body: PolicyProposal, request: Request, user: Actor, session:
     if any(document.kind != "policy" for document in documents):
         raise HTTPException(422, "Only policy documents can define requirements")
     chunks = chunks_for(session, documents)
+    proposal_metrics = {}
     requirements = validated_requirements(
-        propose_requirements(chunks, mode=request.app.state.settings.model_mode), chunks
+        propose_requirements(
+            chunks, mode=request.app.state.settings.model_mode, metrics=proposal_metrics
+        ),
+        chunks,
     )
     policy = PolicySetVersion(
         organization_id=user.organization_id,
@@ -492,7 +523,12 @@ def propose_policy(body: PolicyProposal, request: Request, user: Actor, session:
     )
     session.add(policy)
     session.flush()
-    audit(session, user, "policy.proposed", details={"policy_id": str(policy.id)})
+    audit(
+        session,
+        user,
+        "policy.proposed",
+        details={"policy_id": str(policy.id), "model_metrics": proposal_metrics},
+    )
     session.commit()
     return public_policy(policy)
 
@@ -569,6 +605,7 @@ def public_run(session, run):
             "policy_version_id",
             "status",
             "input_snapshot",
+            "retrieval_snapshot",
             "report",
             "retrieval_variant",
             "model_mode",
@@ -598,37 +635,6 @@ def public_run(session, run):
         )
     ]
     return value
-
-
-def pgvector_scores(session, user, case, documents, requirements):
-    """Exact pgvector search over at most 500 immutable evidence chunks.
-
-    The persisted hash embeddings are a deterministic demo feature representation,
-    not a learned semantic model. Retaining every bounded candidate preserves the
-    same lexical + cosine ranking used by the offline evaluation pipeline.
-    """
-    from counterparty.analysis import EMBEDDING_MODEL, embed_text
-
-    result = {}
-    for requirement in requirements:
-        query = embed_text(requirement["title"] + " " + requirement["field"])
-        distance = DocumentChunk.embedding.cosine_distance(query).label("distance")
-        rows = session.execute(
-            select(DocumentChunk.id, distance)
-            .where(
-                DocumentChunk.organization_id == user.organization_id,
-                DocumentChunk.case_id == case.id,
-                DocumentChunk.document_id.in_([document.id for document in documents]),
-                DocumentChunk.embedding_model == EMBEDDING_MODEL,
-            )
-            .order_by(distance, DocumentChunk.id)
-            .limit(500)
-        )
-        result[requirement["id"]] = {
-            str(chunk_id): (1.0 - value if math.isfinite(value) else 0.0)
-            for chunk_id, value in rows
-        }
-    return result
 
 
 @router.get("/cases/{case_id}/runs")
@@ -683,22 +689,25 @@ def create_run(case_id: UUID, body: RunCreate, request: Request, user: Actor, se
         "chunks": chunks,
         "model_mode": request.app.state.settings.model_mode,
     }
-    if body.retrieval_variant == "hybrid":
-        from counterparty.analysis import EMBEDDING_MODEL
+    from counterparty.embedding_config import CONFIG, FINGERPRINT
 
-        snapshot["retrieval_scores"] = pgvector_scores(
-            session, user, case, list(current.values()), policy.requirements
-        )
-        eligible_ids = {chunk["id"] for chunk in chunks if chunk["kind"] == "evidence"}
-        if any(set(scores) != eligible_ids for scores in snapshot["retrieval_scores"].values()):
-            raise HTTPException(422, "Evidence embeddings are incompatible; re-ingest documents")
-        snapshot["retrieval_config"] = {
-            "backend": "pgvector-exact",
-            "embedding_model": EMBEDDING_MODEL,
-            "dimension": 128,
-            "limit": 500,
-            "version": "hybrid-v1",
-        }
+    snapshot["retrieval_algorithm"] = CONFIG["retrieval"]
+    if body.retrieval_variant in {"hybrid", "semantic"}:
+        if any(
+            doc.index_status != "ready" or doc.index_config != FINGERPRINT
+            for doc in current.values()
+        ) or any(
+            chunk["embedding_model"] != FINGERPRINT
+            for chunk in chunks
+            if chunk["kind"] == "evidence"
+        ):
+            raise HTTPException(
+                409,
+                "Evidence indexing is pending or incompatible. Wait for ready status or request "
+                "reindex; lexical analysis remains available.",
+            )
+        snapshot["retrieval_config"] = copy.deepcopy(CONFIG)
+        snapshot["retrieval_fingerprint"] = FINGERPRINT
     run = AnalysisRun(
         organization_id=user.organization_id,
         case_id=case.id,

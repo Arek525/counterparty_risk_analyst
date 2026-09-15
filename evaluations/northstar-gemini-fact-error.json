@@ -1,0 +1,455 @@
+{
+  "dataset_role": "Development and acceptance; not held-out evidence",
+  "mode": "gemini",
+  "policy_chunks": 35,
+  "policy_input_chars_unbatched": 63274,
+  "planned_policy_batches": [
+    9,
+    8,
+    9,
+    9
+  ],
+  "policy_metrics": {
+    "input_tokens": 18322,
+    "output_tokens": 5224,
+    "cost_usd": null,
+    "calls": 4,
+    "citation_corrections": 0,
+    "duration_ms": 15505.11
+  },
+  "source_hashes": {
+    "information-security.md": "3aaed2be8a5bf12f40354b0ea4457e1cb82fb2edccf16fea52734a84bb6ca65c",
+    "privacy-data-handling.md": "4429268938774c51efc399b2f9d535ca5cd4a304650b0498bdaef8776ff2e41e",
+    "supplier-governance.md": "f1ac772a28500a7aeb64b7eec2f410a9282e5fff032b4b30262d3bcfb12a5e6b",
+    "incident-response.md": "d4674e874cc88754421256f233dd53e9ff53806cfc9af2a3326f5a9da76b1998",
+    "atlas-assurance-pack.md": "cfafcc6b2c4a95722eb8226779b69f0663510820ea7d0b7db37981644e0adfe3"
+  },
+  "proposal": {
+    "matched_once": 20,
+    "missing": [],
+    "duplicates": [],
+    "extra_or_internal": [],
+    "rule_mismatches": [],
+    "manual_field_names": {
+      "SEC-03": "supplier_accountability_and_inventory",
+      "SEC-04": "privileged_access_revocation",
+      "SEC-05": "vulnerability_and_patch_process",
+      "SEC-06": "independent_assurance_evidence",
+      "PRI-04": "subprocessor_inventory_and_notice",
+      "PRI-05": "documented_purpose_and_minimization",
+      "PRI-06": "individual_request_support",
+      "GOV-01": "accountable_relationship_owner",
+      "GOV-02": "accurate_assurance_responses",
+      "GOV-03": "subcontractor_flow_down",
+      "GOV-04": "continuity_and_exit_plan",
+      "IR-02": "supplier_evidence_preservation_and_timeline",
+      "IR-03": "supplier_containment_and_recovery_updates",
+      "IR-04": "supplier_root_cause_and_corrective_action_report"
+    }
+  },
+  "proposed_requirements": [
+    {
+      "id": "req-sec-03",
+      "title": "Supplier accountability for security and inventory management",
+      "field": "supplier_accountability_and_inventory",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {},
+      "source": {
+        "chunk_id": "4445a9de-db0a-50f8-98a4-fee150591966",
+        "document_id": "64ee4dab-45d3-520b-b13a-c7ab98ad3d26",
+        "location": {
+          "line_start": 23,
+          "line_end": 36
+        },
+        "quote": "The supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-sec-01",
+      "title": "Enable MFA for privileged accounts when privileged access is present",
+      "field": "mfa",
+      "operator": "eq",
+      "expected": true,
+      "severity": "High",
+      "applicability": {
+        "privileged_access": true
+      },
+      "source": {
+        "chunk_id": "4445a9de-db0a-50f8-98a4-fee150591966",
+        "document_id": "64ee4dab-45d3-520b-b13a-c7ab98ad3d26",
+        "location": {
+          "line_start": 23,
+          "line_end": 36
+        },
+        "quote": "For relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service."
+      },
+      "evaluation_method": "deterministic"
+    },
+    {
+      "id": "req-sec-04",
+      "title": "Least privilege access and prompt revocation for supplier personnel with privileged access",
+      "field": "privileged_access_revocation",
+      "operator": "manual",
+      "expected": null,
+      "severity": "High",
+      "applicability": {
+        "privileged_access": true
+      },
+      "source": {
+        "chunk_id": "ae459a4e-4a4a-57c1-9705-6d65fe5fc738",
+        "document_id": "64ee4dab-45d3-520b-b13a-c7ab98ad3d26",
+        "location": {
+          "line_start": 37,
+          "line_end": 44
+        },
+        "quote": "For relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-sec-02",
+      "title": "Encrypt Northstar data at rest when personal data is processed",
+      "field": "encryption_at_rest",
+      "operator": "eq",
+      "expected": true,
+      "severity": "High",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "34879d7d-850f-5e50-bff6-5e49959a47f8",
+        "document_id": "64ee4dab-45d3-520b-b13a-c7ab98ad3d26",
+        "location": {
+          "line_start": 45,
+          "line_end": 54
+        },
+        "quote": "For relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups."
+      },
+      "evaluation_method": "deterministic"
+    },
+    {
+      "id": "req-sec-05",
+      "title": "Operate a documented vulnerability and patch management process",
+      "field": "vulnerability_and_patch_process",
+      "operator": "manual",
+      "expected": null,
+      "severity": "High",
+      "applicability": {},
+      "source": {
+        "chunk_id": "77d584bf-d29f-57bf-b568-cce47343c79c",
+        "document_id": "64ee4dab-45d3-520b-b13a-c7ab98ad3d26",
+        "location": {
+          "line_start": 55,
+          "line_end": 64
+        },
+        "quote": "The supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-sec-06",
+      "title": "Provide independent assurance evidence for high-criticality services",
+      "field": "independent_assurance_evidence",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {
+        "business_criticality": "high"
+      },
+      "source": {
+        "chunk_id": "4984bc35-73d7-5a45-8037-a4a8d6089afa",
+        "document_id": "64ee4dab-45d3-520b-b13a-c7ab98ad3d26",
+        "location": {
+          "line_start": 65,
+          "line_end": 74
+        },
+        "quote": "For high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-dpa-signed",
+      "title": "For relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins.",
+      "field": "dpa_signed",
+      "operator": "eq",
+      "expected": true,
+      "severity": "High",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "ad51d1a0-96c8-5d94-b10f-e8c85312d324",
+        "document_id": "c00b7701-04a7-5069-800f-fec382346246",
+        "location": {
+          "line_start": 25,
+          "line_end": 34
+        },
+        "quote": "For relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins."
+      },
+      "evaluation_method": "deterministic"
+    },
+    {
+      "id": "req-purpose-minimization",
+      "title": "For relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need.",
+      "field": "documented_purpose_and_minimization",
+      "operator": "manual",
+      "expected": null,
+      "severity": "High",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "ad51d1a0-96c8-5d94-b10f-e8c85312d324",
+        "document_id": "c00b7701-04a7-5069-800f-fec382346246",
+        "location": {
+          "line_start": 25,
+          "line_end": 34
+        },
+        "quote": "For relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-hosting-region",
+      "title": "For relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU.",
+      "field": "hosting_region",
+      "operator": "eq",
+      "expected": "EU",
+      "severity": "High",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "6fe66c39-da30-50d4-9ed2-0957fca4caaa",
+        "document_id": "c00b7701-04a7-5069-800f-fec382346246",
+        "location": {
+          "line_start": 35,
+          "line_end": 46
+        },
+        "quote": "For relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU."
+      },
+      "evaluation_method": "deterministic"
+    },
+    {
+      "id": "req-subprocessor-inventory-notice",
+      "title": "For relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards.",
+      "field": "subprocessor_inventory_and_notice",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "077edb45-3ac4-594c-b7b7-a6a44c23df11",
+        "document_id": "c00b7701-04a7-5069-800f-fec382346246",
+        "location": {
+          "line_start": 47,
+          "line_end": 60
+        },
+        "quote": "For relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-deletion-window",
+      "title": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles.",
+      "field": "retention_days",
+      "operator": "lte",
+      "expected": 30,
+      "severity": "High",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "354c5249-8b0f-5526-a0cc-a8f9ea180a23",
+        "document_id": "c00b7701-04a7-5069-800f-fec382346246",
+        "location": {
+          "line_start": 61,
+          "line_end": 66
+        },
+        "quote": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles."
+      },
+      "evaluation_method": "deterministic"
+    },
+    {
+      "id": "req-individual-requests",
+      "title": "For relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process.",
+      "field": "individual_request_support",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {
+        "personal_data": true
+      },
+      "source": {
+        "chunk_id": "dfd12dc6-7308-5e0b-a695-08439b4914d2",
+        "document_id": "c00b7701-04a7-5069-800f-fec382346246",
+        "location": {
+          "line_start": 67,
+          "line_end": 76
+        },
+        "quote": "For relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-gov-01",
+      "title": "Supplier relationship accountability (GOV-01)",
+      "field": "accountable_relationship_owner",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {},
+      "source": {
+        "chunk_id": "46e6f1db-2799-57d2-b804-730cfc2630c7",
+        "document_id": "754169f5-0099-5066-9390-5c14ed62df0e",
+        "location": {
+          "line_start": 21,
+          "line_end": 34
+        },
+        "quote": "The supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-gov-02",
+      "title": "Assurance response quality (GOV-02)",
+      "field": "accurate_assurance_responses",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {},
+      "source": {
+        "chunk_id": "c7dc097d-c3d8-536f-bc88-8a35ca7243d5",
+        "document_id": "754169f5-0099-5066-9390-5c14ed62df0e",
+        "location": {
+          "line_start": 35,
+          "line_end": 42
+        },
+        "quote": "The supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-gov-03",
+      "title": "Contractual flow-down (GOV-03)",
+      "field": "subcontractor_flow_down",
+      "operator": "manual",
+      "expected": null,
+      "severity": "High",
+      "applicability": {},
+      "source": {
+        "chunk_id": "c72127d1-7a33-5647-a506-8ee2c816263f",
+        "document_id": "754169f5-0099-5066-9390-5c14ed62df0e",
+        "location": {
+          "line_start": 43,
+          "line_end": 52
+        },
+        "quote": "The supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-gov-04",
+      "title": "Continuity and exit plan for high-criticality services (GOV-04)",
+      "field": "continuity_and_exit_plan",
+      "operator": "manual",
+      "expected": null,
+      "severity": "High",
+      "applicability": {
+        "business_criticality": "high"
+      },
+      "source": {
+        "chunk_id": "840acbd8-88af-560c-8476-357ad48bcfbd",
+        "document_id": "754169f5-0099-5066-9390-5c14ed62df0e",
+        "location": {
+          "line_start": 53,
+          "line_end": 62
+        },
+        "quote": "For high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-ir-01",
+      "title": "Supplier initial notification within 24 hours for qualifying incidents",
+      "field": "notification_hours",
+      "operator": "lte",
+      "expected": 24,
+      "severity": "High",
+      "applicability": {},
+      "source": {
+        "chunk_id": "25dec942-234f-523f-87d2-5a156f5af891",
+        "document_id": "5762d095-852f-56eb-8fdf-1153f9f71e72",
+        "location": {
+          "line_start": 21,
+          "line_end": 30
+        },
+        "quote": "The supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery."
+      },
+      "evaluation_method": "deterministic"
+    },
+    {
+      "id": "req-ir-02",
+      "title": "Supplier preservation of relevant incident evidence and timeline maintenance",
+      "field": "supplier_evidence_preservation_and_timeline",
+      "operator": "manual",
+      "expected": null,
+      "severity": "High",
+      "applicability": {},
+      "source": {
+        "chunk_id": "388a7d3c-1197-5714-89f1-191dfba2799d",
+        "document_id": "5762d095-852f-56eb-8fdf-1153f9f71e72",
+        "location": {
+          "line_start": 31,
+          "line_end": 42
+        },
+        "quote": "The supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-ir-03",
+      "title": "Supplier provision of containment and recovery updates through incident closure",
+      "field": "supplier_containment_and_recovery_updates",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {},
+      "source": {
+        "chunk_id": "b02b6baf-db64-55a2-a695-845ca57dc9dd",
+        "document_id": "5762d095-852f-56eb-8fdf-1153f9f71e72",
+        "location": {
+          "line_start": 43,
+          "line_end": 52
+        },
+        "quote": "The supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks."
+      },
+      "evaluation_method": "manual"
+    },
+    {
+      "id": "req-ir-04",
+      "title": "Supplier delivery of scoped root-cause and corrective-action report for confirmed incidents",
+      "field": "supplier_root_cause_and_corrective_action_report",
+      "operator": "manual",
+      "expected": null,
+      "severity": "Medium",
+      "applicability": {},
+      "source": {
+        "chunk_id": "983e9bc8-e820-5278-b4df-4ae46eca3984",
+        "document_id": "5762d095-852f-56eb-8fdf-1153f9f71e72",
+        "location": {
+          "line_start": 63,
+          "line_end": 70
+        },
+        "quote": "For confirmed incidents, the supplier must deliver a scoped root-cause and corrective-action report identifying contributing factors, accountable remediation owners and verification of closure."
+      },
+      "evaluation_method": "manual"
+    }
+  ],
+  "error": "Source quote does not resolve to an eligible chunk"
+}

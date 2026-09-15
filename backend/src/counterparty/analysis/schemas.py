@@ -29,6 +29,21 @@ class Requirement(BaseModel):
 
     @model_validator(mode="after")
     def check_comparison(self):
+        supported = {
+            "retention_days",
+            "notification_hours",
+            "hosting_region",
+            "subprocessors_region",
+            "mfa",
+            "encryption_at_rest",
+            "dpa_signed",
+        }
+        if self.field not in supported and (
+            self.operator != "manual"
+            or self.evaluation_method != "manual"
+            or self.expected is not None
+        ):
+            raise ValueError("Unsupported fields require manual evaluation with expected null")
         if self.operator in {"lte", "gte"} and (
             isinstance(self.expected, bool) or not isinstance(self.expected, (int, float))
         ):

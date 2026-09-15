@@ -1085,9 +1085,6 @@ a {
   .nav a {
     justify-content: center;
   }
-  .workspace {
-    grid-column: 2;
-  }
   .card-grid {
     grid-template-columns: 1fr 1fr;
   }

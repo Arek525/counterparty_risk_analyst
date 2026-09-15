@@ -1,3 +1,15 @@
+# Evaluation scope
+
+The existing `run.py`, demo/Gemini reports and gates below are **historical
+hash-retrieval regressions**, even when their extractor is Gemini. Their variant
+name `hybrid` describes the historical lexical-plus-hash algorithm, not current
+runtime E5 retrieval. Do not compare their finding accuracy with retrieval recall.
+
+Current pretrained multilingual retrieval is evaluated separately by
+`semantic_retrieval.py` against frozen `multilingual-retrieval.json`; results live
+in `results-semantic.json`. See [method and measurements](../docs/verification/embeddings.md).
+Routine tests do not download a model or call paid providers.
+
 # Analysis evaluation
 
 Run from the repository root in the backend Python environment:
@@ -53,7 +65,8 @@ fields: `retention_days`, `notification_hours`, `hosting_region`,
 `subprocessors_region`, `mfa`, `encryption_at_rest`, `dpa_signed`. Other custom
 policies remain editable manual requirements with unknown findings. Uploaded
 policies need human review and approval; proposal thresholds come from their text.
-No Polish extraction quality claim is made, although application output is Polish.
+Application output is English; source quotations keep their original language.
+No Polish extraction quality claim is made.
 Compound statements isolate values by named-control clauses; decimal thresholds
 remain numeric. Pattern extraction still does not provide general language
 understanding. Real-model citation validation establishes source resolution, not
@@ -96,3 +109,36 @@ unknowns and requirements that do not apply. Human decision remains separate.
 Direct contradictions require equal explicit scope and period; differing or absent
 scope/period creates an ambiguity requiring review. EU hosting plus a US
 subprocessor produces a question, not an automatic contradiction or violation.
+
+
+## Northstar development corpus (2026-09-15)
+
+`northstar-gold-v1.json` separately records the 20 expected rules and literal source
+anchors (filename, source hash, full chunk location and quote). The author checked
+these labels against the supplier clauses; independent human review is pending.
+The four substantial source policies and long Atlas declaration are a development
+and acceptance set, not a held-out evaluation. Prompt changes used this set.
+The historical ten-case labels in `held_out.json` remain unchanged.
+
+```bash
+PYTHONPATH=backend/src python evaluations/northstar.py --mode demo
+# Explicit provider calls, only with authorized environment credentials:
+PYTHONPATH=backend/src python evaluations/northstar.py --mode gemini --output /tmp/northstar.json
+```
+
+The offline mode checks curated seed requirements and deterministic Atlas facts;
+it makes no claim about demo-regex policy extraction. Real mode extracts all four
+policies and analyzes the Atlas declaration. Every proposal citation must resolve.
+The runner matches requirements to gold by the cited supplier clause, allowing a
+model to choose different manual field names. Rule, applicability, severity,
+classification, missing/duplicate/internal obligations and seven exact fact values
+are checked separately. Any acceptance mismatch produces a nonzero exit code.
+Citation matching does not independently prove semantic entailment of a shortened
+quote; human review remains required.
+
+Current final Gemini result: 20/20 requirements, six deterministic and 14 manual;
+Atlas has six passes, 14 unknowns, 30% completeness, a US-support discrepancy and
+`Unable to assess` risk. See [the recorded failures, fixes and final metrics](../docs/verification/northstar.md).
+Retrieval in this result uses the existing hash-based hybrid variant; it is not an
+E5 embedding evaluation. Manual control narrative remains available in the source,
+but the evaluator deliberately does not attach or adjudicate it as a passing fact.

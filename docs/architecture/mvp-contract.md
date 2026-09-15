@@ -27,7 +27,7 @@ Demo credentials are seeded explicitly, documented, and usable only locally.
 - GET /api/policies/{id}; PUT /api/policies/{id}/requirements {requirements:[...]}
   only drafts; POST /api/policies/{id}/approve reviewer only. Edits to approved
   policies require POST /api/policies/{id}/clone, producing a draft new version.
-- GET/POST /api/cases/{id}/runs: POST {policy_version_id,retrieval_variant:'lexical'|'hybrid'}.
+- GET/POST /api/cases/{id}/runs: POST {policy_version_id,retrieval_variant:'semantic'|'hybrid'|'lexical' (default semantic)}.
 - GET /api/runs/{id}: status, report, timestamps, events, model and input version.
 - POST /api/runs/{id}/decision {decision:'accepted'|'rejected'|'needs_information',rationale}.
 - GET /api/audit?case_id=... (optional, organization scoped).
@@ -78,14 +78,16 @@ User: id,organization_id,email,password_hash,role,name,is_active.
 AssessmentCase: id,organization_id,owner_id,name,counterparty_name,relationship,
 created_at,updated_at.
 Document: id,organization_id,case_id nullable,uploaded_by,kind,filename,sha256,
-storage_key,version,media_type,created_at.
+storage_key,version,media_type,created_at,index_status (pending/indexing/ready/error),
+index_config,index_attempts,index_owner,index_lease_expires_at,indexed_at,index_error.
 DocumentChunk: id,document_id,organization_id,case_id nullable,text,location,
-embedding Vector(128),embedding_model='demo-hash-v1'.
+embedding nullable Vector(384),embedding_model nullable full configuration fingerprint.
 PolicySetVersion: id,organization_id,name,version,status,document_ids JSON,
 requirements JSON,created_by,approved_by nullable,created_at,approved_at nullable.
 AnalysisRun: id,organization_id,case_id,created_by,policy_version_id,status
 (queued,running,awaiting_review,completed,failed),input_snapshot JSON,report JSON
-nullable,retrieval_variant,model_mode,error nullable,attempts int default0,
+nullable,retrieval_snapshot nullable write-once JSON,retrieval_variant
+(semantic default/hybrid/lexical),model_mode,error nullable,attempts int default0,
 lease_owner nullable,lease_expires_at nullable,created_at,started_at nullable,
 finished_at nullable. Worker creates report and awaits reviewer; decision completes.
 Decision: id,organization_id,run_id,actor_id,decision,rationale,created_at.
@@ -121,3 +123,13 @@ worker recovery, exact write approval, expiration and duplicate execution.
 Compare lexical/hybrid retrieval on held-out synthetic data. Document measured
 demo results and real-provider evaluation pending credentials, without claiming
 LLM quality from fixtures.
+
+
+## Local model indexing
+
+Authenticated `GET /embedding-status` reports worker status, heartbeat freshness,
+full config/fingerprint and a safe error. `POST /documents/{id}/reindex` requires
+write permission plus the normal organization/case scope. Document status is public
+metadata on existing document endpoints. Semantic/hybrid run creation returns 409
+until all captured evidence indexes are ready and compatible. Policy extraction and
+lexical analysis do not require those indexes. Run detail includes retrieval_snapshot.

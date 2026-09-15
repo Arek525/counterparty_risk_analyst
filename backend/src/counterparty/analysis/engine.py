@@ -5,18 +5,19 @@ Authorization and snapshot scoping happen before this pure analysis boundary.
 """
 
 import hashlib
+import json
 import math
 import re
 import time
 from collections import Counter, defaultdict
 from uuid import NAMESPACE_URL, uuid5
 
-from .adapters import GeminiAdapter
+from .adapters import GeminiAdapter, ModelError
 from .schemas import FactBatch, RequirementBatch, validate_requirements, validate_source
 
 EMBEDDING_MODEL = "demo-hash-v1"
 RULES_VERSION = "risk-rules-v1"
-PROMPT_VERSION = "grounded-extraction-v2"
+PROMPT_VERSION = "grounded-extraction-v5"
 ALIASES = {
     "retention_days": r"retention(?: period)?|data (?:deletion|erasure)|retain(?:ed)?",
     "notification_hours": r"(?:breach|incident) notification|notify|notification",
@@ -75,24 +76,64 @@ def retrieve(
     variant="hybrid",
     top_k=8,
     semantic_scores: dict[str, float] | None = None,
+    algorithm="historical-hash-v1",
 ) -> list[dict]:
-    if variant not in {"lexical", "hybrid"}:
+    if variant not in {"lexical", "hybrid", "semantic"}:
         raise ValueError("Unsupported retrieval variant")
-    query_tokens = set(tokens(query))
-    query_vector = embed_text(query)
-    scores = []
+    # Historical offline regressions explicitly retain their original ASCII/hash scoring.
+    tokenizer = tokens if algorithm == "historical-hash-v1" else unicode_tokens
+    query_tokens = set(tokenizer(query))
+    lexical = {}
     for chunk in chunks:
-        counts = Counter(tokens(chunk["text"]))
-        lexical = sum(math.log1p(counts[token]) for token in query_tokens)
-        semantic = (
-            float(semantic_scores.get(str(chunk["id"]), 0))
-            if semantic_scores is not None
-            else sum(a * b for a, b in zip(query_vector, embed_text(chunk["text"]), strict=True))
-        )
-        score = lexical if variant == "lexical" else lexical + 2 * max(0, semantic)
-        if score > 0:
-            scores.append((score, str(chunk["id"]), chunk))
-    return [item[2] for item in sorted(scores, key=lambda x: (-x[0], x[1]))[:top_k]]
+        counts = Counter(tokenizer(chunk["text"]))
+        lexical[str(chunk["id"])] = sum(math.log1p(counts[token]) for token in query_tokens)
+    if variant == "lexical":
+        scores = lexical
+    elif algorithm == "e5-v1":
+        ids = {str(chunk["id"]) for chunk in chunks}
+        if (
+            semantic_scores is None
+            or set(semantic_scores) != ids
+            or not all(math.isfinite(value) for value in semantic_scores.values())
+        ):
+            raise ValueError("Runtime hybrid retrieval requires complete finite semantic scores")
+        if variant == "semantic":
+            scores = semantic_scores
+        else:
+            scores = dict.fromkeys(ids, 0.0)
+            for weight, ranking in (
+                (3, semantic_scores),
+                (1, {key: value for key, value in lexical.items() if value > 0}),
+            ):
+                for rank, key in enumerate(
+                    sorted(ranking, key=lambda key: (-ranking[key], key)), 1
+                ):
+                    scores[key] += weight / (5 + rank)
+    elif algorithm == "historical-hash-v1":
+        # Offline historical baseline only. The worker always supplies its versioned algorithm.
+        if semantic_scores is None:
+            query_vector = embed_text(query)
+            semantic_scores = {
+                str(chunk["id"]): sum(
+                    a * b for a, b in zip(query_vector, embed_text(chunk["text"]), strict=True)
+                )
+                for chunk in chunks
+            }
+        scores = {
+            key: value + 2 * max(0, semantic_scores.get(key, 0)) for key, value in lexical.items()
+        }
+    else:
+        raise ValueError("Unsupported retrieval algorithm")
+    ranked = sorted(chunks, key=lambda chunk: (-scores[str(chunk["id"])], str(chunk["id"])))
+    return (
+        ranked[:top_k]
+        if variant == "semantic"
+        else [chunk for chunk in ranked if scores[str(chunk["id"])] > 0][:top_k]
+    )
+
+
+def unicode_tokens(text):
+    return re.findall(r"[^\W_]+", text.casefold().replace("_", " "))
 
 
 def source(chunk: dict, quote: str) -> dict:
@@ -164,31 +205,231 @@ def extract_facts(chunks: list[dict]) -> list[dict]:
     return FactBatch.model_validate({"facts": facts}).model_dump()["facts"]
 
 
-def propose_requirements(chunks: list[dict], mode: str = "demo") -> list[dict]:
+# Leave substantial headroom below the adapter input limit and bound response size by
+# preserving document boundaries (the larger corpus has 4–6 obligations per document).
+BATCH_INPUT_CHARS = 25000
+MAX_BATCHES = 8
+
+
+def source_order(chunks: list[dict]) -> list[dict]:
+    """Group documents without letting retrieval rank become source order."""
+
+    def key(chunk):
+        location = chunk.get("location", {})
+        coordinates = (
+            (location.get("page", 0), location.get("line_start", 0), location.get("line_end", 0))
+            if isinstance(location, dict)
+            else (0, 0, 0)
+        )
+        return str(chunk["document_id"]), *coordinates, str(chunk["id"])
+
+    return sorted(chunks, key=key)
+
+
+def policy_contexts(chunks: list[dict]) -> dict[str, dict]:
+    """Carry the document introduction, active Markdown sections and adjacent text.
+
+    Context is untrusted interpretation data, never an additional extraction source.
+    Oversized context is rejected at batch planning instead of silently truncated.
+    """
+    contexts, sections = {}, []
+    document_id, intro, previous = None, "", ""
+    for chunk in chunks:
+        if chunk["document_id"] != document_id:
+            document_id, intro, previous = chunk["document_id"], chunk["text"], ""
+            sections = []
+        contexts[str(chunk["id"])] = {
+            "document_intro": intro if previous else "",
+            "active_sections": [
+                {key: value for key, value in section.items() if key != "collecting"}
+                for section in sections
+            ],
+            "preceding_text": previous if previous != intro else "",
+        }
+        for line in chunk["text"].splitlines():
+            heading = re.match(r"^(#{1,6})\s+(.+)$", line)
+            if heading:
+                level = len(heading[1])
+                sections = [section for section in sections if section["level"] < level]
+                sections.append({"level": level, "heading": line, "lead": "", "collecting": True})
+            elif sections and sections[-1]["collecting"]:
+                if line.strip():
+                    sections[-1]["lead"] += ("\n" if sections[-1]["lead"] else "") + line
+                elif sections[-1]["lead"]:
+                    sections[-1]["collecting"] = False
+        previous = chunk["text"]
+    return contexts
+
+
+def policy_batches(chunks: list[dict]) -> list[dict]:
+    contexts = policy_contexts(chunks)
+    payloads, current = [], None
+    for chunk in chunks:
+        candidate = {**current, "chunks": [*current["chunks"], chunk]} if current else None
+        if current and (
+            chunk["document_id"] != current["chunks"][-1]["document_id"]
+            or len(json.dumps(candidate, ensure_ascii=False)) + len(POLICY_INSTRUCTION)
+            > BATCH_INPUT_CHARS
+        ):
+            payloads.append(current)
+            current = None
+        if current is None:
+            context = contexts[str(chunk["id"])]
+            if context["document_intro"] and not context["active_sections"]:
+                raise ModelError(
+                    "Policy split lacks explicit section context; split the document by section"
+                )
+            if len(json.dumps(context, ensure_ascii=False)) > 8000:
+                raise ModelError(
+                    "Policy section context limit exceeded; split the policy by section"
+                )
+            current = {"context": context, "chunks": []}
+        current["chunks"].append(chunk)
+        if (
+            len(json.dumps(current, ensure_ascii=False)) + len(POLICY_INSTRUCTION)
+            > BATCH_INPUT_CHARS
+        ):
+            raise ModelError("Policy context and chunk exceed the model batch input limit")
+    if current:
+        payloads.append(current)
+    if len(payloads) > MAX_BATCHES:
+        raise ModelError("Model batch call limit exceeded; reduce selected documents")
+    return payloads
+
+
+def chunk_batches(chunks: list[dict], base: dict, instruction: str) -> list[list[dict]]:
+    """Pack contiguous document chunks by serialized size, never truncate inputs."""
+    batches, current = [], []
+    for chunk in chunks:
+        candidate = [*current, chunk]
+        size = len(json.dumps({**base, "chunks": candidate}, ensure_ascii=False)) + len(instruction)
+        new_document = current and chunk["document_id"] != current[-1]["document_id"]
+        if current and (size > BATCH_INPUT_CHARS or new_document):
+            batches.append(current)
+            current = []
+        if (
+            len(json.dumps({**base, "chunks": [chunk]}, ensure_ascii=False)) + len(instruction)
+            > BATCH_INPUT_CHARS
+        ):
+            raise ModelError("Model batch input limit exceeded; an individual chunk is too large")
+        current.append(chunk)
+    if current:
+        batches.append(current)
+    if len(batches) > MAX_BATCHES:
+        raise ModelError("Model batch call limit exceeded; reduce selected documents")
+    return batches
+
+
+POLICY_INSTRUCTION = (
+    "Propose every external counterparty obligation from these policies, including "
+    "requirements outside "
+    "the supported fields. Counterparties include suppliers, external customers and partners; "
+    "identify external and internal actors from the policy roles, not from a fixed supplier role. "
+    "Context provides document/section scope, severity and adjacent text; inherit relevant "
+    "conditions, but propose and cite obligations ONLY from current chunks, never context. "
+    "Do not repeat an obligation merely because it appears in context. "
+    "Do not turn the assessing organization's internal duties, "
+    "explanatory prose or "
+    "document metadata into counterparty requirements. Keep one requirement per normative "
+    "counterparty obligation; preserve explicit control IDs when present. Do not split its "
+    "examples into extra requirements. Do not omit a requirement because it needs manual review. "
+    "Extract applicability context and severity. Applicability may use these exact "
+    "relationship keys: personal_data (boolean), privileged_access (boolean), "
+    "business_criticality (low/medium/high), purpose, data_shared, system_access. "
+    "Represent stated conditional relationship scope as applicability, not just in the title. "
+    "purpose means the business purpose of the relationship, never an incident/event trigger. "
+    "Assess preparedness for future incident duties across relationships; do not encode a "
+    "future incident, termination or request as an invented exact-text context predicate. "
+    "When an actual relationship condition cannot be represented faithfully by supported "
+    "equality predicates, leave applicability empty, retain the condition in title/source, "
+    "and use manual evaluation with operator manual and expected null to avoid evaluating "
+    "an uncertain scope unconditionally. Future incident duties are readiness obligations, "
+    "not unsupported relationship conditions; assess their stated commitments normally. "
+    "Supported fields: retention_days, notification_hours, hosting_region, "
+    "subprocessors_region, mfa, encryption_at_rest, dpa_signed. Use deterministic "
+    "evaluation for these fields. A requirement to enable MFA, encrypt data at rest or "
+    "have a signed DPA uses the corresponding supported field, operator eq, expected true "
+    "and evaluation_method deterministic. Scope examples do not make those boolean "
+    "requirements manual. Numeric days/hours use numeric expected values and lte/gte "
+    "as stated; region requirements use eq with the stated region. Use operator manual "
+    "and evaluation_method manual "
+    "with expected null and a descriptive snake_case field for unsupported interpretation. "
+    "Require human approval. Unique IDs. Quote only the counterparty obligation sentence "
+    "from ONE chunk. Do not include its heading or concatenate adjacent chunks. "
+    "Copy metadata from the chunk actually containing that exact quoted sentence. "
+    "Source chunk_id, document_id and location must be copied verbatim from the "
+    "supplied chunk metadata. Location identifies the whole chunk: do not calculate "
+    "new line numbers or narrow the location to the quoted sentence. "
+    "Write all generated titles and explanations in natural English, while preserving "
+    "every source quote verbatim in its original language."
+)
+
+
+def ground_model_sources(items: list[dict], batch: list[dict]) -> int:
+    """Repair only opaque chunk coordinates for uniquely grounded unchanged quotes."""
+    corrections = 0
+    for item in items:
+        citation = item["source"]
+        try:
+            validate_source(citation, batch)
+        except ValueError:
+            matches = [
+                chunk
+                for chunk in batch
+                if str(chunk["document_id"]) == citation["document_id"]
+                and citation["quote"] in chunk["text"]
+            ]
+            if len(matches) != 1 or (
+                matches[0]["text"].find(citation["quote"])
+                != matches[0]["text"].rfind(citation["quote"])
+            ):
+                raise
+            corrected = {
+                **citation,
+                "chunk_id": str(matches[0]["id"]),
+                "location": matches[0]["location"],
+            }
+            validate_source(corrected, batch)
+            item["source"] = corrected
+            corrections += 1
+    return corrections
+
+
+def propose_requirements(
+    chunks: list[dict], mode: str = "demo", metrics: dict | None = None
+) -> list[dict]:
     policies = [c for c in chunks if c.get("kind") == "policy"]
     if not policies:
         raise ValueError("Select at least one policy document")
     if mode == "gemini":
+        batches = policy_batches(policies)
         adapter = GeminiAdapter()
-        result = adapter.generate(
-            "Propose every requirement from these policies, including requirements outside "
-            "the supported fields. Do not omit a requirement because it needs manual review. "
-            "Extract applicability context and severity. Applicability may use these exact "
-            "relationship keys: personal_data (boolean), privileged_access (boolean), "
-            "business_criticality (low/medium/high), purpose, data_shared, system_access. "
-            "Represent stated conditional scope as applicability, not just in the title. "
-            "Supported fields: retention_days, notification_hours, hosting_region, "
-            "subprocessors_region, mfa, encryption_at_rest, dpa_signed. Use deterministic "
-            "evaluation for these fields; use operator manual and evaluation_method manual "
-            "with a descriptive snake_case field for unsupported interpretation. "
-            "Require human approval. Unique IDs. Preserve exact source quote. "
-            "Source chunk_id, document_id and location must be copied verbatim from the "
-            "supplied chunk metadata. Location identifies the whole chunk: do not calculate "
-            "new line numbers or narrow the location to the quoted sentence.",
-            {"chunks": policies},
-            RequirementBatch,
-        )["requirements"]
-        return validate_requirements(result, policies)
+        adapter.metrics["citation_corrections"] = 0
+        result = []
+        start = time.monotonic()
+        try:
+            for payload in batches:
+                batch = payload["chunks"]
+                proposed = adapter.generate(POLICY_INSTRUCTION, payload, RequirementBatch)[
+                    "requirements"
+                ]
+                # Empty context-only batches are allowed; the complete proposal cannot be empty.
+                if proposed:
+                    adapter.metrics["citation_corrections"] += ground_model_sources(proposed, batch)
+                    result.extend(validate_requirements(proposed, batch))
+            seen_rules = set()
+            for requirement in result:
+                cite = requirement["source"]
+                key = (cite["document_id"], cite["chunk_id"], cite["quote"], requirement["field"])
+                if key in seen_rules:
+                    raise ModelError("Duplicate or conflicting proposed obligation across batches")
+                seen_rules.add(key)
+            return validate_requirements(result, policies)
+        finally:
+            if metrics is not None:
+                metrics.update(
+                    adapter.metrics, duration_ms=round((time.monotonic() - start) * 1000, 2)
+                )
     if mode != "demo":
         raise ValueError("Unsupported MODEL_MODE")
     proposals = []
@@ -238,7 +479,7 @@ def propose_requirements(chunks: list[dict], mode: str = "demo") -> list[dict]:
                 proposals.append(
                     {
                         "id": str(uuid5(NAMESPACE_URL, str(chunk["id"]))),
-                        "title": "Wymaganie do ręcznej interpretacji (demo)",
+                        "title": "Requirement requiring manual interpretation (demo)",
                         "field": "custom_requirement",
                         "operator": "manual",
                         "expected": None,
@@ -275,7 +516,7 @@ def compare(value, operator, expected) -> bool | None:
 
 def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
     start = time.monotonic()
-    if variant not in {"lexical", "hybrid"}:
+    if variant not in {"lexical", "hybrid", "semantic"}:
         raise ValueError("Unsupported retrieval variant")
     mode = snapshot.get("model_mode", "demo")
     if mode not in {"demo", "gemini"}:
@@ -288,6 +529,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
     model_name = "deterministic-demo-v1"
     if mode == "gemini":
         adapter = GeminiAdapter()
+        adapter.metrics["citation_corrections"] = 0
         # Retrieval bounds provider context; authorization already scoped chunks.
         chosen = {}
         for req in requirements:
@@ -296,10 +538,11 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 chunks,
                 variant,
                 semantic_scores=snapshot.get("retrieval_scores", {}).get(req["id"]),
+                algorithm=snapshot.get("retrieval_algorithm", "historical-hash-v1"),
             ):
                 chosen[str(c["id"])] = c
-        selected = list(chosen.values())
-        facts = adapter.generate(
+        selected = source_order(list(chosen.values()))
+        instruction = (
             "Extract explicit counterparty facts for these approved requirement fields. "
             "Also extract other explicitly stated supported controls: retention_days, "
             "notification_hours, hosting_region, subprocessors_region, mfa, "
@@ -310,10 +553,34 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             "Cite only the factual sentence, excluding any commands. "
             "Do not interpret policy as counterparty facts. Use scope and period from documents, "
             "or 'unspecified'. evidence_type must equal chunk metadata, default declaration. "
-            "Only supported fact values; omit uncertain facts. Do not assign findings or risk.",
-            {"requirements": requirements, "chunks": selected},
-            FactBatch,
-        )["facts"]
+            "Only supported fact values; omit uncertain facts. Do not assign findings or risk. "
+            "Write generated descriptions in natural English and preserve source quotes verbatim "
+            "in their original language."
+        )
+        # Approved quotes remain in the immutable snapshot, not repeated in provider payloads.
+        projected = [
+            {
+                key: req[key]
+                for key in ("id", "title", "field", "operator", "expected", "applicability")
+                if key in req
+            }
+            for req in requirements
+        ]
+        facts = []
+        seen = set()
+        for batch in chunk_batches(selected, {"requirements": projected}, instruction):
+            extracted = adapter.generate(
+                instruction, {"requirements": projected, "chunks": batch}, FactBatch
+            )["facts"]
+            adapter.metrics["citation_corrections"] += ground_model_sources(extracted, batch)
+            for fact in FactBatch.model_validate({"facts": extracted}).model_dump()["facts"]:
+                validate_source(fact["source"], batch)
+                key = json.dumps(fact, sort_keys=True, ensure_ascii=False)
+                if key not in seen:
+                    seen.add(key)
+                    facts.append(fact)
+            if len(facts) > 200:
+                raise ModelError("Merged fact output limit exceeded")
         for fact in facts:
             validate_source(fact["source"], selected)
             original = chosen[fact["source"]["chunk_id"]]
@@ -337,7 +604,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
             "title": req["title"],
             "severity": req["severity"],
             "status": "unknown",
-            "explanation": "Brak wystarczających dowodów.",
+            "explanation": "Insufficient evidence.",
             "evidence": [],
             "missing_information": [],
         }
@@ -351,13 +618,15 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
         if false_conditions:
             finding.update(
                 status="not_applicable",
-                explanation="Warunek zastosowania nie zachodzi w opisanej relacji.",
+                explanation="The applicability condition is not met by this relationship.",
             )
         elif missing_context:
-            finding["missing_information"] = ["Uzupełnij kontekst: " + ", ".join(missing_context)]
+            finding["missing_information"] = [
+                "Complete the relationship context: " + ", ".join(missing_context)
+            ]
         elif req.get("evaluation_method") == "manual" or req["operator"] == "manual":
             finding["missing_information"] = [
-                "Wymaganie wymaga ręcznej interpretacji: " + req["title"]
+                "The requirement needs manual interpretation: " + req["title"]
             ]
         else:
             retrieved = retrieve(
@@ -365,6 +634,7 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 chunks,
                 variant,
                 semantic_scores=snapshot.get("retrieval_scores", {}).get(req["id"]),
+                algorithm=snapshot.get("retrieval_algorithm", "historical-hash-v1"),
             )
             ids = {str(c["id"]) for c in retrieved}
             relevant = [
@@ -395,16 +665,16 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 finding.update(
                     status="conflict",
                     explanation=(
-                        "Sprzeczne deklaracje dotyczą tego samego faktu, zakresu i okresu. "
-                        "Wymagana ocena człowieka."
+                        "Conflicting declarations concern the same fact, scope, and period. "
+                        "Human review is required."
                     ),
                 )
                 if False in evaluations:
                     confirmed_failures.append(req["severity"])
             elif distinct:
                 finding["explanation"] = (
-                    "Różne wartości bez potwierdzenia wspólnego zakresu i okresu. "
-                    "Wymagane wyjaśnienie."
+                    "Values differ without a confirmed shared scope and period. "
+                    "Clarification is required."
                 )
                 discrepancies.append(
                     {
@@ -424,17 +694,17 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
                 finding.update(
                     status="pass" if passed else "fail",
                     explanation=(
-                        f"Dowód wskazuje {displayed_value}; "
-                        f"reguła {req['operator']} {req['expected']}. "
-                        "Ocena dotyczy treści źródła; deklaracja nie jest "
-                        "niezależnym potwierdzeniem."
+                        f"The evidence states {displayed_value}; "
+                        f"the rule is {req['operator']} {req['expected']}. "
+                        "The assessment reflects the source content; a declaration is not "
+                        "independent confirmation."
                     ),
                 )
                 if not passed:
                     confirmed_failures.append(req["severity"])
         if finding["status"] in {"unknown", "conflict"} and not finding["missing_information"]:
             finding["missing_information"] = [
-                "Dostarcz aktualny dowód i wyjaśnij zakres/okres: " + req["title"]
+                "Provide current evidence and clarify its scope and period: " + req["title"]
             ]
         questions.extend(finding["missing_information"])
         findings.append(finding)
@@ -442,8 +712,8 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
     us = [f for f in facts if f["field"] == "subprocessors_region" and f["value"] == "US"]
     if eu and us:
         question = (
-            "Czy podprocesor w USA uzyskuje dostęp do danych przechowywanych w UE? "
-            "Wyjaśnij zakres transferu."
+            "Does the US subprocessor access data stored in the EU? "
+            "Clarify the scope of the transfer."
         )
         discrepancies.append(
             {
@@ -470,11 +740,11 @@ def analyze(snapshot: dict, variant: str = "hybrid") -> dict:
         "risk": risk,
         "completeness": completeness,
         "summary": (
-            "Tryb demonstracyjny: deterministyczny ekstraktor, bez wywołań LLM. "
+            "Demo mode: deterministic extractor with no LLM calls. "
             if mode == "demo"
-            else "Ekstrakcja Gemini; reguły oceny w kodzie. "
+            else "Gemini extraction; assessment rules executed in code. "
         )
-        + f"Ryzyko: {risk}. Kompletność dowodów: {completeness}%. Wymagana decyzja recenzenta.",
+        + f"Risk: {risk}. Evidence completeness: {completeness}%. Reviewer decision required.",
         "questions": list(dict.fromkeys(questions)),
         "discrepancies": discrepancies,
         "model_mode": mode,

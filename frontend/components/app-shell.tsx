@@ -9,9 +9,9 @@ import { Icon } from "./icons";
 import { Spinner } from "./ui";
 
 const links = [
-  { href: "/cases", label: "Sprawy", icon: "cases" as const },
-  { href: "/policies", label: "Polityki", icon: "policy" as const },
-  { href: "/audit", label: "Historia", icon: "audit" as const },
+  { href: "/cases", label: "Cases", icon: "cases" as const },
+  { href: "/policies", label: "Policies", icon: "policy" as const },
+  { href: "/audit", label: "Activity", icon: "audit" as const },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (loading || !user)
     return (
       <main className="main">
-        <Spinner label="Sprawdzanie sesji…" />
+        <Spinner label="Checking your session…" />
       </main>
     );
 
@@ -46,10 +46,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         {meta?.demo_mode && (
           <div className="demo-pill">
             <span className="demo-dot" />
-            <span>Tryb demo</span>
+            <span>Demo mode</span>
           </div>
         )}
-        <nav className="nav" aria-label="Główna nawigacja">
+        <nav className="nav" aria-label="Main navigation">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span>{roleLabels[user.role]}</span>
           <button className="logout-button" onClick={handleLogout}>
             <Icon name="logout" />
-            <span>Wyloguj</span>
+            <span>Sign out</span>
           </button>
         </div>
       </aside>

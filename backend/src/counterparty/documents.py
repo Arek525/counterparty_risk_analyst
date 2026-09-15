@@ -132,8 +132,6 @@ def ingest(
     storage_path: str,
     evidence_type: str = "declaration",
 ) -> tuple[Document, bool]:
-    from counterparty.analysis import embed_text
-
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "Document exceeds the 10 MiB limit")
     filename = safe_filename(filename)
@@ -193,7 +191,6 @@ def ingest(
                     case_id=case_id,
                     text=chunk["text"],
                     location=chunk["location"],
-                    embedding=embed_text(chunk["text"]),
                 )
             )
         session.flush()

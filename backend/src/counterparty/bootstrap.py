@@ -1,6 +1,7 @@
 """Explicit, repeatable local synthetic demo bootstrap; importing does not seed data."""
 
 import argparse
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from sqlalchemy.orm import Session
 from counterparty.config import Settings
 from counterparty.database import create_engine_for_settings
 from counterparty.documents import ingest
-from counterparty.models import AssessmentCase, PolicySetVersion, User
+from counterparty.models import PolicySetVersion, User
 from counterparty.organizations import Organization
 from counterparty.security import audit, hash_password
 
@@ -55,16 +56,11 @@ def bootstrap(engine, settings: Settings, fixture_root: Path) -> dict:
     if settings.model_mode != "demo":
         raise ValueError("Bootstrap requires MODEL_MODE=demo and never calls a model provider")
     # Read every fixture before making database or file changes.
+    manifest = json.loads((fixture_root / "policy-manifest.json").read_text())
     policies = {
-        name: (fixture_root / "policies" / f"{name}.md").read_bytes()
-        for name in ("northstar", "orchard")
+        name: (fixture_root / "policies" / name).read_bytes() for name in manifest["documents"]
     }
-    evidence = {
-        name: (fixture_root / "evidence" / f"{name}.md").read_bytes()
-        for name in ("complete", "missing", "conflict", "discrepancy", "injection")
-    }
-    from counterparty.analysis import propose_requirements
-    from counterparty.routes import chunks_for, validated_requirements
+    from counterparty.routes import chunks_for
 
     counts = {"users": 0, "policies": 0, "cases": 0, "documents": 0}
     with Session(engine) as session, session.begin():
@@ -109,77 +105,65 @@ def bootstrap(engine, settings: Settings, fixture_root: Path) -> dict:
             users[account["email"]] = user
         analyst = users["analyst@northstar.demo"]
         reviewer = users["reviewer@northstar.demo"]
-        for name, raw in policies.items():
-            policy_name = f"Synthetic {name.title()} policy"
-            existing = session.scalar(
-                select(PolicySetVersion).where(
-                    PolicySetVersion.organization_id == analyst.organization_id,
-                    PolicySetVersion.name == policy_name,
+        existing = session.scalar(
+            select(PolicySetVersion).where(
+                PolicySetVersion.organization_id == analyst.organization_id,
+                PolicySetVersion.name == manifest["name"],
+                PolicySetVersion.version == 1,
+            )
+        )
+        if existing is None:
+            documents = []
+            for name, raw in policies.items():
+                document, created = ingest(
+                    session, analyst, raw, name, "policy", None, settings.storage_path
                 )
-            )
-            if existing is not None:
-                continue
-            document, created = ingest(
-                session, analyst, raw, f"{name}.md", "policy", None, settings.storage_path
-            )
-            counts["documents"] += created
-            chunks = chunks_for(session, [document])
+                documents.append(document)
+                counts["documents"] += created
+            requirements = resolve_manifest(manifest, chunks_for(session, documents))
             policy = PolicySetVersion(
                 organization_id=analyst.organization_id,
-                name=policy_name,
+                name=manifest["name"],
                 version=1,
                 status="approved",
-                document_ids=[str(document.id)],
-                requirements=validated_requirements(
-                    propose_requirements(chunks, mode="demo"), chunks
-                ),
+                document_ids=[str(document.id) for document in documents],
+                requirements=requirements,
                 created_by=analyst.id,
                 approved_by=reviewer.id,
                 approved_at=datetime.now(UTC),
             )
             session.add(policy)
             session.flush()
-            audit(session, reviewer, "demo.policy_seeded", details={"policy_id": str(policy.id)})
-            counts["policies"] += 1
-        for scenario, raw in evidence.items():
-            name = f"Synthetic scenario: {scenario}"
-            case = session.scalar(
-                select(AssessmentCase).where(
-                    AssessmentCase.organization_id == analyst.organization_id,
-                    AssessmentCase.name == name,
-                )
-            )
-            if case is not None:
-                continue
-            case = AssessmentCase(
-                organization_id=analyst.organization_id,
-                owner_id=analyst.id,
-                name=name,
-                counterparty_name=f"Synthetic {scenario.title()} Vendor",
-                relationship={
-                    "purpose": "Synthetic technology supplier assessment",
-                    "data_shared": "Synthetic customer records",
-                    "system_access": "Admin console",
-                    "business_criticality": "high",
-                    "personal_data": True,
-                    "privileged_access": True,
-                },
-            )
-            session.add(case)
-            session.flush()
-            _, created = ingest(
-                session, analyst, raw, f"{scenario}.md", "evidence", case.id, settings.storage_path
-            )
-            counts["documents"] += created
-            counts["cases"] += 1
             audit(
                 session,
-                analyst,
-                "demo.case_seeded",
-                case_id=case.id,
-                details={"scenario": scenario},
+                reviewer,
+                "synthetic.policy_seeded",
+                details={
+                    "policy_id": str(policy.id),
+                    "manifest_provenance": manifest["provenance"],
+                },
             )
+            counts["policies"] += 1
     return counts
+
+
+def resolve_manifest(manifest: dict, chunks: list[dict]) -> list[dict]:
+    """Resolve curated literal citations; ambiguous edits fail the entire transaction."""
+    from counterparty.analysis import validate_requirements
+    from counterparty.analysis.engine import source
+
+    requirements = []
+    for entry in manifest["requirements"]:
+        citation = entry["source"]
+        matches = [
+            chunk
+            for chunk in chunks
+            if chunk.get("filename") == citation["filename"] and citation["quote"] in chunk["text"]
+        ]
+        if len(matches) != 1 or matches[0]["text"].count(citation["quote"]) != 1:
+            raise ValueError(f"Curated citation must resolve exactly once: {entry['id']}")
+        requirements.append({**entry, "source": source(matches[0], citation["quote"])})
+    return validate_requirements(requirements, chunks)
 
 
 def main():

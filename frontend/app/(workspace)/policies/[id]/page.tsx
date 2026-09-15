@@ -80,7 +80,7 @@ export default function PolicyDetailPage() {
       setPending(false);
     }
   }
-  if (!policy && !error) return <Spinner label="Ładowanie polityki…" />;
+  if (!policy && !error) return <Spinner label="Loading policy…" />;
   if (!policy) return <ErrorNotice message={error} retry={load} />;
   const canEdit = policy.status === "draft" && user?.role !== "auditor";
   const canApprove =
@@ -89,9 +89,9 @@ export default function PolicyDetailPage() {
   return (
     <>
       <PageHeader
-        eyebrow={`Wersja ${policy.version}`}
+        eyebrow={`Version ${policy.version}`}
         title={policy.name}
-        description={`Utworzono ${formatDate(policy.created_at)}`}
+        description={`Created ${formatDate(policy.created_at)}`}
         actions={
           <>
             <StatusBadge value={policy.status}>
@@ -103,7 +103,7 @@ export default function PolicyDetailPage() {
                 onClick={clone}
                 disabled={pending}
               >
-                Sklonuj do edycji
+                Clone for editing
               </button>
             )}
             {canEdit && !editing && (
@@ -111,7 +111,7 @@ export default function PolicyDetailPage() {
                 className="button button-secondary"
                 onClick={() => setEditing(true)}
               >
-                Edytuj wymagania
+                Edit requirements
               </button>
             )}
             {editing && (
@@ -122,18 +122,18 @@ export default function PolicyDetailPage() {
                   setEditing(false);
                 }}
               >
-                Anuluj edycję
+                Cancel editing
               </button>
             )}
             {editing && (
               <button className="button" onClick={save} disabled={pending}>
-                {pending ? "Zapisywanie…" : "Zapisz wymagania"}
+                {pending ? "Saving…" : "Save requirements"}
               </button>
             )}
             {canApprove && !editing && (
               <button className="button" onClick={approve} disabled={pending}>
                 <Icon name="check" />
-                Zatwierdź wersję
+                Approve version
               </button>
             )}
           </>
@@ -144,21 +144,21 @@ export default function PolicyDetailPage() {
         <div>
           <strong>
             {policy.status === "approved"
-              ? "Niezmienna zatwierdzona wersja"
-              : "Wersja wymaga przeglądu"}
+              ? "Immutable approved version"
+              : "Version requires review"}
           </strong>
           <p>
             {policy.status === "approved"
-              ? "Analizy odwołują się dokładnie do tej wersji. Zmiany wymagają utworzenia nowej wersji roboczej."
-              : "Sprawdź znaczenie każdego wymagania i jego cytat źródłowy przed zatwierdzeniem."}
+              ? "Analyses reference this exact version. Changes require a new draft version."
+              : "Review the meaning and source quote of every requirement before approval."}
           </p>
         </div>
       </div>
       {requirements.length === 0 ? (
         <div className="card">
           <EmptyState
-            title="Brak wymagań"
-            description="Adapter nie zaproponował wymagań dla wybranych źródeł."
+            title="No requirements"
+            description="The adapter proposed no requirements for the selected sources."
           />
         </div>
       ) : (
@@ -203,22 +203,22 @@ function RequirementCard({ requirement }: { requirement: Requirement }) {
       </div>
       <div className="requirement-grid">
         <div>
-          <label>Warunek</label>
+          <label>Condition</label>
           <strong>
             {requirement.field} {requirement.operator}{" "}
             {String(requirement.expected)}
           </strong>
         </div>
         <div>
-          <label>Ocena</label>
+          <label>Evaluation</label>
           <strong>{requirement.evaluation_method}</strong>
         </div>
         <div>
-          <label>Zastosowanie</label>
+          <label>Applicability</label>
           <strong>
             {Object.keys(requirement.applicability).length
               ? JSON.stringify(requirement.applicability)
-              : "Zawsze"}
+              : "Always"}
           </strong>
         </div>
       </div>
@@ -229,7 +229,7 @@ function RequirementCard({ requirement }: { requirement: Requirement }) {
             className="arrow-link"
             href={`/documents/${requirement.source.document_id}?chunk=${requirement.source.chunk_id}`}
           >
-            Otwórz źródło · {formatLocation(requirement.source.location)}{" "}
+            Open source · {formatLocation(requirement.source.location)}{" "}
             <Icon name="arrow" />
           </Link>
         </small>
@@ -291,7 +291,7 @@ function RequirementEditor({
       setApplicabilityError("");
     } catch {
       setApplicabilityError(
-        'Wpisz poprawny obiekt JSON, np. {"personal_data":true}.',
+        'Enter a valid JSON object, for example {"personal_data":true}.',
       );
     }
   }
@@ -299,7 +299,7 @@ function RequirementEditor({
     <article className="card requirement">
       <div className="requirement-edit-grid">
         <label className="field">
-          <span>Tytuł</span>
+          <span>Title</span>
           <input
             className="input"
             value={value.title}
@@ -307,7 +307,7 @@ function RequirementEditor({
           />
         </label>
         <label className="field">
-          <span>Dotkliwość</span>
+          <span>Severity</span>
           <select
             className="select"
             value={value.severity}
@@ -321,7 +321,7 @@ function RequirementEditor({
           </select>
         </label>
         <label className="field">
-          <span>Metoda</span>
+          <span>Method</span>
           <select
             className="select"
             value={value.evaluation_method}
@@ -340,7 +340,7 @@ function RequirementEditor({
       </div>
       <div className="requirement-edit-grid">
         <label className="field">
-          <span>Pole</span>
+          <span>Field</span>
           <input
             className="input"
             value={value.field}
@@ -364,7 +364,7 @@ function RequirementEditor({
           </select>
         </label>
         <label className="field">
-          <span>Wartość oczekiwana</span>
+          <span>Expected value</span>
           <input
             className="input"
             inputMode={
@@ -378,7 +378,7 @@ function RequirementEditor({
         </label>
       </div>
       <label className="field">
-        <span>Warunki zastosowania (JSON)</span>
+        <span>Applicability conditions (JSON)</span>
         <input
           className="input mono"
           value={applicabilityText}
@@ -394,7 +394,7 @@ function RequirementEditor({
       <div className="source-box">
         <q>{value.source.quote}</q>
         <small>
-          Cytat pozostaje związany z {formatLocation(value.source.location)}.
+          The quote remains linked to {formatLocation(value.source.location)}.
         </small>
       </div>
       <div className="form-actions">
@@ -403,7 +403,7 @@ function RequirementEditor({
           type="button"
           onClick={remove}
         >
-          Usuń wymaganie
+          Remove requirement
         </button>
       </div>
     </article>

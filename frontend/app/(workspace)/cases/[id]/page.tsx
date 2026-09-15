@@ -61,6 +61,13 @@ export default function CaseDetailPage() {
     void load();
   }, [id]);
 
+  useEffect(() => {
+    if (!documents.some((doc) => ["pending", "indexing"].includes(doc.index_status ?? ""))) return;
+    const timer = setInterval(() => {
+      void api<DocumentRecord[]>(`/api/documents?case_id=${encodeURIComponent(id)}`).then(setDocuments).catch(() => {});
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [id, documents]);
   async function upload(event: React.FormEvent) {
     event.preventDefault();
     if (!file) return;
@@ -85,10 +92,10 @@ export default function CaseDetailPage() {
     }
   }
 
-  if (loading) return <Spinner label="Ładowanie sprawy…" />;
+  if (loading) return <Spinner label="Loading case…" />;
   if (!caseItem)
     return (
-      <ErrorNotice message={error || "Nie znaleziono sprawy."} retry={load} />
+      <ErrorNotice message={error || "Case not found."} retry={load} />
     );
   const latestRun = runs[0];
 
@@ -97,15 +104,15 @@ export default function CaseDetailPage() {
       <PageHeader
         eyebrow={caseItem.counterparty_name}
         title={caseItem.name}
-        description={`Utworzono ${formatDate(caseItem.created_at)}`}
+        description={`Created ${formatDate(caseItem.created_at)}`}
         actions={
           <>
             <Link className="button button-quiet" href={`/audit?case_id=${id}`}>
-              Historia
+              Activity
             </Link>
             {canWrite && (
               <button className="button" onClick={() => setModal("analysis")}>
-                Uruchom analizę
+                Run analysis
               </button>
             )}
           </>
@@ -116,16 +123,16 @@ export default function CaseDetailPage() {
         <div className="stack">
           <section className="card">
             <div className="card-header">
-              <h2>Dokumenty dowodowe</h2>
+              <h2>Evidence documents</h2>
               {canWrite && (
-                <span className="subtle">PDF, Markdown lub TXT</span>
+                <span className="subtle">PDF, Markdown, or TXT</span>
               )}
             </div>
             <div className="card-body">
               {documents.length === 0 ? (
                 <EmptyState
-                  title="Brak dokumentów"
-                  description="Dodaj kwestionariusz, umowę, certyfikat lub politykę kontrahenta."
+                  title="No documents"
+                  description="Add a questionnaire, contract, certificate, or counterparty policy."
                 />
               ) : (
                 documents.map((document) => (
@@ -137,11 +144,12 @@ export default function CaseDetailPage() {
                       <Link href={`/documents/${document.id}`}>
                         <strong>{document.filename}</strong>
                       </Link>
+                      <span className="subtle">Semantic index: {document.index_status ?? "pending"}</span>
                       <span className="subtle">
                         {document.evidence_type === "independent"
-                          ? "Niezależny dowód"
-                          : "Deklaracja kontrahenta"}{" "}
-                        · wersja {document.version} ·{" "}
+                          ? "Independent evidence"
+                          : "Counterparty declaration"}{" "}
+                        · version {document.version} ·{" "}
                         {formatDate(document.created_at)}
                       </span>
                     </div>
@@ -149,7 +157,7 @@ export default function CaseDetailPage() {
                       className="arrow-link"
                       href={`/documents/${document.id}`}
                     >
-                      Źródło <Icon name="arrow" />
+                      Source <Icon name="arrow" />
                     </Link>
                   </div>
                 ))
@@ -159,7 +167,7 @@ export default function CaseDetailPage() {
                   <Icon name="upload" style={{ width: 25, marginBottom: 7 }} />
                   <div>
                     <input
-                      aria-label="Dokument dowodowy"
+                      aria-label="Evidence document"
                       type="file"
                       accept=".pdf,.md,.txt,text/plain,text/markdown,application/pdf"
                       onChange={(event) =>
@@ -175,7 +183,7 @@ export default function CaseDetailPage() {
                       textAlign: "left",
                     }}
                   >
-                    <span>Rodzaj dowodu</span>
+                    <span>Evidence type</span>
                     <select
                       className="select"
                       value={evidenceType}
@@ -186,13 +194,13 @@ export default function CaseDetailPage() {
                       }
                     >
                       <option value="declaration">
-                        Deklaracja kontrahenta
+                        Counterparty declaration
                       </option>
-                      <option value="independent">Niezależny dowód</option>
+                      <option value="independent">Independent evidence</option>
                     </select>
                     <small className="field-help">
-                      Deklaracja opisuje stanowisko kontrahenta; niezależny
-                      dowód pochodzi z osobnego źródła.
+                      A declaration states the counterparty's position;
+                      independent evidence comes from a separate source.
                     </small>
                   </label>
                   <button
@@ -200,7 +208,7 @@ export default function CaseDetailPage() {
                     style={{ marginTop: 12 }}
                     disabled={!file || uploading}
                   >
-                    {uploading ? "Przesyłanie…" : "Dodaj dokument"}
+                    {uploading ? "Uploading…" : "Add document"}
                   </button>
                 </form>
               )}
@@ -209,20 +217,20 @@ export default function CaseDetailPage() {
 
           <section className="card">
             <div className="card-header">
-              <h2>Analizy</h2>
-              <span className="subtle">Najnowsze jako pierwsze</span>
+              <h2>Analyses</h2>
+              <span className="subtle">Newest first</span>
             </div>
             {runs.length === 0 ? (
               <EmptyState
-                title="Brak analiz"
-                description="Połącz sprawę z zatwierdzoną polityką i uruchom ocenę."
+                title="No analyses"
+                description="Connect the case to an approved policy and start an assessment."
                 action={
                   canWrite && (
                     <button
                       className="button"
                       onClick={() => setModal("analysis")}
                     >
-                      Uruchom pierwszą analizę
+                      Run first analysis
                     </button>
                   )
                 }
@@ -233,9 +241,9 @@ export default function CaseDetailPage() {
                   <thead>
                     <tr>
                       <th>Status</th>
-                      <th>Wariant</th>
+                      <th>Variant</th>
                       <th>Model</th>
-                      <th>Utworzono</th>
+                      <th>Created</th>
                       <th />
                     </tr>
                   </thead>
@@ -248,19 +256,21 @@ export default function CaseDetailPage() {
                           </StatusBadge>
                         </td>
                         <td>
-                          {run.retrieval_variant === "hybrid"
-                            ? "Hybrydowy"
-                            : "Leksykalny"}
+                          {run.retrieval_variant === "semantic"
+                            ? "Semantic"
+                            : run.retrieval_variant === "hybrid"
+                            ? "Hybrid"
+                            : "Lexical"}
                         </td>
                         <td className="subtle">{run.model_mode}</td>
                         <td className="subtle">{formatDate(run.created_at)}</td>
                         <td>
                           <Link
                             className="arrow-link"
-                            aria-label={`Otwórz analizę ${formatDate(run.created_at)}`}
+                            aria-label={`Open analysis ${formatDate(run.created_at)}`}
                             href={`/runs/${run.id}`}
                           >
-                            Otwórz <Icon name="arrow" />
+                            Open <Icon name="arrow" />
                           </Link>
                         </td>
                       </tr>
@@ -275,32 +285,32 @@ export default function CaseDetailPage() {
         <aside className="stack">
           <section className="card">
             <div className="card-header">
-              <h2>Kontekst relacji</h2>
+              <h2>Relationship context</h2>
               {canWrite && (
                 <button
                   className="button button-small button-quiet"
                   onClick={() => setModal("edit")}
                 >
-                  Edytuj
+                  Edit
                 </button>
               )}
             </div>
             <div className="card-body">
               <dl className="definition-list">
                 <div>
-                  <dt>Cel</dt>
+                  <dt>Purpose</dt>
                   <dd>{caseItem.relationship.purpose}</dd>
                 </div>
                 <div>
-                  <dt>Udostępniane dane</dt>
+                  <dt>Data shared</dt>
                   <dd>{caseItem.relationship.data_shared}</dd>
                 </div>
                 <div>
-                  <dt>Dostęp do systemów</dt>
+                  <dt>System access</dt>
                   <dd>{caseItem.relationship.system_access}</dd>
                 </div>
                 <div>
-                  <dt>Krytyczność</dt>
+                  <dt>Criticality</dt>
                   <dd>
                     <StatusBadge
                       value={
@@ -317,13 +327,13 @@ export default function CaseDetailPage() {
                   </dd>
                 </div>
                 <div>
-                  <dt>Dane osobowe</dt>
-                  <dd>{caseItem.relationship.personal_data ? "Tak" : "Nie"}</dd>
+                  <dt>Personal data</dt>
+                  <dd>{caseItem.relationship.personal_data ? "Yes" : "No"}</dd>
                 </div>
                 <div>
-                  <dt>Dostęp uprzywilejowany</dt>
+                  <dt>Privileged access</dt>
                   <dd>
-                    {caseItem.relationship.privileged_access ? "Tak" : "Nie"}
+                    {caseItem.relationship.privileged_access ? "Yes" : "No"}
                   </dd>
                 </div>
               </dl>
@@ -332,18 +342,17 @@ export default function CaseDetailPage() {
           {latestRun && (
             <section className="card">
               <div className="card-header">
-                <h2>Ostatnia ocena</h2>
+                <h2>Latest assessment</h2>
               </div>
               <div className="card-body">
                 <StatusBadge value={latestRun.status}>
                   {statusLabels[latestRun.status]}
                 </StatusBadge>
                 <p className="subtle">
-                  Wersja polityki jest związana z tym przebiegiem i pozostaje
-                  niezmienna.
+                  The policy version is bound to this run and remains immutable.
                 </p>
                 <Link className="arrow-link" href={`/runs/${latestRun.id}`}>
-                  Przejdź do raportu <Icon name="arrow" />
+                  Open report <Icon name="arrow" />
                 </Link>
               </div>
             </section>
@@ -406,11 +415,11 @@ function EditCaseModal({
     }
   }
   return (
-    <Modal title="Edytuj kontekst relacji" close={close}>
+    <Modal title="Edit relationship context" close={close}>
       <form className="modal-content" onSubmit={submit}>
         {error && <ErrorNotice message={error} />}
         <label className="field">
-          <span>Nazwa sprawy</span>
+          <span>Case name</span>
           <input
             className="input"
             required
@@ -419,7 +428,7 @@ function EditCaseModal({
           />
         </label>
         <label className="field">
-          <span>Cel współpracy</span>
+          <span>Relationship purpose</span>
           <textarea
             className="textarea"
             required
@@ -429,7 +438,7 @@ function EditCaseModal({
         </label>
         <div className="form-grid">
           <label className="field">
-            <span>Udostępniane dane</span>
+            <span>Data shared</span>
             <textarea
               className="textarea"
               required
@@ -438,7 +447,7 @@ function EditCaseModal({
             />
           </label>
           <label className="field">
-            <span>Dostęp do systemów</span>
+            <span>System access</span>
             <textarea
               className="textarea"
               required
@@ -448,15 +457,15 @@ function EditCaseModal({
           </label>
         </div>
         <label className="field">
-          <span>Krytyczność</span>
+          <span>Criticality</span>
           <select
             className="select"
             value={relationship.business_criticality}
             onChange={(e) => set("business_criticality", e.target.value)}
           >
-            <option value="low">Niska</option>
-            <option value="medium">Średnia</option>
-            <option value="high">Wysoka</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
           </select>
         </label>
         <div className="form-grid">
@@ -466,7 +475,7 @@ function EditCaseModal({
               checked={relationship.personal_data}
               onChange={(e) => set("personal_data", e.target.checked)}
             />
-            Dane osobowe
+            Personal data
           </label>
           <label className="checkbox">
             <input
@@ -474,15 +483,15 @@ function EditCaseModal({
               checked={relationship.privileged_access}
               onChange={(e) => set("privileged_access", e.target.checked)}
             />
-            Dostęp uprzywilejowany
+            Privileged access
           </label>
         </div>
         <div className="form-actions">
           <button type="button" className="button button-quiet" onClick={close}>
-            Anuluj
+            Cancel
           </button>
           <button className="button" disabled={pending}>
-            {pending ? "Zapisywanie…" : "Zapisz zmiany"}
+            {pending ? "Saving…" : "Save changes"}
           </button>
         </div>
       </form>
@@ -502,7 +511,7 @@ function StartRunModal({
   created: (run: AnalysisRun) => void;
 }) {
   const [policyId, setPolicyId] = useState(policies[0]?.id ?? "");
-  const [variant, setVariant] = useState<"lexical" | "hybrid">("hybrid");
+  const [variant, setVariant] = useState<"lexical" | "hybrid" | "semantic">("semantic");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function submit(event: React.FormEvent) {
@@ -525,23 +534,23 @@ function StartRunModal({
     }
   }
   return (
-    <Modal title="Uruchom analizę" close={close}>
+    <Modal title="Run analysis" close={close}>
       <form className="modal-content" onSubmit={submit}>
         {error && <ErrorNotice message={error} />}{" "}
         {policies.length === 0 ? (
           <EmptyState
-            title="Brak zatwierdzonej polityki"
-            description="Recenzent musi najpierw zatwierdzić co najmniej jeden zestaw wymagań."
+            title="No approved policy"
+            description="A reviewer must first approve at least one requirement set."
             action={
               <Link href="/policies" className="button">
-                Przejdź do polityk
+                Go to policies
               </Link>
             }
           />
         ) : (
           <>
             <label className="field">
-              <span>Zatwierdzona polityka</span>
+              <span>Approved policy</span>
               <select
                 className="select"
                 value={policyId}
@@ -555,30 +564,30 @@ function StartRunModal({
               </select>
             </label>
             <label className="field">
-              <span>Wariant wyszukiwania dowodów</span>
+              <span>Evidence retrieval variant</span>
               <select
                 className="select"
                 value={variant}
                 onChange={(e) =>
-                  setVariant(e.target.value as "lexical" | "hybrid")
+                  setVariant(e.target.value as "lexical" | "hybrid" | "semantic")
                 }
               >
+                <option value="semantic">Semantic (local multilingual model)</option>
                 <option value="hybrid">
-                  Hybrydowy — słowa kluczowe i podobieństwo
+                  Hybrid — keywords and similarity
                 </option>
-                <option value="lexical">Leksykalny — słowa kluczowe</option>
+                <option value="lexical">Lexical — keywords</option>
               </select>
               <small className="field-help">
-                Wariant jest zapisywany przy przebiegu, aby umożliwić porównanie
-                wyników.
+                The variant is saved with the run so results can be compared.
               </small>
             </label>
             <div className="notice notice-info">
               <div>
-                <strong>Niezmienny zapis wejścia</strong>
+                <strong>Immutable input snapshot</strong>
                 <p>
-                  Analiza zapisze wersje sprawy, dokumentów i polityki użyte do
-                  oceny.
+                  The analysis records the case, document, and policy versions
+                  used for the assessment.
                 </p>
               </div>
             </div>
@@ -588,10 +597,10 @@ function StartRunModal({
                 className="button button-quiet"
                 onClick={close}
               >
-                Anuluj
+                Cancel
               </button>
               <button className="button" disabled={pending || !policyId}>
-                {pending ? "Uruchamianie…" : "Uruchom analizę"}
+                {pending ? "Starting…" : "Run analysis"}
               </button>
             </div>
           </>

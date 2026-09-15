@@ -40,36 +40,36 @@ export default function AuditPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Niezmienny rejestr"
-        title="Historia aktywności"
+        eyebrow="Immutable record"
+        title="Activity history"
         description={
           caseId
-            ? "Zdarzenia dotyczące wybranej sprawy, od najnowszych."
-            : "Zdarzenia organizacji, od najnowszych."
+            ? "Events for the selected case, newest first."
+            : "Organization events, newest first."
         }
         actions={
           caseId && (
             <Link className="button button-quiet" href={`/cases/${caseId}`}>
-              Powrót do sprawy
+              Back to case
             </Link>
           )
         }
       />
       {error && <ErrorNotice message={error} retry={load} />}{" "}
       {loading ? (
-        <Spinner label="Pobieranie historii…" />
+        <Spinner label="Loading activity…" />
       ) : events.length === 0 ? (
         <section className="card">
           <EmptyState
-            title="Brak zdarzeń"
-            description="Aktywność pojawi się po pracy z politykami, sprawami i analizami."
+            title="No events"
+            description="Activity will appear as you work with policies, cases, and analyses."
           />
         </section>
       ) : (
         <section className="card">
           <div className="card-header">
-            <h2>Zdarzenia</h2>
-            <span className="subtle">{events.length} wpisów</span>
+            <h2>Events</h2>
+            <span className="subtle">{events.length} entries</span>
           </div>
           <div className="card-body">
             <div className="timeline">
@@ -83,13 +83,13 @@ export default function AuditPage() {
                     <p>
                       {event.actor_name ??
                         (event.actor_id
-                          ? `Użytkownik ${event.actor_id}`
+                          ? `User ${event.actor_id}`
                           : "System")}{" "}
                       · {formatDate(event.created_at)}
                     </p>
                     {event.details && Object.keys(event.details).length > 0 && (
                       <details>
-                        <summary className="subtle">Szczegóły</summary>
+                        <summary className="subtle">Details</summary>
                         <pre className="source-document mono">
                           {JSON.stringify(event.details, null, 2)}
                         </pre>
@@ -100,7 +100,7 @@ export default function AuditPage() {
                         className="arrow-link"
                         href={`/runs/${event.run_id}`}
                       >
-                        Otwórz analizę →
+                        Open analysis →
                       </Link>
                     )}
                   </div>
