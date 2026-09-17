@@ -241,3 +241,19 @@ def remove_rolled_back_originals(session):
 @event.listens_for(Session, "after_commit")
 def forget_committed_originals(session):
     session.info.pop("new_document_paths", None)
+
+
+def chunks_for(session, documents):
+    result = []
+    for document in documents:
+        chunks = session.scalars(
+            select(DocumentChunk)
+            .where(DocumentChunk.document_id == document.id)
+            .order_by(DocumentChunk.id)
+        ).all()
+        # Source order is stable even though chunk UUIDs are random.
+        chunks = sorted(
+            chunks, key=lambda c: (c.location.get("page", 0), c.location.get("line_start", 0))
+        )
+        result.extend(chunk_dict(chunk, document) for chunk in chunks)
+    return result

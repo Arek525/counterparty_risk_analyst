@@ -268,6 +268,8 @@ async def test_bootstrap_does_not_restore_deleted_seed(workflow_setup, client_fa
             },
         )
         assert response.status_code == 200
+        case = (await client.get("/api/cases")).json()[0]
+        assert (await client.delete(f"/api/cases/{case['id']}")).status_code == 200
         policy = (await client.get("/api/policies")).json()[0]
         assert (await client.delete(f"/api/policies/{policy['id']}")).status_code == 200
         for doc_id in policy["document_ids"]:

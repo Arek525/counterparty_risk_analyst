@@ -337,17 +337,24 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         assert (await client.get("/api/audit")).json()[0]["event"] == "auth.login"
 
 
-async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, tmp_path):
+async def test_explicit_bootstrap_is_idempotent(
+    database_url, migration_config, tmp_path, monkeypatch
+):
     command.upgrade(migration_config, "head")
     settings = Settings(database_url=database_url, storage_path=str(tmp_path / "storage"))
     engine = create_engine_for_settings(settings)
     fixtures = Path("/datasets/synthetic")
     if not fixtures.exists():
         fixtures = Path(__file__).resolve().parents[2] / "datasets" / "synthetic"
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Seeding must not call Gemini")
+
+    monkeypatch.setattr("counterparty.analysis.adapters.GeminiAdapter.generate", forbidden)
     try:
         first = bootstrap(engine, settings, fixtures)
-        assert first == {"users": 5, "policies": 1, "cases": 0, "documents": 4}
-        from counterparty.models import ApprovalRequest, AuditEvent, Document, IntegrationCall
+        assert first == {"users": 3, "policies": 1, "cases": 1, "documents": 5}
+        from counterparty.models import AuditEvent, Document
 
         def seed_state():
             with Session(engine) as session:
@@ -360,6 +367,51 @@ async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, 
                 )
 
         original = seed_state()
+        from counterparty.analysis.schemas import validate_source
+        from counterparty.analysis.semantic import validate_narrative_requirements
+        from counterparty.documents import chunks_for
+        from counterparty.models import Decision
+        from counterparty.worker import process_one, setup_checkpoints
+
+        with Session(engine) as session:
+            run = session.scalar(select(AnalysisRun))
+            run_id = run.id
+            assert run.status == "awaiting_review" and run.model_mode == "gemini"
+            assert run.report["recorded_example"]["model_name"] == run.report["model_name"]
+            assert run.assessment_progress["completed"] == len(original[1])
+            assert any(f["status"] == "pass" for f in run.report["findings"])
+            policy = session.scalar(select(PolicySetVersion))
+            chunks = chunks_for(session, session.scalars(select(Document)).all())
+            validate_narrative_requirements(policy.requirements, chunks)
+            for finding in run.report["findings"]:
+                validate_source(finding["requirement_source"], chunks)
+                for citation in finding["evidence"]:
+                    validate_source(
+                        {k: v for k, v in citation.items() if k != "evidence_type"}, chunks
+                    )
+            assert all(
+                "description" in req and "operator" not in req for req in policy.requirements
+            )
+            before_report = run.report.copy()
+            reviewer = session.scalar(select(User).where(User.role == "reviewer"))
+            session.add(
+                Decision(
+                    organization_id=run.organization_id,
+                    run_id=run.id,
+                    actor_id=reviewer.id,
+                    decision="needs_information",
+                    rationale="Clarify missing assurance",
+                )
+            )
+            run.status = "completed"
+            session.commit()
+        setup_checkpoints(engine)
+        assert process_one(engine, settings) is True
+        with Session(engine) as session:
+            run = session.get(AnalysisRun, run_id)
+            assert run.status == "completed" and run.report["workflow_complete"] is True
+            assert run.report["findings"] == before_report["findings"]
+            assert run.report["recorded_example"] == before_report["recorded_example"]
         assert bootstrap(engine, settings, fixtures) == {
             "users": 0,
             "policies": 0,
@@ -370,15 +422,22 @@ async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, 
         assert len(original[1]) == 20
         with Session(engine) as session:
             assert session.scalar(select(func.count()).select_from(Organization)) == 2
-            assert session.scalar(select(func.count()).select_from(User)) == 5
-            assert session.scalar(select(func.count()).select_from(Document)) == 4
-            assert session.scalar(select(func.count()).select_from(AuditEvent)) == 1
-            assert session.scalar(select(AuditEvent)).event == "synthetic.policy_seeded"
-            for entity in (ApprovalRequest, IntegrationCall):
-                assert session.scalar(select(func.count()).select_from(entity)) == 0
+            assert session.scalar(select(func.count()).select_from(User)) == 3
+            assert session.scalar(select(func.count()).select_from(Document)) == 5
+            assert (
+                session.scalar(
+                    select(func.count())
+                    .select_from(AuditEvent)
+                    .where(
+                        AuditEvent.event.in_(("synthetic.policy_seeded", "synthetic.report_seeded"))
+                    )
+                )
+                == 2
+            )
+
             assert session.scalar(select(func.count()).select_from(PolicySetVersion)) == 1
-            assert session.scalar(select(func.count()).select_from(AssessmentCase)) == 0
-            assert session.scalar(select(func.count()).select_from(AnalysisRun)) == 0
+            assert session.scalar(select(func.count()).select_from(AssessmentCase)) == 1
+            assert session.scalar(select(func.count()).select_from(AnalysisRun)) == 1
     finally:
         engine.dispose()
 
@@ -575,3 +634,37 @@ async def test_index_readiness_reindex_authorization_and_lexical_availability(
         assert (await client.post(f"/api/documents/{doc['id']}/reindex")).status_code == 404
         with Session(engine) as session:
             assert session.get(Document, UUID(doc["id"])).index_status == "pending"
+
+
+@pytest.mark.parametrize("damage", ["source_hash", "quote", "missing_finding"])
+async def test_recorded_seed_rejects_changed_sources_or_report(
+    database_url, migration_config, tmp_path, damage
+):
+    import json
+    import shutil
+
+    from counterparty.models import Document
+
+    command.upgrade(migration_config, "head")
+    fixtures = tmp_path / "fixtures"
+    shutil.copytree(Path("/datasets/synthetic"), fixtures)
+    path = fixtures / "gemini-example.json"
+    example = json.loads(path.read_text())
+    if damage == "source_hash":
+        example["documents"][0]["sha256"] = "0" * 64
+    elif damage == "quote":
+        example["policy"]["requirements"][0]["source"]["quote"] = "An invented obligation"
+    else:
+        example["report"]["findings"].pop()
+    path.write_text(json.dumps(example))
+    settings = Settings(database_url=database_url, storage_path=str(tmp_path / "storage"))
+    engine = create_engine_for_settings(settings)
+    try:
+        with pytest.raises(ValueError):
+            bootstrap(engine, settings, fixtures)
+        with Session(engine) as session:
+            for model in (User, AssessmentCase, Document, PolicySetVersion, AnalysisRun):
+                assert session.scalar(select(func.count()).select_from(model)) == 0
+        assert not list((tmp_path / "storage").rglob("*.md"))
+    finally:
+        engine.dispose()

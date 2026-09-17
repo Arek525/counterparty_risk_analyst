@@ -136,6 +136,7 @@ export interface Discrepancy {
 }
 
 export interface Report {
+  recorded_example?: { captured_at: string; model_name: string; description: string };
   findings: Finding[];
   risk: Risk;
   completeness: number;
