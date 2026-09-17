@@ -5,13 +5,14 @@ import os
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic_core import PydanticCustomError
 
 from counterparty.analysis.adapters import GeminiAdapter
 from counterparty.analysis.retrieval import retrieve
 from counterparty.analysis.schemas import Source, validate_source
 from counterparty.analysis.sources import ground_model_sources, source, source_order
 
-PROMPT_VERSION = "semantic-assessment-v2"
+PROMPT_VERSION = "semantic-assessment-v4"
 RULES_VERSION = "semantic-risk-v2"
 MAX_POLICY_CHARS = 100000
 MAX_ASSESSMENT_CHARS = 25000
@@ -42,11 +43,19 @@ class SemanticAssessment(BaseModel):
     @model_validator(mode="after")
     def supported_conclusion(self):
         if self.status in {"pass", "fail", "conflict"} and not self.evidence:
-            raise ValueError("Pass, fail and conflict require source evidence")
+            raise PydanticCustomError(
+                "assessment_evidence_required", "Pass, fail and conflict require source evidence"
+            )
         if self.status == "conflict" and len({e.quote for e in self.evidence}) < 2:
-            raise ValueError("Conflict requires two distinct contradictory source quotations")
+            raise PydanticCustomError(
+                "conflict_requires_distinct_quotes",
+                "Conflict requires two distinct contradictory source quotations",
+            )
         if self.status in {"pass", "fail", "not_applicable"} and self.missing_information:
-            raise ValueError("Unresolved information requires unknown or conflict")
+            raise PydanticCustomError(
+                "assessment_unresolved_information",
+                "Unresolved information requires unknown or conflict",
+            )
         return self
 
 
@@ -183,10 +192,19 @@ relationship and selected evidence. The requirement description and source quote
 conditions and exceptions: evaluate the WHOLE obligation, not an isolated number or matching term.
 First establish applicability from explicit relationship context; missing context is unknown, not
 not_applicable. not_applicable requires a concrete explanation of which scope condition is absent.
+Interpret numerical bounds according to their direction and trigger: within, no later than,
+and at most specify a maximum; at least specifies a minimum; exactly specifies equality.
+A shorter period satisfies a maximum deadline when the trigger, scope and other conditions match.
+A different number alone is not a violation. Explain which bound and starting event apply,
+and consider exceptions and conflicting minimum-retention obligations before judging compliance.
 Use pass only if evidence supports every applicable material condition. Use fail only for an
 explicit grounded violation after considering exceptions. Missing documents or silence is unknown.
 Use conflict only for two explicit incompatible statements about the same scope and period, cite
-both. Mere differences between scopes are not contradictions. Claims referencing missing annexes,
+both as TWO SEPARATE evidence entries, one exact quotation for each incompatible statement,
+even when both statements are in the SAME chunk. Never combine both statements into one quotation.
+The requirement.source is policy context ONLY: never copy it into evidence. Every evidence entry
+must use the document_id, chunk_id and location of a supplied selected_evidence chunk.
+Mere differences between scopes are not contradictions. Claims referencing missing annexes,
 uncertain signature/effective dates, or unresolved amendment precedence require unknown with
 targeted missing_information. Never invent an exception or choose precedence without evidence.
 Distinguish declarations from independent proof in the explanation. Citation text must be exact;
@@ -276,6 +294,9 @@ def assess_requirement(
     try:
         output = adapter.generate(ASSESSMENT_INSTRUCTION, payload, SemanticAssessment)
         assessment = SemanticAssessment.model_validate(output).model_dump()
+        citations = [{"source": citation} for citation in assessment["evidence"]]
+        ground_model_sources(citations, selected)
+        assessment["evidence"] = [item["source"] for item in citations]
         selected_by_id = {str(chunk["id"]): chunk for chunk in selected}
         for citation in assessment["evidence"]:
             validate_source(citation, selected)

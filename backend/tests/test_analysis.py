@@ -580,3 +580,41 @@ def test_model_prompt_retains_customer_and_partner_roles_with_internal_duties(mo
 
     monkeypatch.setattr(GeminiAdapter, "generate", generate)
     assert propose_requirements(policies, "gemini") == expected
+
+
+def test_gemini_validation_diagnostics_do_not_expose_model_text(monkeypatch):
+    import json
+
+    import httpx
+
+    from counterparty.analysis.semantic import SemanticAssessment
+
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-test-key")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-test")
+    monkeypatch.setattr(GeminiAdapter, "_last_call", 0)
+    real_client = httpx.Client
+    output = {"status": "secret-output", "explanation": "private", "secret-field": "private"}
+    response = {
+        "candidates": [
+            {"finishReason": "STOP", "content": {"parts": [{"text": json.dumps(output)}]}}
+        ]
+    }
+    monkeypatch.setattr(
+        httpx,
+        "Client",
+        lambda **kw: real_client(
+            transport=httpx.MockTransport(lambda request: httpx.Response(200, json=response)), **kw
+        ),
+    )
+    with pytest.raises(ModelError) as caught:
+        GeminiAdapter().generate("Assess", {}, SemanticAssessment)
+    message = str(caught.value)
+    assert "status: literal_error" in message
+    assert "[field]: extra_forbidden" in message
+    assert "secret" not in message and "private" not in message
+
+    output.clear()
+    output.update(status="conflict", explanation="Conflicting declarations.", evidence=[])
+    response["candidates"][0]["content"]["parts"][0]["text"] = json.dumps(output)
+    with pytest.raises(ModelError, match="assessment_evidence_required"):
+        GeminiAdapter().generate("Assess", {}, SemanticAssessment)

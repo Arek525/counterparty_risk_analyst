@@ -1,5 +1,6 @@
 """Validated data contracts. Model output can never provide executable rules."""
 
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -73,6 +74,41 @@ class RequirementBatch(BaseModel):
     requirements: list[Requirement] = Field(max_length=100)
 
 
+def quote_matches(quote: str, chunks: list[dict], *, normalize_whitespace=False):
+    """Locate literal words within one chunk or verified consecutive lines of one page."""
+    pattern = (
+        r"\s+".join(re.escape(word) for word in quote.split())
+        if normalize_whitespace
+        else re.escape(quote)
+    )
+    if not pattern:
+        return []
+    matches = []
+    for chunk in chunks:
+        value = chunk["text"]
+        location = chunk["location"]
+        while isinstance(location, dict) and isinstance(location.get("line_end"), int):
+            following = [
+                candidate
+                for candidate in chunks
+                if candidate["document_id"] == chunk["document_id"]
+                and isinstance(candidate["location"], dict)
+                and candidate["location"].get("page") == location.get("page")
+                and candidate["location"].get("line_start") == location["line_end"] + 1
+                and candidate["location"].get("line_end", -1) > location["line_end"]
+            ]
+            if len(following) != 1 or len(value) >= len(chunk["text"]) + 6000:
+                break
+            next_chunk = following[0]
+            value += "\n" + next_chunk["text"]
+            location = next_chunk["location"]
+        for match in re.finditer("(?=(" + pattern + "))", value):
+            if match.start() >= len(chunk["text"]):
+                break
+            matches.append((chunk, match.group(1)))
+    return matches
+
+
 def validate_source(source: dict, chunks: list[dict]) -> None:
     """Reject hallucinated, cross-document or modified citations."""
     item = Source.model_validate(source)
@@ -81,7 +117,9 @@ def validate_source(source: dict, chunks: list[dict]) -> None:
     if not chunk or (
         str(chunk["document_id"]) != item.document_id
         or chunk["location"] != item.location
-        or item.quote not in chunk["text"]
+        or not any(
+            str(anchor["id"]) == item.chunk_id for anchor, _ in quote_matches(item.quote, chunks)
+        )
     ):
         raise ValueError("Source quote does not resolve to an eligible chunk")
 

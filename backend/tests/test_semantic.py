@@ -7,6 +7,79 @@ import pytest
 from counterparty.analysis import semantic
 
 
+def test_policy_citation_restores_whitespace_across_adjacent_chunks():
+    from counterparty.analysis.schemas import validate_source
+    from counterparty.analysis.sources import ground_model_sources
+
+    chunks = [
+        {
+            "id": "a",
+            "document_id": "p",
+            "text": "Header\nAll data, including replicas,",
+            "location": {"line_start": 1, "line_end": 2},
+        },
+        {
+            "id": "b",
+            "document_id": "p",
+            "text": "logs and backups, must stay in the EU.",
+            "location": {"line_start": 3, "line_end": 3},
+        },
+    ]
+    items = [
+        {
+            "source": {
+                "document_id": "p",
+                "chunk_id": "wrong",
+                "location": {},
+                "quote": "All data, including replicas, logs and backups, must stay in the EU.",
+            }
+        }
+    ]
+    assert ground_model_sources(items, chunks) == 1
+    citation = items[0]["source"]
+    assert citation["chunk_id"] == "a"
+    assert (
+        citation["quote"] == "All data, including replicas,\nlogs and backups, must stay in the EU."
+    )
+    validate_source(citation, chunks)
+
+
+@pytest.mark.parametrize("failure", ["gap", "document", "page", "changed_word", "ambiguous"])
+def test_citation_normalization_does_not_fabricate_a_source(failure):
+    from counterparty.analysis.sources import ground_model_sources
+
+    chunks = [
+        {
+            "id": "a",
+            "document_id": "p",
+            "text": "All data must",
+            "location": {"line_start": 1, "line_end": 1},
+        },
+        {
+            "id": "b",
+            "document_id": "p",
+            "text": "stay in the EU.",
+            "location": {"line_start": 2, "line_end": 2},
+        },
+    ]
+    quote = "All data must stay in the EU."
+    if failure == "gap":
+        chunks[1]["location"]["line_start"] = 3
+    elif failure == "document":
+        chunks[1]["document_id"] = "other"
+    elif failure == "page":
+        chunks[1]["location"]["page"] = 2
+    elif failure == "changed_word":
+        quote = "All data must stay outside the EU."
+    else:
+        chunks[1]["text"] += "\n" + quote
+    with pytest.raises(ValueError, match="eligible chunk"):
+        ground_model_sources(
+            [{"source": {"document_id": "p", "chunk_id": "wrong", "location": {}, "quote": quote}}],
+            chunks,
+        )
+
+
 def chunk(text, kind="evidence", identifier="c1"):
     return {"id": identifier, "document_id": "d1", "location": "page 1", "text": text, "kind": kind}
 
@@ -69,6 +142,20 @@ def test_policy_overlimit_is_rejected_without_call(monkeypatch):
     with pytest.raises(ValueError, match="100000"):
         semantic.propose_narrative_requirements([chunk("x" * 100001, "policy")])
     assert not calls
+
+
+def test_assessment_restores_source_whitespace_without_changing_words(monkeypatch):
+    evidence = chunk("Delete personal data\nwithin 30 days.")
+    provider(
+        monkeypatch,
+        {
+            "status": "pass",
+            "explanation": "The declared deadline satisfies the requirement.",
+            "evidence": [{**citation(evidence), "quote": "Delete personal data within 30 days."}],
+        },
+    )
+    result = semantic.assess_requirement(requirement(), [evidence], {}, semantic_scores={"c1": 1.0})
+    assert result["evidence"][0]["quote"] == evidence["text"]
 
 
 def test_legacy_normalization_preserves_source_and_explicit_conditions():

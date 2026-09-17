@@ -9,18 +9,18 @@ export function sourceHref(citation: Citation): string {
   return `/documents/${encodeURIComponent(citation.document_id)}#${fragment}`;
 }
 
-function matches(text: string, quote: string): RegExpExecArray[] {
+function matches(text: string, quote: string, startBefore = text.length): RegExpExecArray[] {
   const pattern = quote.trim().split(/\s+/)
     .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
     .join("\\s+");
   if (!pattern) return [];
   const regex = new RegExp(pattern, "g");
   const first = regex.exec(text);
-  if (!first) return [];
+  if (!first || first.index >= startBefore) return [];
   // A second match, including an overlapping one, makes the location ambiguous.
   regex.lastIndex = first.index + 1;
   const second = regex.exec(text);
-  return second ? [first, second] : [first];
+  return second && second.index < startBefore ? [first, second] : [first];
 }
 
 export function locateSource(
@@ -46,12 +46,17 @@ export function locateSource(
       ? "Multiple matching source passages were found. An exact location cannot be highlighted reliably."
       : "The cited passage could not be located in the full document. No quote has been highlighted." };
   }
-  const quotes = matches(anchors[0][0], quote);
+  const anchor = anchors[0];
+  let quotes = matches(anchor[0], quote);
+  if (quotes.length === 0) {
+    // A citation may continue into the next chunk, but must start in its anchor.
+    quotes = matches(document.text.slice(anchor.index), quote, anchor[0].length);
+  }
   if (quotes.length !== 1) {
     return { notice: quotes.length
       ? "The quote occurs more than once in the cited passage. An exact location cannot be highlighted reliably."
       : "The cited quote could not be found in its source passage. No quote has been highlighted." };
   }
-  const start = anchors[0].index + quotes[0].index;
+  const start = anchor.index + quotes[0].index;
   return { start, end: start + quotes[0][0].length };
 }

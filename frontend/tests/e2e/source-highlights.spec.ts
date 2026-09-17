@@ -64,3 +64,41 @@ test("ambiguous passages are reported and punctuation stays literal", async () =
   expect(href).toMatch(/^\/documents\/source#chunk=/);
   expect(new URLSearchParams(href.split("#")[1]).get("quote")).toBe("[1.5] (USD)?");
 });
+
+test("a citation starting in its anchor highlights original text across chunk boundaries", async ({ page }) => {
+  const crossQuote = "Notify us within 24 hours of discovery.";
+  const prefix = `${crossQuote}\n${crossQuote}\nCurrent obligations:\n`;
+  const anchor = "Current obligations:\nNotify us within";
+  const crossText = `${prefix}Notify us\twithin\n24 hours of discovery.\nUnrelated later obligation.`;
+  await page.route("**/api/documents/source", (route) => route.fulfill({ json: {
+    id: "source", filename: "Agreement.txt", kind: "evidence", version: 1,
+    created_at: "2026-09-16T10:00:00Z", text: crossText,
+    chunks: [
+      { id: "current", text: anchor, location: { line_start: 3, line_end: 4 } },
+      { id: "next", text: "24 hours of discovery.\nUnrelated later obligation.", location: { line_start: 5, line_end: 6 } },
+    ],
+  } }));
+  await page.goto(`/documents/source#${new URLSearchParams({ chunk: "current", quote: crossQuote })}`);
+  const highlight = page.locator("mark.source-highlight");
+  await expect(highlight).toHaveCount(1);
+  expect(await highlight.textContent()).toBe("Notify us\twithin\n24 hours of discovery.");
+  expect(await highlight.evaluate((node) => node.previousSibling?.textContent)).toBe(prefix);
+  await page.goto(`/documents/source#${new URLSearchParams({ chunk: "current", quote: "Unrelated later obligation." })}`);
+  await expect(page.locator("mark.source-highlight")).toHaveCount(0);
+  await expect(page.getByRole("status")).toContainText("could not be found");
+});
+
+test("cross-boundary matching rejects ambiguous starts and missing or repeated anchors", async () => {
+  const { locateSource } = await import("../../lib/source");
+  const document = {
+    id: "source", filename: "Agreement.txt", kind: "evidence" as const,
+    version: 1, created_at: "2026-09-16T10:00:00Z",
+    text: "Intro repeat repeat repeat repeat end.",
+    chunks: [{ id: "anchor", text: "Intro repeat repeat", location: {} }],
+  };
+  expect(locateSource(document, "anchor", "repeat repeat repeat").notice).toContain("more than once");
+  document.text = "Intro repeat repeat\nIntro repeat repeat repeat repeat end.";
+  expect(locateSource(document, "anchor", "repeat repeat repeat").notice).toContain("Multiple matching");
+  document.text = "Unrelated text.";
+  expect(locateSource(document, "anchor", "repeat repeat repeat").notice).toContain("could not be located");
+});
