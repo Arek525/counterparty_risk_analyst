@@ -10,7 +10,6 @@ CHECKPOINT_TABLES = {
     "checkpoints",
     "checkpoint_blobs",
     "checkpoint_writes",
-    "demo_tickets",
 }
 
 

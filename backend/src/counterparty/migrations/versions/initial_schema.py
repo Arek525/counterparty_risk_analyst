@@ -1,18 +1,51 @@
-"""Create versioned domain records, server sessions and pgvector embeddings."""
+"""Create the current application schema directly.
+
+The revision ID is retained from the former history's final migration so databases
+already at that version remain untouched. Earlier revisions are not supported.
+This schema is frozen: future changes belong in new migrations.
+"""
 
 import pgvector.sqlalchemy.vector
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision = "0002_domain"
-down_revision = "0001_organizations"
+revision = "0007_information_requests"
+down_revision = None
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
     op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    op.create_table(
+        "organizations",
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("slug", sa.String(length=100), nullable=False),
+        sa.Column("name", sa.String(length=255), nullable=False),
+        sa.Column("is_synthetic", sa.Boolean(), server_default=sa.text("false"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.CheckConstraint(
+            "slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'", name=op.f("ck_organizations_slug_format")
+        ),
+        sa.CheckConstraint("length(trim(name)) > 0", name=op.f("ck_organizations_name_not_blank")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_organizations")),
+        sa.UniqueConstraint("slug", name=op.f("uq_organizations_slug")),
+    )
+    op.create_table(
+        "worker_model_state",
+        sa.Column("id", sa.String(length=50), nullable=False),
+        sa.Column("status", sa.String(length=20), nullable=False),
+        sa.Column("config", sa.String(length=64), nullable=False),
+        sa.Column("error", sa.Text(), nullable=True),
+        sa.Column("heartbeat_at", sa.DateTime(timezone=True), nullable=False),
+        sa.PrimaryKeyConstraint("id", name="worker_model_state_pkey"),
+    )
     op.create_table(
         "users",
         sa.Column("email", sa.String(length=254), nullable=False),
@@ -22,6 +55,7 @@ def upgrade():
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("organization_id", sa.Uuid(), nullable=False),
+        sa.CheckConstraint("role IN ('analyst', 'reviewer')", name=op.f("ck_users_supported_role")),
         sa.ForeignKeyConstraint(
             ["organization_id"],
             ["organizations.id"],
@@ -84,6 +118,12 @@ def upgrade():
         sa.Column("created_by", sa.Uuid(), nullable=False),
         sa.Column("approved_by", sa.Uuid(), nullable=True),
         sa.Column("approved_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("extraction_key", sa.String(length=64), nullable=True),
+        sa.Column("extraction_status", sa.String(length=20), nullable=False),
+        sa.Column("extraction_error", sa.Text(), nullable=True),
+        sa.Column("requirement_embeddings", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("requirement_index_status", sa.String(length=20), nullable=False),
+        sa.Column("requirement_index_error", sa.Text(), nullable=True),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("organization_id", sa.Uuid(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
@@ -107,6 +147,12 @@ def upgrade():
         ),
     )
     op.create_index(
+        op.f("ix_policy_set_versions_extraction_key"),
+        "policy_set_versions",
+        ["extraction_key"],
+        unique=False,
+    )
+    op.create_index(
         op.f("ix_policy_set_versions_organization_id"),
         "policy_set_versions",
         ["organization_id"],
@@ -119,6 +165,11 @@ def upgrade():
         sa.Column("policy_version_id", sa.Uuid(), nullable=False),
         sa.Column("status", sa.String(length=30), nullable=False),
         sa.Column("input_snapshot", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("retrieval_snapshot", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("assessment_progress", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column(
+            "information_request_draft", postgresql.JSONB(astext_type=sa.Text()), nullable=True
+        ),
         sa.Column("report", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("retrieval_variant", sa.String(length=30), nullable=False),
         sa.Column("model_mode", sa.String(length=30), nullable=False),
@@ -167,6 +218,13 @@ def upgrade():
         sa.Column("storage_key", sa.Text(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("media_type", sa.String(length=100), nullable=False),
+        sa.Column("index_status", sa.String(length=20), nullable=False),
+        sa.Column("index_config", sa.String(length=64), nullable=False),
+        sa.Column("index_attempts", sa.Integer(), nullable=False),
+        sa.Column("index_owner", sa.String(length=64), nullable=True),
+        sa.Column("index_lease_expires_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("indexed_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("index_error", sa.Text(), nullable=True),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("organization_id", sa.Uuid(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
@@ -184,47 +242,9 @@ def upgrade():
         sa.PrimaryKeyConstraint("id", name=op.f("pk_documents")),
     )
     op.create_index(op.f("ix_documents_case_id"), "documents", ["case_id"], unique=False)
+    op.create_index(op.f("ix_documents_index_status"), "documents", ["index_status"], unique=False)
     op.create_index(
         op.f("ix_documents_organization_id"), "documents", ["organization_id"], unique=False
-    )
-    op.create_table(
-        "approval_requests",
-        sa.Column("run_id", sa.Uuid(), nullable=False),
-        sa.Column("requested_by", sa.Uuid(), nullable=False),
-        sa.Column("approved_by", sa.Uuid(), nullable=True),
-        sa.Column("action", sa.String(length=50), nullable=False),
-        sa.Column("arguments", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("arguments_hash", sa.String(length=64), nullable=False),
-        sa.Column("status", sa.String(length=30), nullable=False),
-        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("approved_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("organization_id", sa.Uuid(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["approved_by"], ["users.id"], name=op.f("fk_approval_requests_approved_by_users")
-        ),
-        sa.ForeignKeyConstraint(
-            ["organization_id"],
-            ["organizations.id"],
-            name=op.f("fk_approval_requests_organization_id_organizations"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["requested_by"], ["users.id"], name=op.f("fk_approval_requests_requested_by_users")
-        ),
-        sa.ForeignKeyConstraint(
-            ["run_id"], ["analysis_runs.id"], name=op.f("fk_approval_requests_run_id_analysis_runs")
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_approval_requests")),
-    )
-    op.create_index(
-        op.f("ix_approval_requests_organization_id"),
-        "approval_requests",
-        ["organization_id"],
-        unique=False,
-    )
-    op.create_index(
-        op.f("ix_approval_requests_run_id"), "approval_requests", ["run_id"], unique=False
     )
     op.create_table(
         "audit_events",
@@ -291,8 +311,8 @@ def upgrade():
         sa.Column("case_id", sa.Uuid(), nullable=True),
         sa.Column("text", sa.Text(), nullable=False),
         sa.Column("location", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("embedding", pgvector.sqlalchemy.vector.VECTOR(dim=128), nullable=False),
-        sa.Column("embedding_model", sa.String(length=100), nullable=False),
+        sa.Column("embedding", pgvector.sqlalchemy.vector.VECTOR(dim=384), nullable=True),
+        sa.Column("embedding_model", sa.String(length=100), nullable=True),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("organization_id", sa.Uuid(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -325,51 +345,33 @@ def upgrade():
         ["organization_id"],
         unique=False,
     )
-    op.create_table(
-        "integration_calls",
-        sa.Column("approval_id", sa.Uuid(), nullable=False),
-        sa.Column("idempotency_key", sa.String(length=100), nullable=False),
-        sa.Column("status", sa.String(length=30), nullable=False),
-        sa.Column("request", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("response", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-        sa.Column("error", sa.Text(), nullable=True),
-        sa.Column("attempts", sa.Integer(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("organization_id", sa.Uuid(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["approval_id"],
-            ["approval_requests.id"],
-            name=op.f("fk_integration_calls_approval_id_approval_requests"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["organization_id"],
-            ["organizations.id"],
-            name=op.f("fk_integration_calls_organization_id_organizations"),
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_integration_calls")),
-        sa.UniqueConstraint("approval_id", name=op.f("uq_integration_calls_approval_id")),
-        sa.UniqueConstraint("idempotency_key", name=op.f("uq_integration_calls_idempotency_key")),
-    )
-    op.create_index(
-        op.f("ix_integration_calls_organization_id"),
-        "integration_calls",
-        ["organization_id"],
-        unique=False,
-    )
+
+    op.execute("""CREATE FUNCTION protect_analysis_snapshots() RETURNS trigger AS $$
+        BEGIN
+          IF NEW.input_snapshot IS DISTINCT FROM OLD.input_snapshot THEN
+            RAISE EXCEPTION 'Analysis input snapshot is immutable';
+          END IF;
+          IF OLD.retrieval_snapshot IS NOT NULL AND
+             NEW.retrieval_snapshot IS DISTINCT FROM OLD.retrieval_snapshot THEN
+            RAISE EXCEPTION 'Retrieval snapshot is write-once';
+          END IF;
+          RETURN NEW;
+        END; $$ LANGUAGE plpgsql""")
+    op.execute("""CREATE TRIGGER analysis_snapshots_immutable BEFORE UPDATE ON analysis_runs
+        FOR EACH ROW EXECUTE FUNCTION protect_analysis_snapshots()""")
 
 
 def downgrade():
-    op.drop_table("integration_calls")
+    op.execute("DROP TRIGGER analysis_snapshots_immutable ON analysis_runs")
+    op.execute("DROP FUNCTION protect_analysis_snapshots()")
     op.drop_table("document_chunks")
     op.drop_table("decisions")
     op.drop_table("audit_events")
-    op.drop_table("approval_requests")
     op.drop_table("documents")
     op.drop_table("analysis_runs")
     op.drop_table("policy_set_versions")
     op.drop_table("auth_sessions")
     op.drop_table("assessment_cases")
     op.drop_table("users")
-    op.execute("DROP EXTENSION IF EXISTS vector")
+    op.drop_table("worker_model_state")
+    op.drop_table("organizations")

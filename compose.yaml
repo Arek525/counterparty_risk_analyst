@@ -14,8 +14,6 @@ x-backend: &backend
     MODEL_MODE: ${MODEL_MODE:-demo}
     GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     GEMINI_MODEL: ${GEMINI_MODEL:-}
-    TICKET_SERVICE_URL: http://tickets:8010
-    TICKET_SERVICE_TOKEN: ${TICKET_SERVICE_TOKEN:-local-demo-ticket-token}
     LANGSMITH_TRACING: "false"
     LANGCHAIN_TRACING_V2: "false"
   volumes:
@@ -80,18 +78,6 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
-
-  tickets:
-    <<: *backend
-    command: ["uvicorn", "counterparty.ticket_service:create_app", "--factory", "--host", "0.0.0.0", "--port", "8010"]
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   frontend:
     build:

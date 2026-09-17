@@ -163,3 +163,40 @@ def test_seed_rolls_back_when_slug_belongs_to_real_organization(
     with engine.connect() as connection:
         row = connection.execute(text("SELECT name, is_synthetic FROM organizations")).one()
         assert row == ("Existing real company", False)
+
+
+def test_current_schema_has_one_baseline(migration_config):
+    from alembic.script import ScriptDirectory
+
+    revisions = list(ScriptDirectory.from_config(migration_config).walk_revisions())
+    assert len(revisions) == 1
+    assert revisions[0].revision == "0007_information_requests"
+    assert revisions[0].down_revision is None
+
+
+def test_current_upgrade_preserves_data(workflow_setup, migration_config):
+    from sqlalchemy.exc import IntegrityError
+
+    engine, _, (run_id, user_id, _) = workflow_setup
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE analysis_runs SET information_request_draft = :draft WHERE id = :id"),
+            {"draft": '{"text": "Preserve this request"}', "id": run_id},
+        )
+    command.upgrade(migration_config, "head")
+    command.check(migration_config)
+    with engine.connect() as connection:
+        assert (
+            connection.scalar(
+                text("SELECT information_request_draft->>'text' FROM analysis_runs WHERE id = :id"),
+                {"id": run_id},
+            )
+            == "Preserve this request"
+        )
+    assert not {"approval_requests", "integration_calls", "demo_tickets"} & set(
+        inspect(engine).get_table_names()
+    )
+    with pytest.raises(IntegrityError), engine.begin() as connection:
+        connection.execute(
+            text("UPDATE users SET role = 'auditor' WHERE id = :id"), {"id": user_id}
+        )

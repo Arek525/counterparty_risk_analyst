@@ -4,7 +4,16 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,6 +40,7 @@ class Created:
 
 class User(Identity, Tenant, Base):
     __tablename__ = "users"
+    __table_args__ = (CheckConstraint("role IN ('analyst', 'reviewer')", name="supported_role"),)
     email: Mapped[str] = mapped_column(String(254), unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     role: Mapped[str] = mapped_column(String(30))
@@ -114,6 +124,7 @@ class AnalysisRun(Identity, Tenant, Created, Base):
     input_snapshot: Mapped[dict] = mapped_column(JSONB)
     retrieval_snapshot: Mapped[dict | None] = mapped_column(JSONB)
     assessment_progress: Mapped[dict | None] = mapped_column(JSONB)
+    information_request_draft: Mapped[dict | None] = mapped_column(JSONB)
     report: Mapped[dict | None] = mapped_column(JSONB)
     retrieval_variant: Mapped[str] = mapped_column(String(30), default="semantic")
     model_mode: Mapped[str] = mapped_column(String(30), default="demo")
@@ -140,31 +151,6 @@ class AuditEvent(Identity, Tenant, Created, Base):
     run_id: Mapped[UUID | None] = mapped_column(ForeignKey("analysis_runs.id"), index=True)
     event: Mapped[str] = mapped_column(String(100))
     details: Mapped[dict] = mapped_column(JSONB, default=dict)
-
-
-class ApprovalRequest(Identity, Tenant, Created, Base):
-    __tablename__ = "approval_requests"
-    run_id: Mapped[UUID] = mapped_column(ForeignKey("analysis_runs.id"), index=True)
-    requested_by: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    approved_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
-    action: Mapped[str] = mapped_column(String(50), default="create_ticket")
-    arguments: Mapped[dict] = mapped_column(JSONB)
-    arguments_hash: Mapped[str] = mapped_column(String(64))
-    status: Mapped[str] = mapped_column(String(30), default="proposed")
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-
-
-class IntegrationCall(Identity, Tenant, Created, Base):
-    __tablename__ = "integration_calls"
-    approval_id: Mapped[UUID] = mapped_column(ForeignKey("approval_requests.id"), unique=True)
-    idempotency_key: Mapped[str] = mapped_column(String(100), unique=True)
-    status: Mapped[str] = mapped_column(String(30), default="pending")
-    request: Mapped[dict] = mapped_column(JSONB)
-    response: Mapped[dict | None] = mapped_column(JSONB)
-    error: Mapped[str | None] = mapped_column(Text)
-    attempts: Mapped[int] = mapped_column(Integer, default=0)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class WorkerModelState(Base):

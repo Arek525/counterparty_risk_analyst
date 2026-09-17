@@ -11,11 +11,11 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from counterparty.models import AssessmentCase, AuditEvent, AuthSession, User
+from counterparty.models import AnalysisRun, AssessmentCase, AuditEvent, AuthSession, Decision, User
 
 COOKIE_NAME = "counterparty_session"
-WRITE_ROLES = ("analyst", "reviewer", "administrator")
-REVIEW_ROLES = ("reviewer", "administrator")
+WRITE_ROLES = ("analyst", "reviewer")
+REVIEW_ROLES = ("reviewer",)
 
 
 def hash_password(password: str) -> str:
@@ -64,12 +64,12 @@ def current_user(request: Request, session: Annotated[Session, Depends(get_sessi
     if auth is None or auth.expires_at <= datetime.now(UTC):
         raise HTTPException(401, "Session expired")
     user = session.get(User, auth.user_id)
-    if user is None or not user.is_active:
+    if user is None or not user.is_active or user.role not in WRITE_ROLES:
         raise HTTPException(401, "Account unavailable")
     if not request.app.state.settings.demo_mode:
-        from counterparty.bootstrap import DEMO_ACCOUNTS
+        from counterparty.bootstrap import DEMO_EMAILS
 
-        if user.email in {account["email"] for account in DEMO_ACCOUNTS}:
+        if user.email in DEMO_EMAILS:
             raise HTTPException(403, "Demo accounts are disabled")
     return user
 
@@ -85,7 +85,7 @@ def get_case(session: Session, user: User, case_id: UUID) -> AssessmentCase:
             AssessmentCase.id == case_id, AssessmentCase.organization_id == user.organization_id
         )
     )
-    if case is None or (user.role == "analyst" and case.owner_id != user.id):
+    if case is None:
         raise HTTPException(404, "Case not found")
     return case
 
@@ -101,3 +101,29 @@ def audit(session: Session, user: User, event: str, case_id=None, run_id=None, d
     )
     session.add(record)
     return record
+
+
+def case_is_decided(session, case_id):
+    return (
+        session.scalar(
+            select(Decision.id)
+            .join(AnalysisRun, Decision.run_id == AnalysisRun.id)
+            .where(AnalysisRun.case_id == case_id, Decision.decision.in_(["accepted", "rejected"]))
+            .limit(1)
+        )
+        is not None
+    )
+
+
+def require_case_write(session, user, case_id):
+    require_roles(user, *WRITE_ROLES)
+    get_case(session, user, case_id)
+    if user.role == "analyst" and case_is_decided(session, case_id):
+        raise HTTPException(403, "This case has a final decision and is read-only for analysts.")
+
+
+def require_document_write(session, user, document):
+    if document.kind == "policy":
+        require_roles(user, *REVIEW_ROLES)
+    else:
+        require_case_write(session, user, document.case_id)

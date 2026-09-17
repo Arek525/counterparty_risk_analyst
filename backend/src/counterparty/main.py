@@ -36,12 +36,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
     app.include_router(health_router)
-    from counterparty.integrations import router as integrations_router
     from counterparty.routes import router
 
     app.include_router(router)
-    app.include_router(integrations_router)
-    from counterparty.deletion import router as deletion_router
-
-    app.include_router(deletion_router)
     return app

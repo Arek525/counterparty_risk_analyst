@@ -19,7 +19,7 @@ import type { DocumentRecord, PolicyVersion } from "@/lib/types";
 
 export default function PoliciesPage() {
   const { user } = useAuth();
-  const canWrite = user?.role !== "auditor";
+  const canWrite = user?.role === "reviewer";
   const [policies, setPolicies] = useState<PolicyVersion[]>([]);
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +33,7 @@ export default function PoliciesPage() {
     setError("");
     const [policyResult, documentResult] = await Promise.allSettled([
       api<PolicyVersion[]>("/api/policies"),
-      api<DocumentRecord[]>("/api/documents"),
+      api<DocumentRecord[]>("/api/documents?kind=policy"),
     ]);
     if (policyResult.status === "fulfilled") setPolicies(policyResult.value);
     else setError(errorMessage(policyResult.reason));
@@ -49,12 +49,13 @@ export default function PoliciesPage() {
   useEffect(() => {
     if (!documents.some((doc) => ["pending", "indexing"].includes(doc.index_status ?? ""))) return;
     const timer = setInterval(() => {
-      void api<DocumentRecord[]>("/api/documents").then(setDocuments).catch(() => {});
+      void api<DocumentRecord[]>("/api/documents?kind=policy").then(setDocuments).catch(() => {});
     }, 2000);
     return () => clearInterval(timer);
   }, [documents]);
-  async function upload(event: React.FormEvent) {
+  async function upload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!file) return;
     setUploading(true);
     setError("");
@@ -63,6 +64,7 @@ export default function PoliciesPage() {
     data.append("kind", "policy");
     try {
       await api("/api/documents", { method: "POST", body: data });
+      form.reset();
       setFile(null);
       await load();
     } catch (reason) {
@@ -138,7 +140,7 @@ export default function PoliciesPage() {
                         >
                           Open <Icon name="arrow" />
                         </Link>
-                        <DeleteButton endpoint={`/api/policies/${policy.id}`} label="Delete" ariaLabel="Delete policy set" onDeleted={load}
+                        <DeleteButton reviewerOnly endpoint={`/api/policies/${policy.id}`} label="Delete" ariaLabel="Delete policy set" onDeleted={load}
                           confirmation={`Permanently delete “${policy.name}” v${policy.version} and its requirements? Source documents remain. Referencing reports must be deleted first.`} />
                         </div>
                       </td>
@@ -170,7 +172,7 @@ export default function PoliciesPage() {
                     </Link>
                     <span className="subtle">version {document.version}</span>
                   </div>
-                  <DeleteButton endpoint={`/api/documents/${document.id}`} label="Delete" ariaLabel={`Delete ${document.filename}`} onDeleted={load}
+                  <DeleteButton reviewerOnly endpoint={`/api/documents/${document.id}`} label="Delete" ariaLabel={`Delete ${document.filename}`} onDeleted={load}
                     confirmation={`Permanently delete “${document.filename}” and its search index? Referencing reports or policy sets must be deleted first.`} />
                 </div>
               ))

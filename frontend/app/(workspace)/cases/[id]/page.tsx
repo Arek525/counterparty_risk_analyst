@@ -28,8 +28,8 @@ export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
-  const canWrite = user?.role !== "auditor";
   const [caseItem, setCaseItem] = useState<AssessmentCase | null>(null);
+  const canWrite = user?.role === "reviewer" || (user?.role === "analyst" && !caseItem?.is_decided);
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [runs, setRuns] = useState<AnalysisRun[]>([]);
   const [policies, setPolicies] = useState<PolicyVersion[]>([]);
@@ -47,7 +47,7 @@ export default function CaseDetailPage() {
     setError("");
     const results = await Promise.allSettled([
       api<AssessmentCase>(`/api/cases/${id}`),
-      api<DocumentRecord[]>(`/api/documents?case_id=${encodeURIComponent(id)}`),
+      api<DocumentRecord[]>(`/api/documents?kind=evidence&case_id=${encodeURIComponent(id)}`),
       api<AnalysisRun[]>(`/api/cases/${id}/runs`),
       api<PolicyVersion[]>("/api/policies"),
     ]);
@@ -65,12 +65,13 @@ export default function CaseDetailPage() {
   useEffect(() => {
     if (!documents.some((doc) => ["pending", "indexing"].includes(doc.index_status ?? ""))) return;
     const timer = setInterval(() => {
-      void api<DocumentRecord[]>(`/api/documents?case_id=${encodeURIComponent(id)}`).then(setDocuments).catch(() => {});
+      void api<DocumentRecord[]>(`/api/documents?kind=evidence&case_id=${encodeURIComponent(id)}`).then(setDocuments).catch(() => {});
     }, 2000);
     return () => clearInterval(timer);
   }, [id, documents]);
-  async function upload(event: React.FormEvent) {
+  async function upload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!file) return;
     setUploading(true);
     setError("");
@@ -84,7 +85,9 @@ export default function CaseDetailPage() {
         method: "POST",
         body: data,
       });
+      form.reset();
       setFile(null);
+      setEvidenceType("declaration");
       await load();
     } catch (reason) {
       setError(errorMessage(reason));
@@ -108,8 +111,8 @@ export default function CaseDetailPage() {
         description={`Created ${formatDate(caseItem.created_at)}`}
         actions={
           <>
-            <DeleteButton endpoint={`/api/cases/${id}`} label="Delete case" redirect="/cases"
-              confirmation={`Permanently delete “${caseItem.name}”, all its documents, reports, decisions and local ticket records? Shared policy documents remain. This cannot be undone.`} />
+            <DeleteButton reviewerOnly endpoint={`/api/cases/${id}`} label="Delete case" redirect="/cases"
+              confirmation={`Permanently delete “${caseItem.name}”, all its documents, reports and decisions? Shared policy documents remain. This cannot be undone.`} />
             <Link className="button button-quiet" href={`/audit?case_id=${id}`}>
               Activity
             </Link>
@@ -122,6 +125,7 @@ export default function CaseDetailPage() {
         }
       />
       {error && <ErrorNotice message={error} />}
+      {!canWrite && caseItem.is_decided && <p className="notice notice-info">This case has a final decision and is read-only for analysts.</p>}
       <div className="detail-grid">
         <div className="stack">
           <section className="card">
@@ -162,7 +166,7 @@ export default function CaseDetailPage() {
                     >
                       Source <Icon name="arrow" />
                     </Link>
-                    <DeleteButton endpoint={`/api/documents/${document.id}`} label="Delete" ariaLabel={`Delete ${document.filename}`} onDeleted={load}
+                    <DeleteButton allowed={canWrite} endpoint={`/api/documents/${document.id}`} label="Delete" ariaLabel={`Delete ${document.filename}`} onDeleted={load}
                       confirmation={`Permanently delete “${document.filename}” and its search index? Referencing reports or policy sets must be deleted first.`} />
                     </div>
                   </div>
@@ -279,8 +283,8 @@ export default function CaseDetailPage() {
                           >
                             Open <Icon name="arrow" />
                           </Link>
-                          <DeleteButton endpoint={`/api/runs/${run.id}`} label="Delete" ariaLabel="Delete report" onDeleted={load}
-                            confirmation="Permanently delete this report, its decision, saved analysis progress and local ticket records? Source documents remain. This cannot be undone." />
+                          <DeleteButton allowed={canWrite && (user?.role === "reviewer" || !run.decision)} endpoint={`/api/runs/${run.id}`} label="Delete" ariaLabel="Delete report" onDeleted={load}
+                            confirmation="Permanently delete this report, its decision and saved analysis progress? Source documents remain. This cannot be undone." />
                           </div>
                         </td>
                       </tr>
@@ -369,7 +373,7 @@ export default function CaseDetailPage() {
           )}
         </aside>
       </div>
-      {modal === "edit" && (
+      {canWrite && modal === "edit" && (
         <EditCaseModal
           item={caseItem}
           close={() => setModal(null)}
@@ -379,7 +383,7 @@ export default function CaseDetailPage() {
           }}
         />
       )}
-      {modal === "analysis" && (
+      {canWrite && modal === "analysis" && (
         <StartRunModal
           caseId={id}
           policies={policies.filter((policy) => policy.status === "approved")}
@@ -521,7 +525,6 @@ function StartRunModal({
   created: (run: AnalysisRun) => void;
 }) {
   const [policyId, setPolicyId] = useState(policies[0]?.id ?? "");
-  const [variant, setVariant] = useState<"lexical" | "hybrid" | "semantic">("hybrid");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function submit(event: React.FormEvent) {
@@ -534,7 +537,6 @@ function StartRunModal({
           method: "POST",
           body: JSON.stringify({
             policy_version_id: policyId,
-            retrieval_variant: variant,
           }),
         }),
       );
@@ -573,27 +575,6 @@ function StartRunModal({
                 ))}
               </select>
             </label>
-            <details><summary>Advanced retrieval options</summary>
-            <label className="field">
-              <span>Evidence retrieval variant</span>
-              <select
-                className="select"
-                value={variant}
-                onChange={(e) =>
-                  setVariant(e.target.value as "lexical" | "hybrid" | "semantic")
-                }
-              >
-                <option value="semantic">Semantic (local multilingual model)</option>
-                <option value="hybrid">
-                  Hybrid — keywords and similarity
-                </option>
-                <option value="lexical">Lexical — keywords</option>
-              </select>
-              <small className="field-help">
-                The variant is saved with the run so results can be compared.
-              </small>
-            </label>
-            </details>
             <div className="notice notice-info">
               <div>
                 <strong>Immutable input snapshot</strong>

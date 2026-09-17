@@ -31,7 +31,7 @@ export default function PolicyDetailPage() {
     try {
       const [value, sources] = await Promise.all([
         api<PolicyVersion>(`/api/policies/${id}`),
-        api<DocumentRecord[]>("/api/documents"),
+        api<DocumentRecord[]>("/api/documents?kind=policy"),
       ]);
       setPolicy(value);
       setDocuments(sources);
@@ -75,7 +75,7 @@ export default function PolicyDetailPage() {
   const requirements = policy.requirements ?? [];
   const canApprove =
     extractionReady && policy.status === "draft" &&
-    (user?.role === "reviewer" || user?.role === "administrator");
+    user?.role === "reviewer";
   return (
     <>
       <PageHeader
@@ -84,12 +84,12 @@ export default function PolicyDetailPage() {
         description={`Created ${formatDate(policy.created_at)}`}
         actions={
           <>
-            <DeleteButton endpoint={`/api/policies/${id}`} label="Delete policy set" redirect="/policies"
+            <DeleteButton reviewerOnly endpoint={`/api/policies/${id}`} label="Delete policy set" redirect="/policies"
               confirmation={`Permanently delete “${policy.name}” v${policy.version}, its requirements and their embeddings? Source documents remain. Referencing reports must be deleted first.`} />
             <StatusBadge value={policy.status}>
               {statusLabels[policy.status]}
             </StatusBadge>
-            {user?.role !== "auditor" && <button className="button button-quiet" disabled={pending} onClick={regenerate}>Regenerate requirements</button>}
+            {user?.role === "reviewer" && <button className="button button-quiet" disabled={pending} onClick={regenerate}>Regenerate requirements</button>}
             {canApprove && (
               <button className="button" onClick={approve} disabled={pending}>
                 <Icon name="check" />
@@ -100,7 +100,7 @@ export default function PolicyDetailPage() {
         }
       />
       {error && <ErrorNotice message={error} />}
-      <div className="notice notice-info" style={{ marginBottom: 18 }}>
+      {extractionReady && <div className="notice notice-info" style={{ marginBottom: 18 }}>
         <div>
           <strong>
             {policy.status === "approved"
@@ -113,7 +113,7 @@ export default function PolicyDetailPage() {
               : "Review the extracted requirements against their sources before approval. If extraction is incorrect, regenerate or delete this draft. Requirements cannot be edited manually."}
           </p>
         </div>
-      </div>
+      </div>}
       {policy.extraction_status === "extracting" && <Spinner label="Extracting requirements from the full source documents…" />}
       {policy.extraction_status === "error" && <ErrorNotice message={policy.extraction_error ?? "Extraction failed. Regenerate requirements to try again."} />}
       {policy.status === "draft" && extractionReady && requirements.length > 0 && (
@@ -132,11 +132,11 @@ export default function PolicyDetailPage() {
       {policy.status === "approved" && policy.requirement_index_status && policy.requirement_index_status !== "ready" && (
         <div className="notice notice-info" style={{marginBottom: 18}} aria-live="polite"><p>{policy.requirement_index_status === "error" ? "Requirement preparation failed. " + (policy.requirement_index_error ?? "") : "Preparing approved requirements for analysis in the background…"}</p></div>
       )}
-      {requirements.length === 0 ? (
+      {extractionReady && (requirements.length === 0 ? (
         <div className="card">
           <EmptyState
             title="No requirements"
-            description="The adapter proposed no requirements for the selected sources."
+            description="Extraction completed without finding requirements in the selected sources."
           />
         </div>
       ) : (
@@ -152,7 +152,7 @@ export default function PolicyDetailPage() {
               document={documents.find((document) => document.id === requirement.source.document_id)} />
           ))}
         </div>
-      )}
+      ))}
     </>
   );
 }

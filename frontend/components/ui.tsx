@@ -79,7 +79,6 @@ export function StatusBadge({
     needs_information: "warning",
     draft: "neutral",
     proposed: "neutral",
-    approved_ticket: "info",
     executing: "info",
     executed: "success",
     not_applicable: "neutral",

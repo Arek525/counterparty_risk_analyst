@@ -18,12 +18,10 @@ import {
   findingLabels,
   formatDate,
   statusLabels,
-  titleCase,
 } from "@/lib/format";
 import { sourceHref } from "@/lib/source";
 import type {
   AnalysisRun,
-  ApprovalRequest,
   Citation,
   Decision,
   DocumentRecord,
@@ -34,7 +32,6 @@ export default function RunPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [run, setRun] = useState<AnalysisRun | null>(null);
-  const [tickets, setTickets] = useState<ApprovalRequest[]>([]);
   const [error, setError] = useState("");
   const [source, setSource] = useState<Citation | null>(null);
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
@@ -42,12 +39,7 @@ export default function RunPage() {
   const [sourceError, setSourceError] = useState("");
   const load = useCallback(async () => {
     try {
-      const [runValue, ticketValue] = await Promise.all([
-        api<AnalysisRun>(`/api/runs/${id}`),
-        api<ApprovalRequest[]>(`/api/runs/${id}/tickets`),
-      ]);
-      setRun(runValue);
-      setTickets(ticketValue);
+      setRun(await api<AnalysisRun>(`/api/runs/${id}`));
       setError("");
     } catch (reason) {
       setError(errorMessage(reason));
@@ -61,7 +53,7 @@ export default function RunPage() {
     let active = true;
     setDocuments([]);
     setSourceError("");
-    Promise.allSettled([api<DocumentRecord[]>("/api/documents"), api<DocumentRecord[]>(`/api/documents?case_id=${encodeURIComponent(run.case_id)}`)])
+    Promise.allSettled([api<DocumentRecord[]>("/api/documents?kind=policy"), api<DocumentRecord[]>(`/api/documents?kind=evidence&case_id=${encodeURIComponent(run.case_id)}`)])
       .then((results) => {
         if (!active) return;
         setDocuments(results.flatMap((result) => result.status === "fulfilled" ? result.value : []));
@@ -84,6 +76,7 @@ export default function RunPage() {
   const decision = run?.decision ?? null;
   if (!run && !error) return <Spinner label="Loading analysis…" />;
   if (!run) return <ErrorNotice message={error} retry={load} />;
+  const canWrite = user?.role === "reviewer" || (user?.role === "analyst" && !run.case_is_decided);
   const processing = run.status === "queued" || run.status === "running";
   return (
     <>
@@ -94,8 +87,8 @@ export default function RunPage() {
         description={`Run ${run.id}`}
         actions={
           <>
-            <DeleteButton endpoint={`/api/runs/${id}`} label="Delete report" redirect={`/cases/${run.case_id}`}
-              confirmation="Permanently delete this report, its decision, saved analysis progress and local ticket records? Source documents remain. This cannot be undone." />
+            <DeleteButton allowed={canWrite && (user?.role === "reviewer" || !decision)} endpoint={`/api/runs/${id}`} label="Delete report" redirect={`/cases/${run.case_id}`}
+              confirmation="Permanently delete this report, its decision and saved analysis progress? Source documents remain. This cannot be undone." />
             <Link className="button button-quiet" href={`/cases/${run.case_id}`}>
               Back to case
             </Link>
@@ -118,7 +111,8 @@ export default function RunPage() {
       {run.status === "failed" && (
         <div style={{marginBottom: 18}}>
           <ErrorNotice message={run.error || run.progress?.error || "The analysis failed."} />
-          {user?.role !== "auditor" && <button className="button" disabled={retrying} onClick={retry}>{retrying ? "Resuming…" : "Resume unfinished requirements"}</button>}
+          {canWrite && !run.retry_blocked_reason && <button className="button" disabled={retrying} onClick={retry}>{retrying ? "Resuming…" : "Resume unfinished requirements"}</button>}
+          {run.retry_blocked_reason && <p className="subtle">{run.retry_blocked_reason}</p>}
           <p className="subtle">Completed requirement assessments are preserved.</p>
         </div>
       )}{" "}
@@ -250,59 +244,14 @@ export default function RunPage() {
             </div>
             <aside className="stack">
               <DecisionPanel
+                key={run.id}
                 run={run}
                 decision={decision}
                 canDecide={
-                  user?.role === "reviewer" || user?.role === "administrator"
+                  user?.role === "reviewer"
                 }
                 saved={load}
               />
-              <TicketPanel run={run} tickets={tickets} saved={load} />
-              <section className="card">
-                <div className="card-header">
-                  <h2>Execution trace</h2>
-                </div>
-                <div className="card-body">
-                  <dl className="definition-list">
-                    <div>
-                      <dt>Model</dt>
-                      <dd>
-                        {run.report.model_name}{" "}
-                        <StatusBadge value="neutral">
-                          {run.report.model_mode}
-                        </StatusBadge>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Assessment version</dt>
-                      <dd className="mono">{run.report.rules_version}</dd>
-                    </div>
-                    <div>
-                      <dt>Prompt</dt>
-                      <dd className="mono">{run.report.prompt_version}</dd>
-                    </div>
-                    <div>
-                      <dt>Duration</dt>
-                      <dd>{run.report.metrics.duration_ms == null ? "Not recorded" : `${run.report.metrics.duration_ms} ms`}</dd>
-                    </div>
-                    <div>
-                      <dt>Tokens</dt>
-                      <dd>
-                        {run.report.metrics.input_tokens} /{" "}
-                        {run.report.metrics.output_tokens}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Cost</dt>
-                      <dd>
-                        {run.report.metrics.cost_usd === null
-                          ? "Cost unavailable"
-                          : `$${run.report.metrics.cost_usd.toFixed(4)}`}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              </section>
             </aside>
           </div>
         </>
@@ -315,6 +264,9 @@ export default function RunPage() {
 }
 
 function RunProgress({ run }: { run: AnalysisRun }) {
+  const lastAnalysisEvent = run.events?.filter(({ event }) =>
+    event.startsWith("run.") || event.startsWith("analysis."),
+  ).at(-1);
   const steps = [
     { key: "queued", label: "Created" },
     { key: "running", label: "Analysis" },
@@ -344,7 +296,7 @@ function RunProgress({ run }: { run: AnalysisRun }) {
               <span
                 className={`badge ${i <= index ? "badge-success" : "badge-neutral"}`}
               >
-                {i < index ? "✓ " : ""}
+                {i < index || (step.key === "completed" && run.decision) ? "✓ " : ""}
                 {step.label}
               </span>
               {i < steps.length - 1 && (
@@ -369,12 +321,12 @@ function RunProgress({ run }: { run: AnalysisRun }) {
           <progress aria-label="Requirement assessment progress" value={run.progress.completed} max={Math.max(run.progress.total, 1)} style={{width: "100%"}} />
           {run.progress.current_requirement_id && <p className="subtle">Current requirement: {run.progress.current_requirement_id}</p>}
         </div>}
-        {run.events && run.events.length > 0 && (
+        {lastAnalysisEvent && (
           <p
             className="subtle"
             style={{ textAlign: "center", margin: "14px 0 0" }}
           >
-            {runEventLabel(run.events.at(-1)?.event ?? "")}
+            {runEventLabel(lastAnalysisEvent.event)}
           </p>
         )}
       </div>
@@ -396,7 +348,7 @@ function runEventLabel(event: string): string {
   if (event.startsWith("run.") || event.startsWith("analysis.")) {
     return "Analysis status updated";
   }
-  return titleCase(event);
+  return "Analysis status updated";
 }
 
 function ReportLists({
@@ -453,327 +405,103 @@ function DecisionPanel({
   saved: () => Promise<void>;
 }) {
   const [value, setValue] = useState<Decision["decision"]>("needs_information");
+  // Initialize once: refreshing run metadata must not replace work in progress.
+  const [questions, setQuestions] = useState(
+    run.information_request_draft?.text ?? run.report?.questions.join("\n") ?? "",
+  );
   const [rationale, setRationale] = useState("");
-  const [pending, setPending] = useState(false);
+  const [pending, setPending] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [editing, setEditing] = useState(false);
+  const isRequest = !canDecide || value === "needs_information";
+  const savedMessage = run.information_request_draft;
+  const readOnlyRequest = isRequest && !!savedMessage && !editing;
+  const text = isRequest ? (readOnlyRequest ? savedMessage!.text : questions) : rationale;
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    setPending(true);
+    await save(canDecide ? "decision" : "draft");
+  }
+  async function save(action: "draft" | "decision") {
+    setPending(action);
     setError("");
+    setNotice("");
     try {
-      await api(`/api/runs/${run.id}/decision`, {
-        method: "POST",
-        body: JSON.stringify({ decision: value, rationale }),
+      await api(`/api/runs/${run.id}/${action === "draft" ? "information-request-draft" : "decision"}`, {
+        method: action === "draft" ? "PUT" : "POST",
+        body: JSON.stringify(action === "draft" ? { text: questions } : { decision: value, rationale: text }),
       });
       await saved();
+      if (action === "draft") {
+        setEditing(false);
+        setNotice("Draft saved for reviewer review.");
+      }
     } catch (reason) {
       setError(errorMessage(reason));
     } finally {
-      setPending(false);
+      setPending("");
     }
   }
   return (
     <section className="card">
-      <div className="card-header">
-        <h2>Decision</h2>
-      </div>
+      <div className="card-header"><h2>Decision</h2></div>
       <div className="card-body">
         {decision ? (
           <>
-            <StatusBadge value={decision.decision}>
-              {statusLabels[decision.decision]}
-            </StatusBadge>
-            <p>{decision.rationale}</p>
+            <StatusBadge value={decision.decision}>{statusLabels[decision.decision]}</StatusBadge>
+            <p style={{ whiteSpace: "pre-wrap" }}>{decision.rationale}</p>
             <span className="subtle">{formatDate(decision.created_at)}</span>
           </>
         ) : run.status !== "awaiting_review" ? (
-          <p className="subtle">
-            A decision can be recorded after the report is ready.
-          </p>
-        ) : !canDecide ? (
-          <p className="subtle">The report is awaiting a reviewer decision.</p>
+          <p className="subtle">A decision can be recorded after the report is ready.</p>
+        ) : run.case_is_decided && !canDecide ? (
+          <p className="subtle">This case already has a final decision.</p>
         ) : (
           <form onSubmit={submit}>
             {error && <ErrorNotice message={error} />}
-            <div className="decision-options">
-              {(
-                [
-                  ["accepted", "Accept"],
-                  ["rejected", "Reject"],
-                  ["needs_information", "Request information"],
-                ] as const
-              ).map(([key, label]) => (
-                <button
-                  type="button"
-                  key={key}
+            {notice && <p role="status">{notice}</p>}
+            {canDecide ? <div className="decision-options">
+              {([
+                ["accepted", "Accept"],
+                ["rejected", "Reject"],
+                ["needs_information", "Request information"],
+              ] as const).map(([key, label]) => (
+                <button type="button" key={key} disabled={!!pending}
                   className={`decision-option ${value === key ? "selected" : ""}`}
-                  onClick={() => setValue(key)}
-                >
-                  {label}
-                </button>
+                  onClick={() => setValue(key)}>{label}</button>
               ))}
-            </div>
-            <label className="field">
-              <span>Decision rationale</span>
-              <textarea
-                className="textarea"
-                required
-                minLength={3}
-                value={rationale}
-                onChange={(e) => setRationale(e.target.value)}
-                placeholder="Explain which findings informed the decision."
-              />
-            </label>
-            <button
-              className="button"
-              style={{ width: "100%" }}
-              disabled={pending || !rationale.trim()}
-            >
-              {pending ? "Saving…" : "Save decision"}
-            </button>
+            </div> : <p className="subtle">Prepare an information request for the reviewer. Only a reviewer can record the decision.</p>}
+            {isRequest && <p className="subtle">Questions are saved in this report. Nothing is sent externally.</p>}
+            {isRequest && run.information_request_draft && <p className="subtle">
+              Draft saved by {run.information_request_draft.actor_email ?? run.information_request_draft.actor_id} · {formatDate(run.information_request_draft.updated_at)}
+            </p>}
+            {readOnlyRequest ? <div>
+              <p style={{ whiteSpace: "pre-wrap" }}>{savedMessage!.text}</p>
+              {!canDecide && <p className="subtle">Submitted for reviewer review.</p>}
+            </div> : <label className="field">
+              <span>{isRequest ? "Information request" : "Decision rationale"}</span>
+              <textarea className="textarea" required minLength={5} maxLength={10000} disabled={!!pending}
+                value={text} onChange={(event) => {
+                  if (isRequest) setQuestions(event.target.value); else setRationale(event.target.value);
+                  setNotice("");
+                }}
+                placeholder={isRequest ? "Describe the information the counterparty should provide." : "Explain which findings informed the decision."} />
+            </label>}
+            {(canDecide || !readOnlyRequest) && <div className="form-actions"
+              style={{ gap: 12, marginTop: 16, flexWrap: "wrap" }}>
+              {canDecide && readOnlyRequest && <button type="button" className="button button-secondary"
+                disabled={!!pending} onClick={() => { setQuestions(savedMessage!.text); setEditing(true); setNotice(""); }}>
+                Edit
+              </button>}
+            {canDecide && isRequest && !readOnlyRequest && <button type="button" className="button button-secondary"
+              disabled={!!pending || questions.trim().length < 5} onClick={() => void save("draft")}>
+              {pending === "draft" ? "Saving…" : "Save draft"}
+            </button>}
+            {(canDecide || !readOnlyRequest) && <button className="button" disabled={!!pending || text.trim().length < 5}>
+              {pending ? "Saving…" : canDecide ? "Save decision" : "Save draft"}
+            </button>}
+            </div>}
           </form>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function TicketPanel({
-  run,
-  tickets,
-  saved,
-}: {
-  run: AnalysisRun;
-  tickets: ApprovalRequest[];
-  saved: () => Promise<void>;
-}) {
-  const { user } = useAuth();
-  const [title, setTitle] = useState(
-    `Information request — analysis ${run.id.slice(0, 8)}`,
-  );
-  const [body, setBody] = useState(
-    run.report?.questions.map((q) => `- ${q}`).join("\n") ?? "",
-  );
-  const [preview, setPreview] = useState(false);
-  const [pending, setPending] = useState("");
-  const [error, setError] = useState("");
-  const [currentStatuses, setCurrentStatuses] = useState<
-    Record<string, string>
-  >({});
-  const canPropose =
-    user?.role === "analyst" ||
-    user?.role === "reviewer" ||
-    user?.role === "administrator";
-  async function action(path: string, key: string, payload?: unknown) {
-    setPending(key);
-    setError("");
-    try {
-      await api(path, {
-        method: "POST",
-        body: payload ? JSON.stringify(payload) : undefined,
-      });
-      await saved();
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      setPending("");
-    }
-  }
-  async function refresh(approvalId: string) {
-    setPending(approvalId);
-    setError("");
-    try {
-      const ticket = await api<{ status?: string }>(
-        `/api/approvals/${approvalId}/ticket-status`,
-      );
-      if (ticket.status) {
-        setCurrentStatuses((current) => ({
-          ...current,
-          [approvalId]: ticket.status as string,
-        }));
-      }
-      await saved();
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      setPending("");
-    }
-  }
-  return (
-    <section className="card">
-      <div className="card-header">
-        <h2>Follow-up ticket</h2>
-      </div>
-      <div className="card-body">
-        {error && <ErrorNotice message={error} />}
-        <p className="subtle">
-          Proposal, approval, and submission to the service are three separate
-          auditable steps.
-        </p>
-        {!canPropose ? (
-          <p className="subtle">The auditor account has read-only access.</p>
-        ) : (
-          <>
-            <label className="field">
-              <span>Title</span>
-              <input
-                className="input"
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  setPreview(false);
-                }}
-              />
-            </label>
-            <label className="field">
-              <span>Body</span>
-              <textarea
-                className="textarea"
-                value={body}
-                onChange={(e) => {
-                  setBody(e.target.value);
-                  setPreview(false);
-                }}
-              />
-            </label>
-          </>
-        )}
-        {canPropose && preview ? (
-          <div className="ticket-preview">
-            <h4>{title}</h4>
-            <p>{body}</p>
-            <div className="form-actions">
-              <button
-                className="button button-quiet button-small"
-                onClick={() => setPreview(false)}
-              >
-                Return to editing
-              </button>
-              <button
-                className="button button-small"
-                disabled={pending === "new"}
-                onClick={() =>
-                  action(`/api/runs/${run.id}/ticket-proposals`, "new", {
-                    title,
-                    body,
-                  })
-                }
-              >
-                {pending === "new"
-                  ? "Saving…"
-                  : "Save exact proposal"}
-              </button>
-            </div>
-          </div>
-        ) : canPropose ? (
-          <button
-            className="button button-secondary button-small"
-            disabled={!title.trim() || !body.trim()}
-            onClick={() => setPreview(true)}
-          >
-            Preview proposal
-          </button>
-        ) : null}
-        {tickets.length > 0 && (
-          <div className="stack" style={{ marginTop: 18 }}>
-            {tickets.map((approval) => (
-              <article className="ticket-preview" key={approval.id}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 10,
-                  }}
-                >
-                  <h4>
-                    {approval.arguments?.title ??
-                      approval.ticket?.title ??
-                      "Ticket"}
-                  </h4>
-                  <StatusBadge value={approval.status}>
-                    {statusLabels[approval.status] ?? approval.status}
-                  </StatusBadge>
-                </div>
-                <p>{approval.arguments?.body ?? approval.ticket?.body}</p>
-                <span className="subtle">
-                  Expires: {formatDate(approval.expires_at)}
-                </span>
-                {approval.error && (
-                  <div
-                    className="notice notice-error"
-                    style={{ marginTop: 10 }}
-                  >
-                    <p>{approval.error}</p>
-                  </div>
-                )}
-                {approval.ticket && (
-                  <p className="subtle">
-                    Ticket {approval.ticket.id} · {approval.ticket.service} ·{" "}
-                    {currentStatuses[approval.id] ?? approval.ticket.status}
-                  </p>
-                )}
-                <div className="form-actions">
-                  <DeleteButton endpoint={`/api/approvals/${approval.id}`} label="Delete local ticket record" onDeleted={saved}
-                    confirmation="Permanently delete this local proposal and execution record? This does not cancel or delete a ticket already created in another service." />
-                  {approval.status === "proposed" &&
-                    (user?.role === "reviewer" ||
-                      user?.role === "administrator") && (
-                      <button
-                        className="button button-small"
-                        disabled={!!pending}
-                        onClick={() =>
-                          action(
-                            `/api/approvals/${approval.id}/approve`,
-                            approval.id,
-                          )
-                        }
-                      >
-                        Approve exact details
-                      </button>
-                    )}
-                  {approval.status === "approved" &&
-                    approval.approved_by === user?.id && (
-                      <button
-                        className="button button-small"
-                        disabled={!!pending}
-                        onClick={() =>
-                          action(
-                            `/api/approvals/${approval.id}/execute`,
-                            approval.id,
-                          )
-                        }
-                      >
-                        Execute write
-                      </button>
-                    )}
-                  {approval.status === "failed" &&
-                    approval.approved_by === user?.id && (
-                      <button
-                        className="button button-small"
-                        disabled={!!pending}
-                        onClick={() =>
-                          action(
-                            `/api/approvals/${approval.id}/reconcile`,
-                            approval.id,
-                          )
-                        }
-                      >
-                        Reconcile receipt
-                      </button>
-                    )}
-                  {(approval.status === "executed" || approval.ticket) && (
-                    <button
-                      className="button button-quiet button-small"
-                      disabled={!!pending}
-                      onClick={() => refresh(approval.id)}
-                    >
-                      Refresh status
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
         )}
       </div>
     </section>

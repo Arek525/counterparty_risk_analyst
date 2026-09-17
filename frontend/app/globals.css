@@ -918,20 +918,6 @@ a {
   border-color: var(--pine);
   background: var(--mint);
 }
-.ticket-preview {
-  background: #f1f2ed;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  padding: 16px;
-}
-.ticket-preview h4 {
-  margin: 0 0 6px;
-}
-.ticket-preview p {
-  white-space: pre-wrap;
-  color: #43504c;
-  margin: 0;
-}
 
 .requirements {
   display: grid;

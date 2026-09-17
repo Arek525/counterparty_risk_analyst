@@ -3,8 +3,6 @@ import type { FindingStatus, Role } from "./types";
 export const roleLabels: Record<Role, string> = {
   analyst: "Analyst",
   reviewer: "Reviewer",
-  auditor: "Auditor",
-  administrator: "Administrator",
 };
 
 export const findingLabels: Record<FindingStatus, string> = {
@@ -23,9 +21,6 @@ export const statusLabels: Record<string, string> = {
   awaiting_review: "Awaiting decision",
   completed: "Completed",
   failed: "Failed",
-  proposed: "Awaiting approval",
-  executing: "Submitting",
-  executed: "Executed",
   succeeded: "Completed",
   accepted: "Accepted",
   rejected: "Rejected",

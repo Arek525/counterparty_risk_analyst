@@ -1,4 +1,4 @@
-export type Role = "analyst" | "reviewer" | "auditor" | "administrator";
+export type Role = "analyst" | "reviewer";
 export type Risk = "Low" | "Medium" | "High" | "Unable to assess";
 export type FindingStatus =
   "pass" | "fail" | "unknown" | "conflict" | "not_applicable";
@@ -46,6 +46,7 @@ export interface Relationship {
 }
 
 export interface AssessmentCase {
+  is_decided?: boolean;
   id: string;
   name: string;
   counterparty_name: string;
@@ -63,6 +64,7 @@ export interface DocumentChunk {
 }
 
 export interface DocumentRecord {
+  case_is_decided?: boolean;
   index_status?: "pending" | "indexing" | "ready" | "error";
   index_error?: string | null;
   index_config?: string;
@@ -166,6 +168,8 @@ export interface Decision {
 }
 
 export interface AnalysisRun {
+  retry_blocked_reason?: string | null;
+  case_is_decided?: boolean;
   progress?: { completed: number; total: number; current_requirement_id: string | null; error?: string | null };
   id: string;
   case_id: string;
@@ -177,6 +181,7 @@ export interface AnalysisRun {
   report?: Report | null;
   events?: AuditEvent[];
   decision?: Decision | null;
+  information_request_draft?: { text: string; actor_id: string; actor_email: string | null; updated_at: string } | null;
   created_at: string;
   started_at?: string | null;
   finished_at?: string | null;
@@ -187,31 +192,9 @@ export interface AuditEvent {
   event: string;
   actor_id?: string | null;
   actor_name?: string | null;
+  actor_email?: string | null;
   case_id?: string | null;
   run_id?: string | null;
   details?: Record<string, unknown> | null;
   created_at: string;
-}
-
-export interface ApprovalRequest {
-  id: string;
-  run_id: string;
-  action: "create_ticket";
-  arguments: { title: string; body: string };
-  status: "proposed" | "approved" | "executing" | "executed" | "failed";
-  expires_at: string;
-  created_at: string;
-  approved_at?: string | null;
-  approved_by?: string | null;
-  requested_by?: string;
-  error?: string | null;
-  ticket?: {
-    id: string;
-    status: string;
-    title: string;
-    body: string;
-    run_id: string;
-    created_at: string;
-    service: string;
-  } | null;
 }

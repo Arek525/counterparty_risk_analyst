@@ -90,9 +90,13 @@ class PolicyProposal(Input):
 
 class RunCreate(Input):
     policy_version_id: UUID
-    retrieval_variant: Literal["lexical", "hybrid", "semantic"] = "hybrid"
+    retrieval_variant: Literal["hybrid"] = "hybrid"
 
 
 class DecisionCreate(Input):
     decision: Literal["accepted", "rejected", "needs_information"]
     rationale: str = Field(min_length=5, max_length=10000)
+
+
+class InformationRequestDraft(Input):
+    text: str = Field(min_length=5, max_length=10000)
