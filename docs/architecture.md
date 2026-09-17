@@ -39,7 +39,9 @@ snapshot. New documents and reindex requests cannot silently enter a queued run.
 
 All new analyses use hybrid retrieval: weighted reciprocal rank fusion combines
 semantic ranking and Unicode lexical retrieval. Evidence indexes must be ready.
-Other variants remain available only for historical reports and offline evaluations.
+The API accepts no retrieval selector and the runtime ranker implements only hybrid.
+Historical variant labels remain stored as provenance; alternative rankings live in
+offline evaluations. The frozen index fingerprint is unchanged by this interface cleanup.
 See [model contract, evaluation and limits](retrieval.md).
 
 ## Analysis and trust

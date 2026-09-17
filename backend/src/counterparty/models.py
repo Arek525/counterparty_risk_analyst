@@ -126,7 +126,7 @@ class AnalysisRun(Identity, Tenant, Created, Base):
     assessment_progress: Mapped[dict | None] = mapped_column(JSONB)
     information_request_draft: Mapped[dict | None] = mapped_column(JSONB)
     report: Mapped[dict | None] = mapped_column(JSONB)
-    retrieval_variant: Mapped[str] = mapped_column(String(30), default="semantic")
+    retrieval_variant: Mapped[str] = mapped_column(String(30), default="hybrid")
     model_mode: Mapped[str] = mapped_column(String(30), default="demo")
     error: Mapped[str | None] = mapped_column(Text)
     attempts: Mapped[int] = mapped_column(Integer, default=0)

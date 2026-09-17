@@ -251,7 +251,6 @@ export default function CaseDetailPage() {
                   <thead>
                     <tr>
                       <th>Status</th>
-                      <th>Variant</th>
                       <th>Model</th>
                       <th>Created</th>
                       <th />
@@ -264,13 +263,6 @@ export default function CaseDetailPage() {
                           <StatusBadge value={run.status}>
                             {statusLabels[run.status] ?? run.status}
                           </StatusBadge>
-                        </td>
-                        <td>
-                          {run.retrieval_variant === "semantic"
-                            ? "Semantic"
-                            : run.retrieval_variant === "hybrid"
-                            ? "Hybrid"
-                            : "Lexical"}
                         </td>
                         <td className="subtle">{run.model_mode}</td>
                         <td className="subtle">{formatDate(run.created_at)}</td>

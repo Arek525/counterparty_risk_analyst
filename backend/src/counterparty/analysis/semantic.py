@@ -222,7 +222,6 @@ def assess_requirement(
     chunks: list[dict],
     relationship: dict,
     mode="gemini",
-    variant="hybrid",
     semantic_scores: dict[str, float] | None = None,
     metrics: dict | None = None,
 ) -> dict:
@@ -265,10 +264,8 @@ def assess_requirement(
     selected = retrieve(
         requirement_query(requirement),
         eligible,
-        variant=variant,
         top_k=8,
         semantic_scores=scores,
-        algorithm="e5-v1",
     )
     payload = {
         "requirement": requirement,

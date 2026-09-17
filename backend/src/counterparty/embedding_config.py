@@ -1,4 +1,4 @@
-"""Pure, immutable retrieval contract. Safe to import in API and migrations."""
+"""Recorded embedding/retrieval contract; changes invalidate persisted index fingerprints."""
 
 import hashlib
 import json
@@ -29,6 +29,7 @@ CONFIG = {
     "pooling": "masked-mean-l2-then-window-mean-l2",
     "query_composition": "title-field-v1",
     "retrieval": "e5-v1",
+    # Historical algorithm descriptions retained for stable fingerprints, not runtime options.
     "algorithms": {
         "semantic": "cosine-v1",
         "hybrid": "weighted-rrf-3-1-k5-v1",

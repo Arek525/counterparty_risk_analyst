@@ -183,7 +183,7 @@ def test_hybrid_synonym_retrieval_and_case_chunk_input_boundary():
         chunk("Multi factor authentication: enabled.", "good"),
         chunk("Retention retention retention.", "bad"),
     ]
-    assert retrieve("mfa", items, "hybrid", top_k=1)[0]["id"] == "good"
+    assert retrieve("mfa", items, top_k=1)[0]["id"] == "good"
     assert len(extract_facts(items)) == 1
 
 
@@ -194,7 +194,7 @@ def test_gemini_missing_key_stops_without_demo_fallback(monkeypatch):
 
 
 def test_unsupported_variant_rejected():
-    with pytest.raises(ValueError, match="variant"):
+    with pytest.raises(TypeError):
         analyze(snapshot([]), "bad")
 
 
@@ -525,9 +525,9 @@ def test_explicit_policy_mode_overrides_process_environment(monkeypatch):
 
 def test_retrieval_consumes_persisted_pgvector_scores():
     items = [chunk("Unrelated document A.", "a"), chunk("Unrelated document B.", "b")]
-    ranked = retrieve("mfa", items, "hybrid", top_k=1, semantic_scores={"a": 0.1, "b": 0.9})
+    ranked = retrieve("mfa", items, top_k=1, semantic_scores={"a": 0.1, "b": 0.9})
     assert ranked[0]["id"] == "b"
-    assert retrieve("mfa", items, "lexical", semantic_scores={"a": 1}) == []
+    assert retrieve("mfa", items, semantic_scores={"a": 0, "b": 0}) == []
 
 
 def test_analysis_uses_snapshot_retrieval_scores():

@@ -41,7 +41,6 @@ logger = logging.getLogger(__name__)
 class AnalysisState(TypedDict, total=False):
     run_id: str
     snapshot: dict
-    variant: str
     report: dict
     decision: dict
 
@@ -79,11 +78,11 @@ def setup_checkpoints(engine: Engine) -> None:
 def build_graph(saver, assessment=None):
     def assess(state: AnalysisState):
         if assessment is not None:
-            report = assessment(state["snapshot"], state["variant"])
+            report = assessment(state["snapshot"])
         else:
             from counterparty.analysis import analyze
 
-            report = analyze(state["snapshot"], state["variant"])
+            report = analyze(state["snapshot"])
         return {"report": report}
 
     def review(state: AnalysisState):
@@ -183,7 +182,7 @@ def _publish_progress(engine, settings, run_id, token, owner, progress, owner_lo
 
 
 def assess_sequential(
-    engine, settings, run_id, token, owner, snapshot, variant, heartbeat=None, owner_lock=None
+    engine, settings, run_id, token, owner, snapshot, heartbeat=None, owner_lock=None
 ):
     from counterparty.analysis.semantic import assess_requirement, build_report
 
@@ -228,7 +227,6 @@ def assess_sequential(
                 snapshot["chunks"],
                 snapshot["case"]["relationship"],
                 mode=snapshot.get("model_mode", "demo"),
-                variant=variant,
                 semantic_scores=snapshot.get("retrieval_scores", {}).get(requirement_id),
                 metrics=progress["metrics"],
             )
@@ -276,7 +274,7 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
         claim_token = f"{os.getpid()}-{uuid4().hex}"
         run.lease_owner = claim_token
         run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=settings.worker_lease_seconds)
-        snapshot, variant = run.input_snapshot, run.retrieval_variant
+        snapshot = run.input_snapshot
         retrieval = run.retrieval_snapshot
         decision_data = (
             {
@@ -310,8 +308,7 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
         state = graph.get_state(config)
         if not state.values:
             if (
-                variant in {"hybrid", "semantic"}
-                and snapshot.get("requirements")
+                snapshot.get("requirements")
                 and any(chunk.get("kind") == "evidence" for chunk in snapshot["chunks"])
                 and "retrieval_config" not in snapshot
                 and "retrieval_scores" not in snapshot
@@ -319,11 +316,7 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
                 raise EmbeddingError(
                     "Run retrieval configuration is missing. Create a new analysis."
                 )
-            if (
-                variant in {"hybrid", "semantic"}
-                and "retrieval_config" in snapshot
-                and "retrieval_scores" not in snapshot
-            ):
+            if "retrieval_config" in snapshot and "retrieval_scores" not in snapshot:
                 retrieval = retrieval or prepare_retrieval(
                     engine, run_id, claim_token, snapshot, model, owner
                 )
@@ -332,9 +325,7 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
                     "retrieval_scores": retrieval["scores"],
                     "retrieval_algorithm": retrieval["config"]["retrieval"],
                 }
-            result = graph.invoke(
-                {"run_id": str(run_id), "snapshot": snapshot, "variant": variant}, config
-            )
+            result = graph.invoke({"run_id": str(run_id), "snapshot": snapshot}, config)
         elif state.next and decision_data:
             result = graph.invoke(Command(resume=decision_data), config)
         elif state.next and any(task.interrupts for task in state.tasks):

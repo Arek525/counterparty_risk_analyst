@@ -90,7 +90,6 @@ class PolicyProposal(Input):
 
 class RunCreate(Input):
     policy_version_id: UUID
-    retrieval_variant: Literal["hybrid"] = "hybrid"
 
 
 class DecisionCreate(Input):

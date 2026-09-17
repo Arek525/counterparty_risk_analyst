@@ -218,8 +218,7 @@ def needs_embeddings(run):
     ):
         return False
     return (
-        run.retrieval_variant in {"hybrid", "semantic"}
-        and run.report is None
+        run.report is None
         and run.retrieval_snapshot is None
         and "retrieval_scores" not in run.input_snapshot
         and bool(run.input_snapshot.get("requirements"))
@@ -318,7 +317,7 @@ def prepare_retrieval(engine, run_id, claim_token, snapshot, model, owner):
             result["scores"][req_id] = scores
         # Recheck ownership immediately before committing the separately fenced business write.
         owner.execute(text("SELECT 1") if hasattr(owner, "dialect") else "SELECT 1")
-        result["variant"] = run.retrieval_variant
+        result["variant"] = "hybrid"
         if semantic_v2 and queries and chunks:
             result["query_version"] = "narrative-v1"
             policy = session.scalar(

@@ -81,7 +81,7 @@ def test_partial_failure_resumes_without_replaying_success(workflow_setup, monke
         lambda findings, mode, metrics: {"findings": findings, "metrics": metrics},
     )
     with pytest.raises(ModelError):
-        assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot, "lexical")
+        assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot)
     with Session(engine) as session:
         progress = session.get(AnalysisRun, run_id).assessment_progress
         assert progress["completed_ids"] == ["first"]
@@ -94,7 +94,7 @@ def test_partial_failure_resumes_without_replaying_success(workflow_setup, monke
         return {"requirement_id": requirement["id"]}
 
     monkeypatch.setattr(semantic, "assess_requirement", resumed)
-    report = assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot, "lexical")
+    report = assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot)
     assert calls == ["first", "second", "second", "third"]
     assert len(report["findings"]) == 3
     assert report["metrics"]["calls"] == 4
@@ -115,7 +115,7 @@ def test_lost_claim_cannot_publish_finding(workflow_setup, monkeypatch):
 
     monkeypatch.setattr(semantic, "assess_requirement", assess)
     with pytest.raises(EmbeddingError, match="ownership changed"):
-        assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot, "lexical")
+        assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot)
     with Session(engine) as session:
         progress = session.get(AnalysisRun, run_id).assessment_progress
         assert progress["findings"] == []
@@ -136,7 +136,7 @@ def test_requirement_attempt_bound_survives_retries(workflow_setup, monkeypatch)
     monkeypatch.setattr(semantic, "assess_requirement", assess)
     for _ in range(4):
         with pytest.raises(ModelError):
-            assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot, "lexical")
+            assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot)
     assert len(calls) == 3
 
 
@@ -228,7 +228,6 @@ def test_semantic_run_reaches_durable_review_without_legacy_analysis(workflow_se
         run = session.get(AnalysisRun, run_id)
         run.status = "queued"
         run.lease_owner = None
-        run.retrieval_variant = "lexical"
         session.commit()
 
     def legacy(*args):
@@ -261,7 +260,7 @@ def test_model_change_stops_before_consuming_requirement_attempt(workflow_setup,
 
     monkeypatch.setattr(semantic, "assess_requirement", forbidden)
     with pytest.raises(ModelError, match="differs from this analysis snapshot"):
-        assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot, "lexical")
+        assess_sequential(engine, settings, run_id, "claim", Owner(), snapshot)
     with Session(engine) as session:
         assert session.get(AnalysisRun, run_id).assessment_progress is None
 
@@ -283,7 +282,6 @@ def test_progress_waits_for_concurrent_checkpoint_write(workflow_setup, monkeypa
         run = session.get(AnalysisRun, run_id)
         run.status = "queued"
         run.lease_owner = None
-        run.retrieval_variant = "lexical"
         session.commit()
 
     writing = Event()

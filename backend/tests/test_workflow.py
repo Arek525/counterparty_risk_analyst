@@ -69,7 +69,7 @@ def test_advisory_lock_prevents_duplicate_execution(workflow_setup):
 def test_lost_owner_connection_cannot_overwrite_replacement_result(workflow_setup, monkeypatch):
     engine, settings, (run_id, _, _) = workflow_setup
 
-    def lose_owner(snapshot, variant):
+    def lose_owner(snapshot):
         with engine.begin() as connection:
             connection.execute(
                 text("""
@@ -179,7 +179,7 @@ def test_model_quota_failure_stops_job_without_outer_retry(workflow_setup, monke
     engine, settings, (run_id, _, _) = workflow_setup
     calls = []
 
-    def exhausted(snapshot, variant):
+    def exhausted(snapshot):
         calls.append(True)
         raise ModelError("Gemini quota exhausted; stopped without fallback")
 

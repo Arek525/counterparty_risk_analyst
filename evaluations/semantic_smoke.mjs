@@ -90,7 +90,7 @@ This document makes no other control declarations.
     return d.index_status === "ready";
   });
   if (!result.run_id) {
-    result.run_id = (await api(`/cases/${result.case_id}/runs`, { policy_version_id: policy.id, retrieval_variant: "hybrid" })).id;
+    result.run_id = (await api(`/cases/${result.case_id}/runs`, { policy_version_id: policy.id })).id;
     save();
   }
   const run = await until(`/runs/${result.run_id}`, r => ["awaiting_review", "completed", "failed"].includes(r.status));

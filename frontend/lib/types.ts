@@ -175,7 +175,7 @@ export interface AnalysisRun {
   case_id: string;
   policy_version_id: string;
   status: "queued" | "running" | "awaiting_review" | "completed" | "failed";
-  retrieval_variant: "lexical" | "hybrid" | "semantic";
+  retrieval_variant: string; // Recorded metadata; not an analysis option.
   model_mode: string;
   error?: string | null;
   report?: Report | null;

@@ -3,11 +3,14 @@
 import argparse
 import hashlib
 import json
+import math
+import re
 import statistics
 import time
+from collections import Counter
 from pathlib import Path
 
-from counterparty.analysis.engine import retrieve
+from counterparty.analysis.retrieval import retrieve, unicode_tokens
 from counterparty.embedding_config import CONFIG, FINGERPRINT, requirement_query
 from counterparty.embeddings import LocalEmbedder
 
@@ -37,21 +40,35 @@ def evaluate(corpus, model):
                     p["id"]: sum(a * b for a, b in zip(vector, v, strict=True))
                     for p, v in zip(passages, vectors, strict=True)
                 }
-                if algorithm == "semantic":
+                tokenizer = (
+                    (lambda text: re.findall(r"[a-z0-9]+", text.lower()))
+                    if algorithm == "old-sum"
+                    else unicode_tokens
+                )
+                query_tokens = set(tokenizer(query_text))
+                lexical = {}
+                for passage in passages:
+                    counts = Counter(tokenizer(passage["text"]))
+                    lexical[passage["id"]] = sum(
+                        math.log1p(counts[t]) for t in query_tokens
+                    )
+                if algorithm == "lexical":
+                    ranking = sorted(
+                        (key for key in lexical if lexical[key] > 0),
+                        key=lambda key: (-lexical[key], key),
+                    )
+                elif algorithm == "semantic":
                     ranking = sorted(scores, key=lambda key: (-scores[key], key))
+                elif algorithm == "old-sum":
+                    combined = {
+                        key: value + 2 * max(0, scores[key])
+                        for key, value in lexical.items()
+                    }
+                    ranking = sorted(
+                        (key for key in combined if combined[key] > 0),
+                        key=lambda key: (-combined[key], key),
+                    )
                 elif algorithm == "equal-rrf-k60":
-                    import math
-                    from collections import Counter
-
-                    from counterparty.analysis.engine import unicode_tokens
-
-                    lexical = {}
-                    for passage in passages:
-                        counts = Counter(unicode_tokens(passage["text"]))
-                        lexical[passage["id"]] = sum(
-                            math.log1p(counts[t])
-                            for t in set(unicode_tokens(query_text))
-                        )
                     fused = dict.fromkeys(scores, 0.0)
                     for source in (
                         scores,
@@ -68,12 +85,8 @@ def evaluate(corpus, model):
                         for p in retrieve(
                             query_text,
                             passages,
-                            "lexical" if algorithm == "lexical" else "hybrid",
                             top_k=len(passages),
                             semantic_scores=scores,
-                            algorithm="historical-hash-v1"
-                            if algorithm == "old-sum"
-                            else "e5-v1",
                         )
                     ]
                 gold = set(query["gold"])
@@ -111,7 +124,9 @@ def main():
         default=Path(__file__).with_name("multilingual-retrieval.json"),
     )
     parser.add_argument(
-        "--output", type=Path, default=Path(__file__).parent / "output/semantic-retrieval.json"
+        "--output",
+        type=Path,
+        default=Path(__file__).parent / "output/semantic-retrieval.json",
     )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)

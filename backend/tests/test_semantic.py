@@ -284,9 +284,7 @@ def test_top_eight_uses_actual_scores_and_forbids_excluded_citations(monkeypatch
         },
     )
     with pytest.raises(ValueError, match="eligible chunk"):
-        semantic.assess_requirement(
-            requirement(), chunks, {}, variant="semantic", semantic_scores=scores
-        )
+        semantic.assess_requirement(requirement(), chunks, {}, semantic_scores=scores)
     assert [c["id"] for c in calls[0][1]["selected_evidence"]] == [f"c{i}" for i in range(9, 1, -1)]
 
 

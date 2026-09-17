@@ -292,7 +292,7 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         created = await case(client)
         document = await upload(client)
         policy = await proposed(client, document["id"])
-        body = {"policy_version_id": policy["id"], "retrieval_variant": "hybrid"}
+        body = {"policy_version_id": policy["id"]}
         assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 409
         old = await upload(client, EVIDENCE, "evidence.md", created["id"])
         latest = await upload(client, EVIDENCE + b" MFA is enabled.", "evidence.md", created["id"])
@@ -556,7 +556,7 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
         run = (
             await client.post(
                 f"/api/cases/{created['id']}/runs",
-                json={"policy_version_id": policy["id"], "retrieval_variant": "hybrid"},
+                json={"policy_version_id": policy["id"]},
             )
         ).json()
         snapshot = run["input_snapshot"]
@@ -603,9 +603,9 @@ async def test_index_readiness_reindex_authorization_and_hybrid_only(domain_setu
         doc = await upload(client, EVIDENCE, "evidence.md", created["id"])
         await login(client, "reviewer")
         await client.post(f"/api/policies/{policy['id']}/approve")
-        body = {"policy_version_id": policy["id"], "retrieval_variant": "hybrid"}
+        body = {"policy_version_id": policy["id"]}
         assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 409
-        for variant in ("lexical", "semantic"):
+        for variant in ("lexical", "semantic", "hybrid"):
             body["retrieval_variant"] = variant
             assert (
                 await client.post(f"/api/cases/{created['id']}/runs", json=body)

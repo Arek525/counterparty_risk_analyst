@@ -54,20 +54,16 @@ def test_bad_download_cannot_be_published(tmp_path):
 
 
 def test_runtime_hybrid_requires_complete_scores_and_never_hashes(monkeypatch):
-    from counterparty.analysis.engine import retrieve
+    from counterparty.analysis.retrieval import retrieve
 
     def forbidden(*args):
         raise AssertionError("hash embedder called")
 
     monkeypatch.setattr("counterparty.analysis.engine.embed_text", forbidden)
     chunks = [{"id": "a", "text": "Multifactor access"}, {"id": "b", "text": "Holiday plans"}]
-    assert retrieve("access", chunks, "lexical")[0]["id"] == "a"
-    assert (
-        retrieve("access", chunks, semantic_scores={"a": 0.9, "b": 0.1}, algorithm="e5-v1")[0]["id"]
-        == "a"
-    )
+    assert retrieve("access", chunks, semantic_scores={"a": 0.9, "b": 0.1})[0]["id"] == "a"
     with pytest.raises(ValueError, match="complete"):
-        retrieve("access", chunks, semantic_scores={"a": 0.9}, algorithm="e5-v1")
+        retrieve("access", chunks, semantic_scores={"a": 0.9})
 
 
 def _probe_child(pipe):
@@ -133,39 +129,40 @@ def test_api_import_never_loads_native_model_runtime():
     assert result.returncode == 0, result.stderr.decode()
 
 
-def test_hybrid_default_and_explicit_semantic_ignores_keyword_distractors():
+def test_runtime_has_no_retrieval_switches():
     from uuid import uuid4
 
-    from counterparty.analysis.engine import retrieve
+    from pydantic import ValidationError
+
+    from counterparty.analysis.retrieval import retrieve
     from counterparty.schemas import RunCreate
 
-    assert RunCreate(policy_version_id=uuid4()).retrieval_variant == "hybrid"
+    assert "retrieval_variant" not in RunCreate.model_fields
+    for variant in ("lexical", "semantic", "hybrid"):
+        with pytest.raises(ValidationError):
+            RunCreate(policy_version_id=uuid4(), retrieval_variant=variant)
+        with pytest.raises(TypeError):
+            retrieve("query", [], variant=variant, semantic_scores={})
+    with pytest.raises(TypeError):
+        retrieve("query", [], algorithm="e5-v1", semantic_scores={})
+    with pytest.raises(TypeError):
+        retrieve("query", [])
+
+
+def test_hybrid_combines_keywords_and_ranks_negative_cosines():
+    from counterparty.analysis.retrieval import retrieve
+
     chunks = [
         {"id": "relevant", "text": "Wymagamy dodatkowego czynnika logowania."},
         {"id": "distractor", "text": "MFA MFA marketing MFA"},
     ]
-    result = retrieve(
-        "MFA",
-        chunks,
-        variant="semantic",
-        top_k=1,
-        semantic_scores={"relevant": 0.9, "distractor": 0.7},
-        algorithm="e5-v1",
+    assert (
+        retrieve("MFA", chunks, top_k=1, semantic_scores={"relevant": 0.9, "distractor": 0.7})[0][
+            "id"
+        ]
+        == "distractor"
     )
-    assert result[0]["id"] == "relevant"
-
-
-def test_semantic_ranks_even_negative_cosine_without_hidden_threshold():
-    from counterparty.analysis.engine import retrieve
-
-    chunks = [{"id": "a", "text": "one"}, {"id": "b", "text": "two"}]
     assert [
-        chunk["id"]
-        for chunk in retrieve(
-            "query",
-            chunks,
-            variant="semantic",
-            algorithm="e5-v1",
-            semantic_scores={"a": -0.1, "b": -0.9},
-        )
-    ] == ["a", "b"]
+        c["id"]
+        for c in retrieve("query", chunks, semantic_scores={"relevant": -0.1, "distractor": -0.9})
+    ] == ["relevant", "distractor"]

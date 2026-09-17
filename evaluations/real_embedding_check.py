@@ -162,7 +162,6 @@ def main():
                 input_snapshot=snapshot,
                 status="running",
                 lease_owner="real-check",
-                retrieval_variant="semantic",
             )
             session.add(run)
             session.commit()

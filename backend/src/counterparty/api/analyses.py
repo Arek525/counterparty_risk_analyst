@@ -190,7 +190,7 @@ def create_run(case_id: UUID, body: RunCreate, request: Request, user: Actor, se
         policy_version_id=policy.id,
         status="queued",
         input_snapshot=snapshot,
-        retrieval_variant=body.retrieval_variant,
+        retrieval_variant="hybrid",
         model_mode=request.app.state.settings.model_mode,
     )
     session.add(run)
@@ -201,7 +201,7 @@ def create_run(case_id: UUID, body: RunCreate, request: Request, user: Actor, se
         "analysis.queued",
         case_id=case.id,
         run_id=run.id,
-        details={"policy_version_id": str(policy.id), "retrieval_variant": body.retrieval_variant},
+        details={"policy_version_id": str(policy.id), "retrieval_variant": "hybrid"},
     )
     session.commit()
     return public_run(session, run)
