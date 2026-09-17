@@ -3,14 +3,25 @@
 ## Persistence and recovery
 
 `postgres-data` stores business records, queue leases, workflow checkpoints and
-local ticket receipts. `document-storage` stores original uploaded files. Both are
+saved information-request drafts. `document-storage` stores original uploaded files. Both are
 needed for a complete backup. `docker compose down` retains both. Never use
 `down --volumes` unless deliberately deleting the entire local installation.
 
 After a worker restart, unfinished jobs become eligible after their lease expires.
 The default lease is 30 seconds and the execution supervisor limit is 120 seconds.
-Automatic retry count is bounded; a failed analysis can be rerun as a new version.
+Automatic retry count is bounded; explicit resume retries unfinished requirements
+while retaining completed assessments. A new analysis creates a separate report.
 A stored human decision is not removed by workflow-finalization failure.
+
+## Database schema baseline
+
+One frozen migration, `initial_schema.py`, creates the current schema directly.
+It retains revision ID `0007_information_requests`, the former history's final
+revision: databases already at that revision need no reset or version stamping.
+`alembic upgrade head` leaves their records untouched. Earlier revisions are no
+longer supported; do not stamp an older schema as current. Keep the previous
+application version to upgrade such a database before switching to this baseline.
+Future schema changes require new migrations; do not edit the baseline in place.
 
 ## Consistent backup
 
@@ -20,10 +31,10 @@ writes a new local directory; do not commit backups containing uploaded document
 ```bash
 backup_dir="/tmp/counterparty-backup-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$backup_dir"
-docker compose stop frontend api worker tickets
+docker compose stop frontend api worker
 docker compose exec -T db pg_dump -U counterparty -d counterparty -Fc > "$backup_dir/database.dump"
 docker compose cp api:/app/storage "$backup_dir/storage"
-docker compose start api worker tickets frontend
+docker compose start api worker frontend
 ```
 
 Keep `.env` credentials separately and encrypted if retaining a backup. No model
@@ -48,15 +59,15 @@ docker compose up -d --wait
 
 A successful restore should open historical reports and download their cited
 source files. Test restoration against a separate Compose project before relying
-on a backup. Local ticket receipts restore with the database, retaining idempotency.
+on a backup. Saved drafts restore with the database.
 
 ## Explicit MVP retention policy
 
 There is no automatic time-based expiry of business evidence or analysis history.
 The UI supports explicit permanent deletion of reports, counterparty cases,
-policy sets, documents and local ticket records. Each delete requires confirmation.
+policy sets and documents. Each delete requires confirmation.
 Deleting a report removes its saved progress, decision, workflow checkpoints,
-local ticket records and related activity content. Deleting a case also removes
+saved information-request drafts and related activity content. Deleting a case also removes
 its documents, files, chunks and embeddings. Shared organization policies remain.
 A minimal deletion event records the actor and removed resource ID, without the
 removed content. File removal is retried by the worker if a filesystem error
@@ -67,9 +78,10 @@ A policy set can be deleted after reports referring to it have been deleted.
 A source document can be deleted after its referencing policy sets and reports.
 Deleting a policy set removes its requirements and requirement embeddings, but
 keeps its source files until separately deleted. Active processing blocks deletion;
-read-only auditors cannot delete data. Removing a local ticket record does not
-cancel or delete a ticket already created in another service. Deleted demo seed
-content is not recreated by an application restart.
+only reviewers can delete company policies or whole cases. Analysts can delete
+unreferenced evidence and unreviewed reports until the case is accepted or rejected.
+Reviewed reports remain protected after a request for information. Deleted demo
+seed content is not recreated by an application restart.
 
 
 Full deletion requires a deliberate removal of both Compose volumes plus any
@@ -100,11 +112,12 @@ One worker is the supported deployment: status describes that single supervised 
 `MODEL_CACHE_PATH`, `MODEL_PREPARE_TIMEOUT_SECONDS`, and `MODEL_RETRY_SECONDS` can
 be overridden in the worker environment. Changing the model requires a versioned
 contract/migration and reindex; the revision is deliberately not a runtime switch.
-No learned-to-hash or paid fallback exists. Lexical analysis, source viewing and
-human-review finalization remain available when preparation fails.
+No learned-to-hash or paid fallback exists. Source viewing and human-review
+finalization remain available when preparation fails; new evidence-based analyses
+require ready compatible indexes.
 
 Cache files are reproducible public artifacts and contain no source documents.
 They need not accompany the mandatory database+document backup, but retaining
 `model-cache` enables offline recovery. `down --volumes` also removes this cache.
 To reproduce a real-model check without a provider key, see
-[embedding verification](../verification/embeddings.md).
+[embedding verification](retrieval.md).
