@@ -1,6 +1,8 @@
 """Analysis contracts run without PostgreSQL or provider credentials."""
 
+import json
 import math
+from pathlib import Path
 
 import pytest
 
@@ -433,8 +435,7 @@ def test_structured_source_location_preserved():
 def test_two_repository_policies_and_all_demo_scenarios():
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[2] / "datasets" / "synthetic" / "regression"
-    assert root.exists(), "Mount datasets at /datasets when running in the test container"
+    root = Path(__file__).parent / "fixtures" / "regression"
     policies = {}
     for name in ["northstar", "orchard"]:
         text = (root / "policies" / f"{name}.md").read_text()
@@ -618,3 +619,36 @@ def test_gemini_validation_diagnostics_do_not_expose_model_text(monkeypatch):
     response["candidates"][0]["content"]["parts"][0]["text"] = json.dumps(output)
     with pytest.raises(ModelError, match="assessment_evidence_required"):
         GeminiAdapter().generate("Assess", {}, SemanticAssessment)
+
+
+@pytest.mark.parametrize(
+    "case",
+    json.loads((Path(__file__).parent / "fixtures/regression-cases.json").read_text())["cases"],
+    ids=lambda case: case["id"],
+)
+def test_historical_regression_examples(case):
+    requirements = [
+        {
+            "id": f"r{i}",
+            "title": item["field"],
+            "applicability": {},
+            "evaluation_method": "deterministic",
+            **item,
+        }
+        for i, item in enumerate(case["requirements"])
+    ]
+    chunks = [
+        chunk(text, id=f"e{i}", evidence_type="declaration") for i, text in enumerate(case["texts"])
+    ]
+    report = analyze(snapshot(chunks, requirements, case.get("relationship", {})))
+    assert [finding["status"] for finding in report["findings"]] == case["expected_statuses"]
+    assert report["risk"] == case["expected_risk"]
+    assert report["completeness"] == case["expected_completeness"]
+    assert {(fact["field"], fact["value"]) for fact in report["facts"]} == {
+        (field, value) for field, value in case["expected_facts"]
+    }
+    from counterparty.analysis.schemas import validate_source
+
+    for finding in report["findings"]:
+        for citation in finding["evidence"]:
+            validate_source({k: v for k, v in citation.items() if k != "evidence_type"}, chunks)

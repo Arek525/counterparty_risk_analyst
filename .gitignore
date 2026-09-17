@@ -56,3 +56,6 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Generated evaluation runs
+/evaluations/output/

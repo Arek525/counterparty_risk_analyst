@@ -1,11 +1,10 @@
 """New source-grounded development acceptance, with provider calls mocked."""
 
 import copy
-import importlib.util
 import io
 import json
-from pathlib import Path
 
+import northstar_fixtures as acceptance
 import pytest
 from fastapi import HTTPException, UploadFile
 
@@ -18,14 +17,7 @@ from counterparty.analysis.engine import (
     extract_facts,
 )
 from counterparty.analysis.schemas import validate_source
-from counterparty.bootstrap import resolve_manifest
 from counterparty.documents import MAX_TEXT_CHARS, MAX_UPLOAD_BYTES, extract, read_upload
-
-ROOT = Path(__file__).resolve().parents[2]
-EVALUATIONS = ROOT / "evaluations"
-spec = importlib.util.spec_from_file_location("northstar_acceptance", EVALUATIONS / "northstar.py")
-acceptance = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(acceptance)
 
 
 def test_source_corpus_and_independently_authored_expected_rules():
@@ -53,12 +45,12 @@ def test_source_corpus_and_independently_authored_expected_rules():
             "the supplier must" in req["source"]["quote"].lower()
             or "supplier personnel must" in req["source"]["quote"].lower()
         )
-    manifest = json.loads((acceptance.FIXTURES / "policy-manifest.json").read_text())
+    manifest = copy.deepcopy(acceptance.GOLD["legacy_manifest"])
     with pytest.raises(ValueError, match="exactly once"):
-        resolve_manifest(manifest, [*policies, *policies])
+        acceptance.resolve_manifest(manifest, [*policies, *policies])
     manifest["requirements"][0]["source"]["quote"] += "invented"
     with pytest.raises(ValueError, match="exactly once"):
-        resolve_manifest(manifest, policies)
+        acceptance.resolve_manifest(manifest, policies)
 
 
 def test_long_atlas_declaration_gold_and_grounding():

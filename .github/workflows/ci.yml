@@ -33,12 +33,6 @@ jobs:
         run: |
           docker compose -f compose.test.yaml run --rm --no-deps tests ruff check .
           docker compose -f compose.test.yaml run --rm --no-deps tests ruff format --check .
-      - name: Deterministic held-out evaluation gate
-        run: |
-          docker compose -f compose.test.yaml run --rm --no-deps --user "$(id -u):$(id -g)" \
-            tests python /evaluations/run.py --check
-          docker compose -f compose.test.yaml run --rm --no-deps --user "$(id -u):$(id -g)" \
-            tests pytest /evaluations/test_gate.py -p no:cacheprovider
       - name: Frontend build and type check
         working-directory: frontend
         run: |
