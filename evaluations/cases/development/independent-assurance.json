@@ -1,0 +1,266 @@
+{
+  "policy": {
+    "id": "dev-assurance",
+    "split": "development",
+    "organization": "Marlow Health Systems",
+    "document": {
+      "id": "policy-05",
+      "filename": "policy-05.md",
+      "kind": "policy",
+      "language": "en",
+      "evidence_type": "declaration",
+      "text": "# Marlow Health Systems — Independent assurance standard\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Independent review report\n\nFor a high-criticality service, the supplier must provide a report issued by an assessor independent of the supplier within the previous 12 months. The report must cover the contracted production service; a supplier self-declaration is insufficient.\n\n## 2. Finding treatment\n\nEvery unresolved high-severity finding in the supplied independent report must have a named owner, corrective action and target completion date documented by the supplier.\n\n## 3. Control monitoring\n\nThe supplier must monitor the contracted service controls at least monthly and retain a record of each review, including months with no detected issue.\n",
+      "sha256": "31721da9b1e2dd2a69d419dca87c442bc7797cfc0be513c64f1bae78947dffba",
+      "characters": 1042
+    },
+    "expected_requirements": [
+      {
+        "id": "P05-R1",
+        "title": "Independent review report",
+        "description": "For a high-criticality service, the supplier must provide a report issued by an assessor independent of the supplier within the previous 12 months. The report must cover the contracted production service; a supplier self-declaration is insufficient.",
+        "applicability_text": "High-criticality service",
+        "severity": "High",
+        "components": [
+          "high-criticality scope",
+          "provided report",
+          "independent issuer",
+          "issued within 12 months",
+          "contracted production scope"
+        ],
+        "source": {
+          "document_id": "policy-05",
+          "quote": "For a high-criticality service, the supplier must provide a report issued by an assessor independent of the supplier within the previous 12 months. The report must cover the contracted production service; a supplier self-declaration is insufficient."
+        }
+      },
+      {
+        "id": "P05-R2",
+        "title": "Finding treatment",
+        "description": "Every unresolved high-severity finding in the supplied independent report must have a named owner, corrective action and target completion date documented by the supplier.",
+        "applicability_text": "An independent report contains unresolved high-severity findings",
+        "severity": "High",
+        "components": [
+          "unresolved high findings",
+          "named owner",
+          "corrective action",
+          "target date"
+        ],
+        "source": {
+          "document_id": "policy-05",
+          "quote": "Every unresolved high-severity finding in the supplied independent report must have a named owner, corrective action and target completion date documented by the supplier."
+        }
+      },
+      {
+        "id": "P05-R3",
+        "title": "Control monitoring",
+        "description": "The supplier must monitor the contracted service controls at least monthly and retain a record of each review, including months with no detected issue.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "contracted service controls",
+          "monthly maximum interval",
+          "retained records",
+          "no-issue months"
+        ],
+        "source": {
+          "document_id": "policy-05",
+          "quote": "The supplier must monitor the contracted service controls at least monthly and retain a record of each review, including months with no detected issue."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "dev-09",
+      "policy_id": "dev-assurance",
+      "split": "development",
+      "title": "An assertion about an audit is not the audit",
+      "tags": [
+        "independent_evidence",
+        "missing_document",
+        "long_document"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-09-1",
+          "filename": "evidence-09-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Briarfield Cloud — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nWe state that our controls meet industry expectations and that an external assessor has reviewed us. No assessor report or extract accompanies this packet, so the issuer, report date, scope and any findings cannot be established from the supplied material.\n\nThe service owner reviews contracted-service controls every month and retains a signed review record even when the review finds no issue.\n\n### Briarfield Cloud administrative register 001: capacity planning\n\nRecord S09-OP-101 describes the capacity planning workstream for the hosted business service. The service directory associates this workstream with internal team 1 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 3 closed items, with a reference to meeting note S09-MN-201. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers release scheduling, with separate owners and work references.\n\n### Briarfield Cloud administrative register 002: release scheduling\n\nRecord S09-OP-102 describes the release scheduling workstream for the hosted business service. The service directory associates this workstream with internal team 2 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 4 closed items, with a reference to meeting note S09-MN-202. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers support routing, with separate owners and work references.\n\n### Briarfield Cloud administrative register 003: support routing\n\nRecord S09-OP-103 describes the support routing workstream for the hosted business service. The service directory associates this workstream with internal team 3 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 5 closed items, with a reference to meeting note S09-MN-203. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers invoice reconciliation, with separate owners and work references.\n\n### Briarfield Cloud administrative register 004: invoice reconciliation\n\nRecord S09-OP-104 describes the invoice reconciliation workstream for the hosted business service. The service directory associates this workstream with internal team 4 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 6 closed items, with a reference to meeting note S09-MN-204. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers asset inventory, with separate owners and work references.\n\n### Briarfield Cloud administrative register 005: asset inventory\n\nRecord S09-OP-105 describes the asset inventory workstream for the hosted business service. The service directory associates this workstream with internal team 5 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 7 closed items, with a reference to meeting note S09-MN-205. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers service naming, with separate owners and work references.\n\n### Briarfield Cloud administrative register 006: service naming\n\nRecord S09-OP-106 describes the service naming workstream for the hosted business service. The service directory associates this workstream with internal team 6 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 8 closed items, with a reference to meeting note S09-MN-206. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers on-call handover, with separate owners and work references.\n\n### Briarfield Cloud administrative register 007: on-call handover\n\nRecord S09-OP-107 describes the on-call handover workstream for the hosted business service. The service directory associates this workstream with internal team 7 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 9 closed items, with a reference to meeting note S09-MN-207. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers workspace allocation, with separate owners and work references.\n\n### Briarfield Cloud administrative register 008: workspace allocation\n\nRecord S09-OP-108 describes the workspace allocation workstream for the hosted business service. The service directory associates this workstream with internal team 8 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 10 closed items, with a reference to meeting note S09-MN-208. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers build reproducibility, with separate owners and work references.\n\n### Briarfield Cloud administrative register 009: build reproducibility\n\nRecord S09-OP-109 describes the build reproducibility workstream for the hosted business service. The service directory associates this workstream with internal team 9 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 3 closed items, with a reference to meeting note S09-MN-209. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers localization review, with separate owners and work references.\n\n### Briarfield Cloud administrative register 010: localization review\n\nRecord S09-OP-110 describes the localization review workstream for the hosted business service. The service directory associates this workstream with internal team 1 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 4 closed items, with a reference to meeting note S09-MN-210. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers maintenance scheduling, with separate owners and work references.\n\n### Briarfield Cloud administrative register 011: maintenance scheduling\n\nRecord S09-OP-111 describes the maintenance scheduling workstream for the hosted business service. The service directory associates this workstream with internal team 2 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 5 closed items, with a reference to meeting note S09-MN-211. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers network inventory, with separate owners and work references.\n\n### Briarfield Cloud administrative register 012: network inventory\n\nRecord S09-OP-112 describes the network inventory workstream for the hosted business service. The service directory associates this workstream with internal team 3 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 6 closed items, with a reference to meeting note S09-MN-212. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers dashboard ownership, with separate owners and work references.\n\n### Briarfield Cloud administrative register 013: dashboard ownership\n\nRecord S09-OP-113 describes the dashboard ownership workstream for the hosted business service. The service directory associates this workstream with internal team 4 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 7 closed items, with a reference to meeting note S09-MN-213. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers telemetry aggregation, with separate owners and work references.\n\n### Briarfield Cloud administrative register 014: telemetry aggregation\n\nRecord S09-OP-114 describes the telemetry aggregation workstream for the hosted business service. The service directory associates this workstream with internal team 5 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 8 closed items, with a reference to meeting note S09-MN-214. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers queue sizing, with separate owners and work references.\n",
+          "sha256": "20c068f716bd28642420bf06272ff49e20d0174981b3297f1052c51ce43a8196",
+          "characters": 15019
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P05-R1",
+          "status": "unknown",
+          "rationale": "The declaration does not supply the independently issued report, date or scope; do not assume a known violation of unseen report contents.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-09-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-09-1",
+                  "quote": "We state that our controls meet industry expectations and that an external assessor has reviewed us. No assessor report or extract accompanies this packet, so the issuer, report date, scope and any findings cannot be established from the supplied material."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P05-R2",
+          "status": "unknown",
+          "rationale": "The missing report prevents establishing whether the conditional high-finding obligation applies.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-09-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-09-1",
+                  "quote": "We state that our controls meet industry expectations and that an external assessor has reviewed us. No assessor report or extract accompanies this packet, so the issuer, report date, scope and any findings cannot be established from the supplied material."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P05-R3",
+          "status": "pass",
+          "rationale": "The explicit monthly review and retained no-issue records meet the obligation.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-09-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-09-1",
+                  "quote": "The service owner reviews contracted-service controls every month and retains a signed review record even when the review finds no issue."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "dev-10",
+      "policy_id": "dev-assurance",
+      "split": "development",
+      "title": "Independent evidence and a complete remediation plan",
+      "tags": [
+        "independent_evidence",
+        "remediation",
+        "explicit_violation"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-10-1",
+          "filename": "evidence-10-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Wintermere Systems — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nFor unresolved finding H-17, the corrective-action register names Priya Shah as owner, specifies a restoration test including encrypted backups, and sets completion for 30 September 2026.\n\nThe service owner reviews controls monthly, but records are saved only when an issue is detected. Records for months without issues are intentionally not retained.\n",
+          "sha256": "93e12aff9cae71e05eb55203257a3ebeb1f5e510605505a7e6e7817c3024bb9c",
+          "characters": 494
+        },
+        {
+          "id": "evidence-10-2",
+          "filename": "independent-assurance-extract.txt",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "independent",
+          "text": "# Independent assurance report extract\n\nIssued 15 July 2026 by Westbridge Assurance, an assessor organizationally independent of the supplier. Scope: the contracted production service for Marlow. Finding H-17 is high severity and unresolved as of the statement date: restoration tests did not include encrypted backups.\n",
+          "sha256": "9915fec8178eeed5e9a21acfb8000efe0aad11aecab936e541b894e7ce2638d7",
+          "characters": 320
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P05-R1",
+          "status": "pass",
+          "rationale": "The independent supplied report is recent and explicitly covers the contracted production service.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-10-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-10-2",
+                  "quote": "Issued 15 July 2026 by Westbridge Assurance, an assessor organizationally independent of the supplier. Scope: the contracted production service for Marlow. Finding H-17 is high severity and unresolved as of the statement date: restoration tests did not include encrypted backups."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P05-R2",
+          "status": "pass",
+          "rationale": "An unresolved high finding has all three required treatment fields; policy does not require already-completed remediation.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-10-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-10-2",
+                  "quote": "Issued 15 July 2026 by Westbridge Assurance, an assessor organizationally independent of the supplier. Scope: the contracted production service for Marlow. Finding H-17 is high severity and unresolved as of the statement date: restoration tests did not include encrypted backups."
+                }
+              ]
+            },
+            {
+              "id": "dev-10-R2-E2",
+              "any_of": [
+                {
+                  "document_id": "evidence-10-1",
+                  "quote": "For unresolved finding H-17, the corrective-action register names Priya Shah as owner, specifies a restoration test including encrypted backups, and sets completion for 30 September 2026."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P05-R3",
+          "status": "fail",
+          "rationale": "The admitted deletion/non-retention of no-issue review records contradicts the requirement.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-10-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-10-1",
+                  "quote": "The service owner reviews controls monthly, but records are saved only when an issue is detected. Records for months without issues are intentionally not retained."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}

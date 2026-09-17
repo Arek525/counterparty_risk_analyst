@@ -1,0 +1,253 @@
+{
+  "policy": {
+    "id": "dev-incident",
+    "split": "development",
+    "organization": "Juniper Analytics",
+    "document": {
+      "id": "policy-02",
+      "filename": "policy-02.md",
+      "kind": "policy",
+      "language": "en",
+      "evidence_type": "declaration",
+      "text": "# Juniper Analytics — Incident communication standard\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Initial notice\n\nThe supplier must notify Juniper within 18 hours after becoming aware of an incident affecting Juniper data. An initial notice may be incomplete; notification must not wait for root-cause confirmation.\n\n## 2. Operational updates\n\nFor an incident affecting Juniper data, the supplier must send a status update at least once every 12 hours until containment, even when there is no new information.\n\n## 3. Round-the-clock contact\n\nThe supplier must maintain a continuously monitored incident contact available to Juniper 24 hours a day, seven days a week.\n",
+      "sha256": "5c76ef3f0e1332c90d70625a827c8895c70047b38f6012b76f73975002b34bb0",
+      "characters": 954
+    },
+    "expected_requirements": [
+      {
+        "id": "P02-R1",
+        "title": "Initial notice",
+        "description": "The supplier must notify Juniper within 18 hours after becoming aware of an incident affecting Juniper data. An initial notice may be incomplete; notification must not wait for root-cause confirmation.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "18-hour maximum",
+          "awareness trigger",
+          "Juniper data scope",
+          "no waiting for root cause"
+        ],
+        "source": {
+          "document_id": "policy-02",
+          "quote": "The supplier must notify Juniper within 18 hours after becoming aware of an incident affecting Juniper data. An initial notice may be incomplete; notification must not wait for root-cause confirmation."
+        }
+      },
+      {
+        "id": "P02-R2",
+        "title": "Operational updates",
+        "description": "For an incident affecting Juniper data, the supplier must send a status update at least once every 12 hours until containment, even when there is no new information.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "12-hour maximum interval",
+          "until containment",
+          "no-news updates"
+        ],
+        "source": {
+          "document_id": "policy-02",
+          "quote": "For an incident affecting Juniper data, the supplier must send a status update at least once every 12 hours until containment, even when there is no new information."
+        }
+      },
+      {
+        "id": "P02-R3",
+        "title": "Round-the-clock contact",
+        "description": "The supplier must maintain a continuously monitored incident contact available to Juniper 24 hours a day, seven days a week.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "continuously monitored contact",
+          "available to Juniper",
+          "24/7"
+        ],
+        "source": {
+          "document_id": "policy-02",
+          "quote": "The supplier must maintain a continuously monitored incident contact available to Juniper 24 hours a day, seven days a week."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "dev-03",
+      "policy_id": "dev-incident",
+      "split": "development",
+      "title": "Correct number with the wrong starting event",
+      "tags": [
+        "trigger_mismatch",
+        "missing_information",
+        "long_document"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-03-1",
+          "filename": "evidence-03-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Harbor Finch Systems — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nFor incidents affecting this customer, our first external notice is sent 16 hours after root cause is confirmed. Our contractual procedure prohibits any customer notification before that confirmation, even when we are already aware of the incident.\n\nDuring containment our incident commander publishes status updates; no maximum interval and no handling of periods without new information are specified in this packet.\n\nThe customer can call the continuously staffed incident line at any hour, including weekends and holidays; the monitoring team responds around the clock.\n\n### Harbor Finch Systems administrative register 001: capacity planning\n\nRecord S03-OP-101 describes the capacity planning workstream for the hosted business service. The service directory associates this workstream with internal team 1 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 3 closed items, with a reference to meeting note S03-MN-201. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers release scheduling, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 002: release scheduling\n\nRecord S03-OP-102 describes the release scheduling workstream for the hosted business service. The service directory associates this workstream with internal team 2 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 4 closed items, with a reference to meeting note S03-MN-202. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers support routing, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 003: support routing\n\nRecord S03-OP-103 describes the support routing workstream for the hosted business service. The service directory associates this workstream with internal team 3 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 5 closed items, with a reference to meeting note S03-MN-203. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers invoice reconciliation, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 004: invoice reconciliation\n\nRecord S03-OP-104 describes the invoice reconciliation workstream for the hosted business service. The service directory associates this workstream with internal team 4 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 6 closed items, with a reference to meeting note S03-MN-204. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers asset inventory, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 005: asset inventory\n\nRecord S03-OP-105 describes the asset inventory workstream for the hosted business service. The service directory associates this workstream with internal team 5 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 7 closed items, with a reference to meeting note S03-MN-205. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers service naming, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 006: service naming\n\nRecord S03-OP-106 describes the service naming workstream for the hosted business service. The service directory associates this workstream with internal team 6 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 8 closed items, with a reference to meeting note S03-MN-206. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers on-call handover, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 007: on-call handover\n\nRecord S03-OP-107 describes the on-call handover workstream for the hosted business service. The service directory associates this workstream with internal team 7 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 9 closed items, with a reference to meeting note S03-MN-207. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers workspace allocation, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 008: workspace allocation\n\nRecord S03-OP-108 describes the workspace allocation workstream for the hosted business service. The service directory associates this workstream with internal team 8 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 10 closed items, with a reference to meeting note S03-MN-208. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers build reproducibility, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 009: build reproducibility\n\nRecord S03-OP-109 describes the build reproducibility workstream for the hosted business service. The service directory associates this workstream with internal team 9 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 3 closed items, with a reference to meeting note S03-MN-209. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers localization review, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 010: localization review\n\nRecord S03-OP-110 describes the localization review workstream for the hosted business service. The service directory associates this workstream with internal team 1 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 4 closed items, with a reference to meeting note S03-MN-210. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers maintenance scheduling, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 011: maintenance scheduling\n\nRecord S03-OP-111 describes the maintenance scheduling workstream for the hosted business service. The service directory associates this workstream with internal team 2 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 5 closed items, with a reference to meeting note S03-MN-211. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers network inventory, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 012: network inventory\n\nRecord S03-OP-112 describes the network inventory workstream for the hosted business service. The service directory associates this workstream with internal team 3 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 6 closed items, with a reference to meeting note S03-MN-212. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers dashboard ownership, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 013: dashboard ownership\n\nRecord S03-OP-113 describes the dashboard ownership workstream for the hosted business service. The service directory associates this workstream with internal team 4 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 7 closed items, with a reference to meeting note S03-MN-213. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers telemetry aggregation, with separate owners and work references.\n\n### Harbor Finch Systems administrative register 014: telemetry aggregation\n\nRecord S03-OP-114 describes the telemetry aggregation workstream for the hosted business service. The service directory associates this workstream with internal team 5 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 8 closed items, with a reference to meeting note S03-MN-214. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers queue sizing, with separate owners and work references.\n",
+          "sha256": "1093bf0af008ea62a18042797d05df4a51ede55dbaa208ce5dfeda464a05c58c",
+          "characters": 15257
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P02-R1",
+          "status": "fail",
+          "rationale": "The documented ban on notification before root-cause confirmation directly contradicts the awareness-based rule.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-03-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-03-1",
+                  "quote": "For incidents affecting this customer, our first external notice is sent 16 hours after root cause is confirmed. Our contractual procedure prohibits any customer notification before that confirmation, even when we are already aware of the incident."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P02-R2",
+          "status": "unknown",
+          "rationale": "The existence of updates does not establish the required interval or no-news behavior.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-03-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-03-1",
+                  "quote": "During containment our incident commander publishes status updates; no maximum interval and no handling of periods without new information are specified in this packet."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P02-R3",
+          "status": "pass",
+          "rationale": "Continuous staffed availability explicitly covers all days and hours.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-03-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-03-1",
+                  "quote": "The customer can call the continuously staffed incident line at any hour, including weekends and holidays; the monitoring team responds around the clock."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "dev-04",
+      "policy_id": "dev-incident",
+      "split": "development",
+      "title": "Two binding notices conflict without precedence",
+      "tags": [
+        "contradiction",
+        "same_scope",
+        "exact_bound"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-04-1",
+          "filename": "evidence-04-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Pinecrest Operations — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nSchedule A, signed 2 September 2026, requires the first notice of a customer-data incident within 10 hours of awareness, without waiting for root cause. The accompanying statement says this schedule is currently binding for the contracted service.\n\nSchedule B, also signed 2 September 2026, requires the first notice of the same customer-data incident exactly 36 hours after awareness. The accompanying statement says this schedule is currently binding for the same service. Neither schedule specifies precedence or supersedes the other.\n\nUntil containment we send a status update every 8 hours, including an explicit no-change update when no new information exists.\n\nThe incident contact is staffed only from 09:00 to 17:00 on weekdays. Outside that interval a mailbox stores messages until the next staffed shift.\n",
+          "sha256": "42684fdef9e61f3c3c99da05ae3c85d207bcd8228bb4e4ad7e13b094fdb559c2",
+          "characters": 959
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P02-R1",
+          "status": "conflict",
+          "rationale": "The currently binding schedules prescribe incompatible notice times for the same event; no precedence resolves them.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-04-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-04-1",
+                  "quote": "Schedule A, signed 2 September 2026, requires the first notice of a customer-data incident within 10 hours of awareness, without waiting for root cause. The accompanying statement says this schedule is currently binding for the contracted service."
+                }
+              ]
+            },
+            {
+              "id": "dev-04-R1-E2",
+              "any_of": [
+                {
+                  "document_id": "evidence-04-1",
+                  "quote": "Schedule B, also signed 2 September 2026, requires the first notice of the same customer-data incident exactly 36 hours after awareness. The accompanying statement says this schedule is currently binding for the same service. Neither schedule specifies precedence or supersedes the other."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P02-R2",
+          "status": "pass",
+          "rationale": "Eight-hour updates cover the entire containment period including no-change intervals.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-04-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-04-1",
+                  "quote": "Until containment we send a status update every 8 hours, including an explicit no-change update when no new information exists."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P02-R3",
+          "status": "fail",
+          "rationale": "An unmonitored overnight mailbox does not meet continuously monitored 24/7 availability.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-04-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-04-1",
+                  "quote": "The incident contact is staffed only from 09:00 to 17:00 on weekdays. Outside that interval a mailbox stores messages until the next staffed shift."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}

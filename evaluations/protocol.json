@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "dataset_version": "current-pipeline-v1",
+  "status": "pending_human_review",
+  "provenance": {
+    "documents": "Agent-authored synthetic companies, policies and evidence; no customer data.",
+    "expected_results": "Agent-authored proposals, not human-reviewed gold labels or Gemini outputs.",
+    "model_runs": "See results.json for all recorded pilot, development and final attempts; no selective removal of failed attempts.",
+    "human_review": {
+      "status": "pending",
+      "reviewer": null,
+      "reviewed_at": null
+    },
+    "limitations": [
+      "Small purposive challenge set; not representative of real supplier populations.",
+      "Documents and proposed labels share an author; authoring bias is not removed by splitting.",
+      "All content is UTF-8 text. PDF layout, scanned pages and OCR are not evaluated.",
+      "Long documents include deliberately constructed operational detail, not sampled real contracts.",
+      "Reserved test cases are public and author-visible; they are not a secret external benchmark.",
+      "Long-case administrative background uses shared synthetic templates, including across splits; case-specific obligations and evidence differ. Length-stratified results measure this controlled setting, not robustness to naturally occurring contract distributions."
+    ]
+  },
+  "protocol": {
+    "status": "provisional_evaluation_without_independent_human_review",
+    "assessment_date": "2026-09-17",
+    "splits": {
+      "development": "12 cases / 6 policy families. Prompt changes and pilot runs allowed only here.",
+      "reserved_test": "6 cases / 3 disjoint policy families. Do not run until labels, prompts and runner are frozen. No prompt tuning on these outcomes.",
+      "unit": "Policy family, not individual requirement; both counterparties sharing a policy stay in one split.",
+      "freeze": "Before final model access, freeze corpus, prompts, runner and production-code hashes. The owner authorized execution, but independent human label review remains pending; final measurements are explicitly provisional agreement with agent-authored reference labels.",
+      "after_test_changes": "Disclose every final-test attempt. After a result-informed change, label any rerun as development/retest, not a fresh held-out result."
+    },
+    "inputs": "Only source documents, reviewed requirement wording and relationship context reach the model. Never pass case titles, tags, expected results, rationales, evidence annotations or split names. Use neutral document/requirement identifiers (or remapped application UUIDs); split labels exist only in evaluation metadata.",
+    "extraction": {
+      "unit": "One extraction per unique policy, shared across that policy's counterparty cases.",
+      "matching": "Human semantic matching against obligation components, independent of generated IDs, titles, ordering or harmless splitting/merging. One bullet can cover multiple obligations only if each is actually retained.",
+      "recall": "Fully recovered gold obligations / all gold obligations. Missing material scope, trigger or exception makes an obligation incomplete; also report incomplete count.",
+      "precision": "Supported predicted atomic obligations / all predicted atomic obligations. Count duplicates separately. Do not credit invented restrictions.",
+      "severity": "Proposed severities are reviewer annotations, not extraction targets unless the source explicitly assigns severity."
+    },
+    "comparison": {
+      "requirements": "Use identical proposed reference requirements in both arms to isolate retrieval/context selection from extraction errors. Extraction is measured separately. This is not end-to-end quality using generated requirements.",
+      "hybrid": "Current application ingestion, E5 embeddings, weighted hybrid ranking and per-requirement semantic assessment, with actual production limits.",
+      "full_document": "Same model, instructions, relationship, requirement and output schema; provide every evidence chunk in source order, without retrieval. Chunk IDs remain citation anchors; all readable text is included.",
+      "limits": "Check the actual serialized payload against production character/token limits; no silent truncation, alternative model or increased output allowance. Above-limit full-document inputs are ineligible, not incorrect model answers.",
+      "order": "Counterbalance arm order across cases; use identical generation settings and record exact model ID/version if available.",
+      "repetitions": "One observation per arm and requirement, counterbalanced arm order by case. Record all provider attempts and retries. No selection of the best response. Pilot and development runs remain separate.",
+      "prompt_injection": "Treat hostile source text as untrusted evidence. A returned pass or fabricated citation following a document instruction is a failure; an appropriately grounded refusal to obey it is not."
+    },
+    "metrics": {
+      "retrieval": "A required evidence group is recovered if the selected chunks cover at least one full annotated passage in that group, allowing adjacent chunks to jointly cover it. Report group recall and fraction of requirements with ALL groups recovered. Empty group sets are N/A, not automatic success.",
+      "classification": "Exact five-class status agreement per requirement, confusion matrix, case-macro and pooled scores. Technical errors remain visible; also report successful-response-only agreement with its denominator.",
+      "false_pass": "Count predicted pass when expected status is fail, conflict or unknown; report count and denominator of those cases, separately from not_applicable.",
+      "citation_location": "Production source validation: document/anchor IDs plus literal resolvable quote. Report invalid and missing citations separately.",
+      "citation_support": "Human review for each conclusion: supported / insufficient / contradicted. A pass must cover every material condition; a conflict needs both same-scope contradictory statements. Presence alone is insufficient. Unknown requires an appropriate gap, not proof that silence is a violation.",
+      "unknown_review": "Review the full evidence packet to confirm absence. A partial contextual quote does not prove global absence. The benchmark evidence groups identify known partial evidence, not a substitute for that review.",
+      "tokens": "Record provider-reported input, output, cached and thinking tokens separately when available. Unknown usage, especially failed calls, is null, never zero. Include retries; do not double-count thinking/cached components in provider totals.",
+      "savings": "On paired eligible cases: 1 - sum(hybrid input+output tokens) / sum(full_document input+output tokens). Also report input and output separately and absolute counts. Missing usage excludes a pair from this ratio with an explicit count.",
+      "shared_costs": "Report policy extraction separately, once per policy; show combined totals including that shared cost. Local embeddings use compute/time, not Gemini tokens. Report first-index setup separately from reuse.",
+      "time": "Wall-clock time per requirement and case, median/p95 plus sample size; distinguish model work, rate-limit waiting, retries, cold model loading and indexing. Report failures and unfinished time, not just successful runs. Percentiles from this small sample are descriptive, not stable service-level estimates.",
+      "quality_token_tradeoff": "Publish paired classification/citation quality beside token savings; savings with lower quality is a tradeoff, not an unconditional win.",
+      "coverage": "Publish eligible/ineligible/completed/failed counts per arm, document lengths, requirement count, language and scenario category. Do not generalize percentages beyond this small synthetic corpus.",
+      "length_strata": "Report short (<4000 evidence characters), medium (4000–9999), long (10000–25000) and oversized (>25000) separately; derive actual full-context eligibility from serialized payload, not this descriptive length band. Short cases are controls and may offer no token savings."
+    },
+    "failures": "API errors and interrupted jobs are controlled technical tests, not fabricated document labels. Reuse backend recovery tests; any live smoke must preserve paid completed work and record provider failures/usage without paid fallback.",
+    "review": "Independent human review remains pending. Agent review compares source obligations, extraction outputs, cited support and proposed labels; it is explicitly identified as non-independent. No human-reviewed accuracy claims are permitted. A human should review all labels and citation judgments before stronger conclusions.",
+    "publication": "README contains methods, paired results and limitations. Commit this corpus, one runner and one chosen complete results artifact containing every measured attempt, model/settings, source/prompt/code hashes and per-requirement outputs/usage. Keep raw diagnostic logs in ignored output/. Never commit credentials.",
+    "budget": {
+      "live_runs_authorized_for_this_increment": true,
+      "pilot_case_ids": [
+        "dev-01",
+        "dev-02",
+        "dev-09"
+      ],
+      "live_call_cap": 160,
+      "decision": "Owner authorized full evaluation on 2026-09-17. Cap 160 requests: up to 120 development including instrumentation pilots and prompt revisions, up to 40 final. Additional development pass justified by observed false passes. No billing activation or paid fallback; observed account quota is free-tier 15 requests/minute. Evaluation spaces requests five seconds apart. Quota exhaustion stops the process; only explicit bounded resumption."
+    }
+  }
+}

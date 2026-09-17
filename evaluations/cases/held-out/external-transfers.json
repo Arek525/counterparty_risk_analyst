@@ -1,0 +1,252 @@
+{
+  "policy": {
+    "id": "test-transfer",
+    "split": "reserved_test",
+    "organization": "Willow Publications",
+    "document": {
+      "id": "policy-09",
+      "filename": "policy-09.md",
+      "kind": "policy",
+      "language": "en",
+      "evidence_type": "declaration",
+      "text": "# Willow Publications — Controlled transfer standard\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Secure transport\n\nEvery transfer of customer files between the supplier and an external destination must use TLS 1.2 or later. Private leased lines do not waive this transport requirement.\n\n## 2. Destination approval\n\nEvery external file-transfer destination must be approved by the customer before the first transfer. Approval must identify the destination and the intended purpose.\n\n## 3. Transfer record retention\n\nFor each external file transfer, the supplier must retain a record of the destination, start time and approving customer identity for at least 75 calendar days.\n",
+      "sha256": "97e527feae8c0f2266f09e69148ead9df99603838d221f427b3dccc0e2b80955",
+      "characters": 963
+    },
+    "expected_requirements": [
+      {
+        "id": "P09-R1",
+        "title": "Secure transport",
+        "description": "Every transfer of customer files between the supplier and an external destination must use TLS 1.2 or later. Private leased lines do not waive this transport requirement.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "every external file transfer",
+          "TLS minimum1.2",
+          "leased lines included"
+        ],
+        "source": {
+          "document_id": "policy-09",
+          "quote": "Every transfer of customer files between the supplier and an external destination must use TLS 1.2 or later. Private leased lines do not waive this transport requirement."
+        }
+      },
+      {
+        "id": "P09-R2",
+        "title": "Destination approval",
+        "description": "Every external file-transfer destination must be approved by the customer before the first transfer. Approval must identify the destination and the intended purpose.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "every external destination",
+          "approval before first transfer",
+          "destination and purpose"
+        ],
+        "source": {
+          "document_id": "policy-09",
+          "quote": "Every external file-transfer destination must be approved by the customer before the first transfer. Approval must identify the destination and the intended purpose."
+        }
+      },
+      {
+        "id": "P09-R3",
+        "title": "Transfer record retention",
+        "description": "For each external file transfer, the supplier must retain a record of the destination, start time and approving customer identity for at least 75 calendar days.",
+        "applicability_text": "All relationships",
+        "severity": "High",
+        "components": [
+          "each external transfer",
+          "destination, start time, approver",
+          "minimum75days retention"
+        ],
+        "source": {
+          "document_id": "policy-09",
+          "quote": "For each external file transfer, the supplier must retain a record of the destination, start time and approving customer identity for at least 75 calendar days."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "test-05",
+      "policy_id": "test-transfer",
+      "split": "reserved_test",
+      "title": "Long service pack with complete transport evidence",
+      "tags": [
+        "long_document",
+        "minimum_bound",
+        "complete_evidence"
+      ],
+      "relationship": {
+        "purpose": "External publication-file transfer Assessment reference date: 2026-09-17.",
+        "data_shared": "Public, non-personal catalogue data only",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": false,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-17-1",
+          "filename": "evidence-17-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Westhaven Transfer — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nWe transfer customer files to the external archive over a private leased line using TLS 1.3 on every transfer. The same TLS 1.3 transport rule applies to every other external destination.\n\nThe customer approval register identifies each external destination and its archival purpose. Approval is recorded before the first transfer; the contracted service has no destination outside that register.\n\nEvery transfer record identifies destination, start time and the approving customer identity. The binding retention rule requires at least 90 calendar days of retention.\n\n### Operational register 001: capacity planning\n\nRecord OP-101 describes the capacity planning workstream for the logistics planning service. The service directory associates this workstream with internal team 1 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 3 closed items, with a reference to meeting note MN-201. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers release scheduling, with separate owners and work references.\n\n### Operational register 002: release scheduling\n\nRecord OP-102 describes the release scheduling workstream for the logistics planning service. The service directory associates this workstream with internal team 2 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 4 closed items, with a reference to meeting note MN-202. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers support routing, with separate owners and work references.\n\n### Operational register 003: support routing\n\nRecord OP-103 describes the support routing workstream for the logistics planning service. The service directory associates this workstream with internal team 3 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 5 closed items, with a reference to meeting note MN-203. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers invoice reconciliation, with separate owners and work references.\n\n### Operational register 004: invoice reconciliation\n\nRecord OP-104 describes the invoice reconciliation workstream for the logistics planning service. The service directory associates this workstream with internal team 4 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 6 closed items, with a reference to meeting note MN-204. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers asset inventory, with separate owners and work references.\n\n### Operational register 005: asset inventory\n\nRecord OP-105 describes the asset inventory workstream for the logistics planning service. The service directory associates this workstream with internal team 5 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 7 closed items, with a reference to meeting note MN-205. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers service naming, with separate owners and work references.\n\n### Operational register 006: service naming\n\nRecord OP-106 describes the service naming workstream for the logistics planning service. The service directory associates this workstream with internal team 6 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 8 closed items, with a reference to meeting note MN-206. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers on-call handover, with separate owners and work references.\n\n### Operational register 007: on-call handover\n\nRecord OP-107 describes the on-call handover workstream for the logistics planning service. The service directory associates this workstream with internal team 7 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 9 closed items, with a reference to meeting note MN-207. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers workspace allocation, with separate owners and work references.\n\n### Operational register 008: workspace allocation\n\nRecord OP-108 describes the workspace allocation workstream for the logistics planning service. The service directory associates this workstream with internal team 8 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 10 closed items, with a reference to meeting note MN-208. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers build reproducibility, with separate owners and work references.\n\n### Operational register 009: build reproducibility\n\nRecord OP-109 describes the build reproducibility workstream for the logistics planning service. The service directory associates this workstream with internal team 9 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 3 closed items, with a reference to meeting note MN-209. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers localization review, with separate owners and work references.\n\n### Operational register 010: localization review\n\nRecord OP-110 describes the localization review workstream for the logistics planning service. The service directory associates this workstream with internal team 1 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 4 closed items, with a reference to meeting note MN-210. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers maintenance scheduling, with separate owners and work references.\n\n### Operational register 011: maintenance scheduling\n\nRecord OP-111 describes the maintenance scheduling workstream for the logistics planning service. The service directory associates this workstream with internal team 2 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 5 closed items, with a reference to meeting note MN-211. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers network inventory, with separate owners and work references.\n\n### Operational register 012: network inventory\n\nRecord OP-112 describes the network inventory workstream for the logistics planning service. The service directory associates this workstream with internal team 3 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 6 closed items, with a reference to meeting note MN-212. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers dashboard ownership, with separate owners and work references.\n\n### Operational register 013: dashboard ownership\n\nRecord OP-113 describes the dashboard ownership workstream for the logistics planning service. The service directory associates this workstream with internal team 4 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 7 closed items, with a reference to meeting note MN-213. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers telemetry aggregation, with separate owners and work references.\n",
+          "sha256": "c4dd39da5ec54f90db8bb527e4a90e1315b5028b1b020c3dc0c583f2c1fb985f",
+          "characters": 13833
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P09-R1",
+          "status": "pass",
+          "rationale": "TLS1.3 meets the minimum even on the leased line.",
+          "required_evidence_groups": [
+            {
+              "id": "test-05-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-17-1",
+                  "quote": "We transfer customer files to the external archive over a private leased line using TLS 1.3 on every transfer. The same TLS 1.3 transport rule applies to every other external destination."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P09-R2",
+          "status": "pass",
+          "rationale": "All destinations have prior purpose-specific customer approval.",
+          "required_evidence_groups": [
+            {
+              "id": "test-05-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-17-1",
+                  "quote": "The customer approval register identifies each external destination and its archival purpose. Approval is recorded before the first transfer; the contracted service has no destination outside that register."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P09-R3",
+          "status": "pass",
+          "rationale": "Ninety days meets the minimum75 and all fields are retained.",
+          "required_evidence_groups": [
+            {
+              "id": "test-05-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-17-1",
+                  "quote": "Every transfer record identifies destination, start time and the approving customer identity. The binding retention rule requires at least 90 calendar days of retention."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "test-06",
+      "policy_id": "test-transfer",
+      "split": "reserved_test",
+      "title": "Contradictory binding transport versions",
+      "tags": [
+        "cross_language",
+        "contradiction",
+        "missing_information"
+      ],
+      "relationship": {
+        "purpose": "External publication-file transfer Assessment reference date: 2026-09-17.",
+        "data_shared": "Public, non-personal catalogue data only",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": false,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-18-1",
+          "filename": "evidence-18-1.md",
+          "kind": "evidence",
+          "language": "pl",
+          "evidence_type": "declaration",
+          "text": "# Mewa Exchange — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nPodpisany rejestr TR-A stwierdza, że wszystkie zewnętrzne transfery plików klienta używają wyłącznie TLS 1.3. Obejmuje także prywatne łącza dzierżawione.\n\nPodpisany aneks TR-B stwierdza, że te same transfery plików tego klienta do tego samego archiwum zewnętrznego używają wyłącznie TLS 1.0. TR-A i TR-B obowiązują w tym samym okresie; żaden dokument nie określa pierwszeństwa.\n\nRejestr zatwierdzeń wymienia adres każdego zewnętrznego celu i cel biznesowy. Każdy wpis ma zgodę klienta wcześniejszą niż pierwszy transfer; innych celów nie używamy.\n\nPrzechowujemy historię transferów zawierającą adres celu, godzinę rozpoczęcia i tożsamość zatwierdzającego po stronie klienta. W przekazanych dokumentach nie określono okresu przechowywania historii.\n",
+          "sha256": "dbd073ca5da0d672dc28220f676b9e46604ef1dc96e46ca67ca0624d7a9cd60e",
+          "characters": 884
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P09-R1",
+          "status": "conflict",
+          "rationale": "Two binding same-scope claims specify mutually exclusive TLS versions without precedence.",
+          "required_evidence_groups": [
+            {
+              "id": "test-06-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-18-1",
+                  "quote": "Podpisany rejestr TR-A stwierdza, że wszystkie zewnętrzne transfery plików klienta używają wyłącznie TLS 1.3. Obejmuje także prywatne łącza dzierżawione."
+                }
+              ]
+            },
+            {
+              "id": "test-06-R1-E2",
+              "any_of": [
+                {
+                  "document_id": "evidence-18-1",
+                  "quote": "Podpisany aneks TR-B stwierdza, że te same transfery plików tego klienta do tego samego archiwum zewnętrznego używają wyłącznie TLS 1.0. TR-A i TR-B obowiązują w tym samym okresie; żaden dokument nie określa pierwszeństwa."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P09-R2",
+          "status": "pass",
+          "rationale": "The complete register confirms prior approval, destination and purpose.",
+          "required_evidence_groups": [
+            {
+              "id": "test-06-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-18-1",
+                  "quote": "Rejestr zatwierdzeń wymienia adres każdego zewnętrznego celu i cel biznesowy. Każdy wpis ma zgodę klienta wcześniejszą niż pierwszy transfer; innych celów nie używamy."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P09-R3",
+          "status": "unknown",
+          "rationale": "Required fields are described, but retention duration is not established.",
+          "required_evidence_groups": [
+            {
+              "id": "test-06-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-18-1",
+                  "quote": "Przechowujemy historię transferów zawierającą adres celu, godzinę rozpoczęcia i tożsamość zatwierdzającego po stronie klienta. W przekazanych dokumentach nie określono okresu przechowywania historii."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}

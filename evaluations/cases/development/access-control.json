@@ -1,0 +1,244 @@
+{
+  "policy": {
+    "id": "dev-access",
+    "split": "development",
+    "organization": "Kestrel Design",
+    "document": {
+      "id": "policy-03",
+      "filename": "policy-03.md",
+      "kind": "policy",
+      "language": "en",
+      "evidence_type": "declaration",
+      "text": "# Kestrel Design — Supplier access standard\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Privileged authentication\n\nWhere supplier staff have privileged access to customer production systems, every privileged interactive sign-in must use phishing-resistant multi-factor authentication. Recovery accounts are included.\n\n## 2. Access removal\n\nFor any supplier account authorized to access customer systems, access must be revoked within 6 hours after the supplier learns that the person has left the assigned role.\n\n## 3. Entitlement review\n\nWhere supplier staff have privileged access to customer production systems, the supplier must review all such entitlements at least once every 90 calendar days and retain the review results.\n",
+      "sha256": "fe4bffdaf4dcf718e7fa59e0da6d39708870b4776d17d29166ef6dfb628f9ac5",
+      "characters": 1017
+    },
+    "expected_requirements": [
+      {
+        "id": "P03-R1",
+        "title": "Privileged authentication",
+        "description": "Where supplier staff have privileged access to customer production systems, every privileged interactive sign-in must use phishing-resistant multi-factor authentication. Recovery accounts are included.",
+        "applicability_text": "Supplier staff have privileged production access",
+        "severity": "High",
+        "components": [
+          "privileged access scope",
+          "every interactive sign-in",
+          "phishing resistance",
+          "recovery accounts"
+        ],
+        "source": {
+          "document_id": "policy-03",
+          "quote": "Where supplier staff have privileged access to customer production systems, every privileged interactive sign-in must use phishing-resistant multi-factor authentication. Recovery accounts are included."
+        }
+      },
+      {
+        "id": "P03-R2",
+        "title": "Access removal",
+        "description": "For any supplier account authorized to access customer systems, access must be revoked within 6 hours after the supplier learns that the person has left the assigned role.",
+        "applicability_text": "Supplier accounts access customer systems",
+        "severity": "High",
+        "components": [
+          "authorized customer account scope",
+          "6-hour maximum",
+          "awareness of role departure"
+        ],
+        "source": {
+          "document_id": "policy-03",
+          "quote": "For any supplier account authorized to access customer systems, access must be revoked within 6 hours after the supplier learns that the person has left the assigned role."
+        }
+      },
+      {
+        "id": "P03-R3",
+        "title": "Entitlement review",
+        "description": "Where supplier staff have privileged access to customer production systems, the supplier must review all such entitlements at least once every 90 calendar days and retain the review results.",
+        "applicability_text": "Supplier staff have privileged production access",
+        "severity": "High",
+        "components": [
+          "privileged access scope",
+          "90-day maximum interval",
+          "all entitlements",
+          "retained results"
+        ],
+        "source": {
+          "document_id": "policy-03",
+          "quote": "Where supplier staff have privileged access to customer production systems, the supplier must review all such entitlements at least once every 90 calendar days and retain the review results."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "dev-05",
+      "policy_id": "dev-access",
+      "split": "development",
+      "title": "Unrelated weak internal control is outside explicit scope",
+      "tags": [
+        "not_applicable",
+        "scope_distractor"
+      ],
+      "relationship": {
+        "purpose": "Public catalogue export; no supplier accounts in customer systems Assessment reference date: 2026-09-17.",
+        "data_shared": "Public, non-personal catalogue data only",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "low",
+        "personal_data": false,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-05-1",
+          "filename": "evidence-05-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Silverbank Studio — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nThe customer receives only a public catalogue export. Our staff hold no accounts in customer systems and have no privileged or ordinary customer-system access.\n\nOur internal design lab uses a local password-only training environment. It is unrelated to the customer, contains no customer data, and grants no customer-system access.\n",
+          "sha256": "9cde2e206085bc67809dddbf16213a52c76e959dadac04d85a8602a654444702",
+          "characters": 472
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P03-R1",
+          "status": "not_applicable",
+          "rationale": "The relationship and evidence explicitly exclude privileged customer access.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-05-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-05-1",
+                  "quote": "The customer receives only a public catalogue export. Our staff hold no accounts in customer systems and have no privileged or ordinary customer-system access."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P03-R2",
+          "status": "not_applicable",
+          "rationale": "There are no authorized supplier accounts in customer systems.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-05-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-05-1",
+                  "quote": "The customer receives only a public catalogue export. Our staff hold no accounts in customer systems and have no privileged or ordinary customer-system access."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P03-R3",
+          "status": "not_applicable",
+          "rationale": "The privileged-access condition is absent; lab accounts are outside scope.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-05-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-05-1",
+                  "quote": "The customer receives only a public catalogue export. Our staff hold no accounts in customer systems and have no privileged or ordinary customer-system access."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "dev-06",
+      "policy_id": "dev-access",
+      "split": "development",
+      "title": "A small exception defeats an otherwise strong control",
+      "tags": [
+        "exception",
+        "recovery_account",
+        "long_document"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "Privileged production support",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": true
+      },
+      "documents": [
+        {
+          "id": "evidence-06-1",
+          "filename": "evidence-06-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Meadow Circuit — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nPrivileged customer-production sign-ins use FIDO2 security keys plus a local PIN, which our security standard identifies as phishing-resistant MFA. Recovery accounts bypass this process and use only a reusable password.\n\nThe identity service revokes every supplier account in customer systems within 4 hours after the supplier learns that its holder has left the assigned role.\n\nAll privileged production entitlements are reviewed every 60 calendar days; review results are stored in the access register for the contract duration.\n\n### Meadow Circuit administrative register 001: capacity planning\n\nRecord S06-OP-101 describes the capacity planning workstream for the hosted business service. The service directory associates this workstream with internal team 1 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 3 closed items, with a reference to meeting note S06-MN-201. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers release scheduling, with separate owners and work references.\n\n### Meadow Circuit administrative register 002: release scheduling\n\nRecord S06-OP-102 describes the release scheduling workstream for the hosted business service. The service directory associates this workstream with internal team 2 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 4 closed items, with a reference to meeting note S06-MN-202. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers support routing, with separate owners and work references.\n\n### Meadow Circuit administrative register 003: support routing\n\nRecord S06-OP-103 describes the support routing workstream for the hosted business service. The service directory associates this workstream with internal team 3 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 5 closed items, with a reference to meeting note S06-MN-203. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers invoice reconciliation, with separate owners and work references.\n\n### Meadow Circuit administrative register 004: invoice reconciliation\n\nRecord S06-OP-104 describes the invoice reconciliation workstream for the hosted business service. The service directory associates this workstream with internal team 4 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 6 closed items, with a reference to meeting note S06-MN-204. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers asset inventory, with separate owners and work references.\n\n### Meadow Circuit administrative register 005: asset inventory\n\nRecord S06-OP-105 describes the asset inventory workstream for the hosted business service. The service directory associates this workstream with internal team 5 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 7 closed items, with a reference to meeting note S06-MN-205. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers service naming, with separate owners and work references.\n\n### Meadow Circuit administrative register 006: service naming\n\nRecord S06-OP-106 describes the service naming workstream for the hosted business service. The service directory associates this workstream with internal team 6 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 8 closed items, with a reference to meeting note S06-MN-206. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers on-call handover, with separate owners and work references.\n\n### Meadow Circuit administrative register 007: on-call handover\n\nRecord S06-OP-107 describes the on-call handover workstream for the hosted business service. The service directory associates this workstream with internal team 7 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 9 closed items, with a reference to meeting note S06-MN-207. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers workspace allocation, with separate owners and work references.\n\n### Meadow Circuit administrative register 008: workspace allocation\n\nRecord S06-OP-108 describes the workspace allocation workstream for the hosted business service. The service directory associates this workstream with internal team 8 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 10 closed items, with a reference to meeting note S06-MN-208. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers build reproducibility, with separate owners and work references.\n\n### Meadow Circuit administrative register 009: build reproducibility\n\nRecord S06-OP-109 describes the build reproducibility workstream for the hosted business service. The service directory associates this workstream with internal team 9 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 3 closed items, with a reference to meeting note S06-MN-209. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers localization review, with separate owners and work references.\n\n### Meadow Circuit administrative register 010: localization review\n\nRecord S06-OP-110 describes the localization review workstream for the hosted business service. The service directory associates this workstream with internal team 1 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 4 closed items, with a reference to meeting note S06-MN-210. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers maintenance scheduling, with separate owners and work references.\n\n### Meadow Circuit administrative register 011: maintenance scheduling\n\nRecord S06-OP-111 describes the maintenance scheduling workstream for the hosted business service. The service directory associates this workstream with internal team 2 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 5 closed items, with a reference to meeting note S06-MN-211. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers network inventory, with separate owners and work references.\n\n### Meadow Circuit administrative register 012: network inventory\n\nRecord S06-OP-112 describes the network inventory workstream for the hosted business service. The service directory associates this workstream with internal team 3 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 6 closed items, with a reference to meeting note S06-MN-212. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers dashboard ownership, with separate owners and work references.\n\n### Meadow Circuit administrative register 013: dashboard ownership\n\nRecord S06-OP-113 describes the dashboard ownership workstream for the hosted business service. The service directory associates this workstream with internal team 4 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 7 closed items, with a reference to meeting note S06-MN-213. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers telemetry aggregation, with separate owners and work references.\n\n### Meadow Circuit administrative register 014: telemetry aggregation\n\nRecord S06-OP-114 describes the telemetry aggregation workstream for the hosted business service. The service directory associates this workstream with internal team 5 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 8 closed items, with a reference to meeting note S06-MN-214. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers queue sizing, with separate owners and work references.\n",
+          "sha256": "6b4fcd0060cb2d2c1617e5cf04b2ac455efadbe6a7686177ebe0fcf6aa904406",
+          "characters": 15124
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P03-R1",
+          "status": "fail",
+          "rationale": "Recovery accounts are explicitly included by policy but bypass MFA.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-06-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-06-1",
+                  "quote": "Privileged customer-production sign-ins use FIDO2 security keys plus a local PIN, which our security standard identifies as phishing-resistant MFA. Recovery accounts bypass this process and use only a reusable password."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P03-R2",
+          "status": "pass",
+          "rationale": "The four-hour deadline uses the required trigger and covers all authorized accounts.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-06-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-06-1",
+                  "quote": "The identity service revokes every supplier account in customer systems within 4 hours after the supplier learns that its holder has left the assigned role."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P03-R3",
+          "status": "pass",
+          "rationale": "Sixty-day complete reviews and retention satisfy the ninety-day maximum interval.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-06-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-06-1",
+                  "quote": "All privileged production entitlements are reviewed every 60 calendar days; review results are stored in the access register for the contract duration."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}

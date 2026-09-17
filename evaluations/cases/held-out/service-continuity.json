@@ -1,0 +1,247 @@
+{
+  "policy": {
+    "id": "test-continuity",
+    "split": "reserved_test",
+    "organization": "Oriole Scheduling",
+    "document": {
+      "id": "policy-07",
+      "filename": "policy-07.md",
+      "kind": "policy",
+      "language": "en",
+      "evidence_type": "declaration",
+      "text": "# Oriole Scheduling — Continuity and restoration standard\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Recovery commitments\n\nFor a high-criticality service, the supplier must contractually commit to recovery within 7 hours of declaring a service disruption and to losing no more than 3 hours of committed customer transactions.\n\n## 2. Annual restoration exercise\n\nFor a high-criticality service, the supplier must perform a restoration exercise at least once every 12 months and provide a dated result covering the contracted production configuration.\n\n## 3. Exercise remediation\n\nEach unresolved material failure in the supplied restoration exercise must have a documented corrective action and target date. A successful exercise with no material failures does not require a remediation plan.\n",
+      "sha256": "e2768c9dac9f4a9e92f3149b7f2764c1faeaa47debe622c0907684957dc1e0da",
+      "characters": 1080
+    },
+    "expected_requirements": [
+      {
+        "id": "P07-R1",
+        "title": "Recovery commitments",
+        "description": "For a high-criticality service, the supplier must contractually commit to recovery within 7 hours of declaring a service disruption and to losing no more than 3 hours of committed customer transactions.",
+        "applicability_text": "High-criticality service",
+        "severity": "High",
+        "components": [
+          "high-criticality scope",
+          "binding commitments",
+          "recovery maximum7h after declaration",
+          "loss maximum3h committed transactions"
+        ],
+        "source": {
+          "document_id": "policy-07",
+          "quote": "For a high-criticality service, the supplier must contractually commit to recovery within 7 hours of declaring a service disruption and to losing no more than 3 hours of committed customer transactions."
+        }
+      },
+      {
+        "id": "P07-R2",
+        "title": "Annual restoration exercise",
+        "description": "For a high-criticality service, the supplier must perform a restoration exercise at least once every 12 months and provide a dated result covering the contracted production configuration.",
+        "applicability_text": "High-criticality service",
+        "severity": "High",
+        "components": [
+          "high-criticality scope",
+          "12-month maximum interval",
+          "dated result supplied",
+          "production configuration"
+        ],
+        "source": {
+          "document_id": "policy-07",
+          "quote": "For a high-criticality service, the supplier must perform a restoration exercise at least once every 12 months and provide a dated result covering the contracted production configuration."
+        }
+      },
+      {
+        "id": "P07-R3",
+        "title": "Exercise remediation",
+        "description": "Each unresolved material failure in the supplied restoration exercise must have a documented corrective action and target date. A successful exercise with no material failures does not require a remediation plan.",
+        "applicability_text": "Supplied restoration exercise has unresolved material failures",
+        "severity": "High",
+        "components": [
+          "unresolved material exercise failures",
+          "corrective action",
+          "target date",
+          "no plan if no failures"
+        ],
+        "source": {
+          "document_id": "policy-07",
+          "quote": "Each unresolved material failure in the supplied restoration exercise must have a documented corrective action and target date. A successful exercise with no material failures does not require a remediation plan."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "test-01",
+      "policy_id": "test-continuity",
+      "split": "reserved_test",
+      "title": "A recent successful production recovery exercise",
+      "tags": [
+        "maximum_bound",
+        "not_applicable",
+        "complete_evidence",
+        "long_document"
+      ],
+      "relationship": {
+        "purpose": "High-criticality scheduling service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-13-1",
+          "filename": "evidence-13-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Beacon Orchard — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nThe signed service schedule commits to restoration within 5 hours after declaration of a service disruption and loss of no more than 2 hours of committed customer transactions.\n\nRestoration exercise record RS-26 is dated 8 August 2026 and covers the contracted production configuration. The previous exercise was 20 August 2025; the next exercise is scheduled within 12 months. The result records successful recovery of every tested production dependency and no material failures.\n\n### Beacon Orchard administrative register 001: capacity planning\n\nRecord S13-OP-101 describes the capacity planning workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 1 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 3 closed items, with a reference to meeting note S13-MN-201. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers release scheduling, with separate owners and work references.\n\n### Beacon Orchard administrative register 002: release scheduling\n\nRecord S13-OP-102 describes the release scheduling workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 2 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 4 closed items, with a reference to meeting note S13-MN-202. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers support routing, with separate owners and work references.\n\n### Beacon Orchard administrative register 003: support routing\n\nRecord S13-OP-103 describes the support routing workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 3 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 5 closed items, with a reference to meeting note S13-MN-203. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers invoice reconciliation, with separate owners and work references.\n\n### Beacon Orchard administrative register 004: invoice reconciliation\n\nRecord S13-OP-104 describes the invoice reconciliation workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 4 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 6 closed items, with a reference to meeting note S13-MN-204. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers asset inventory, with separate owners and work references.\n\n### Beacon Orchard administrative register 005: asset inventory\n\nRecord S13-OP-105 describes the asset inventory workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 5 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 7 closed items, with a reference to meeting note S13-MN-205. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers service naming, with separate owners and work references.\n\n### Beacon Orchard administrative register 006: service naming\n\nRecord S13-OP-106 describes the service naming workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 6 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 8 closed items, with a reference to meeting note S13-MN-206. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers on-call handover, with separate owners and work references.\n\n### Beacon Orchard administrative register 007: on-call handover\n\nRecord S13-OP-107 describes the on-call handover workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 7 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 9 closed items, with a reference to meeting note S13-MN-207. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers workspace allocation, with separate owners and work references.\n\n### Beacon Orchard administrative register 008: workspace allocation\n\nRecord S13-OP-108 describes the workspace allocation workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 8 and release cohort 1. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 10 closed items, with a reference to meeting note S13-MN-208. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers build reproducibility, with separate owners and work references.\n\n### Beacon Orchard administrative register 009: build reproducibility\n\nRecord S13-OP-109 describes the build reproducibility workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 9 and release cohort 2. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 3 closed items, with a reference to meeting note S13-MN-209. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers localization review, with separate owners and work references.\n\n### Beacon Orchard administrative register 010: localization review\n\nRecord S13-OP-110 describes the localization review workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 1 and release cohort 3. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 6 unresolved administrative items and 4 closed items, with a reference to meeting note S13-MN-210. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers maintenance scheduling, with separate owners and work references.\n\n### Beacon Orchard administrative register 011: maintenance scheduling\n\nRecord S13-OP-111 describes the maintenance scheduling workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 2 and release cohort 4. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 2 unresolved administrative items and 5 closed items, with a reference to meeting note S13-MN-211. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers network inventory, with separate owners and work references.\n\n### Beacon Orchard administrative register 012: network inventory\n\nRecord S13-OP-112 describes the network inventory workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 3 and release cohort 5. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 3 unresolved administrative items and 6 closed items, with a reference to meeting note S13-MN-212. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers dashboard ownership, with separate owners and work references.\n\n### Beacon Orchard administrative register 013: dashboard ownership\n\nRecord S13-OP-113 describes the dashboard ownership workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 4 and release cohort 6. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 4 unresolved administrative items and 7 closed items, with a reference to meeting note S13-MN-213. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers telemetry aggregation, with separate owners and work references.\n\n### Beacon Orchard administrative register 014: telemetry aggregation\n\nRecord S13-OP-114 describes the telemetry aggregation workstream for the high-criticality scheduling service. The service directory associates this workstream with internal team 5 and release cohort 7. A coordinator compares the open work list with the preceding release summary and records items awaiting another team. The directory distinguishes a production service identifier from a training-workspace identifier; labels in screenshots are illustrative and do not expand contractual scope. This entry records 5 unresolved administrative items and 8 closed items, with a reference to meeting note S13-MN-214. Scheduling information supports delivery planning and is not evidence of security approval. The appended worksheet describes ordinary service administration; it makes no statement about backup encryption, customer authorization for data exports or export-record retention. The next register entry covers queue sizing, with separate owners and work references.\n",
+          "sha256": "2e3f13494a342e12385bea1f9a150bf8bda484f42fce7d1e231a51075f4f6143",
+          "characters": 15242
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P07-R1",
+          "status": "pass",
+          "rationale": "Both binding maxima meet policy and the recovery trigger matches.",
+          "required_evidence_groups": [
+            {
+              "id": "test-01-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-13-1",
+                  "quote": "The signed service schedule commits to restoration within 5 hours after declaration of a service disruption and loss of no more than 2 hours of committed customer transactions."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P07-R2",
+          "status": "pass",
+          "rationale": "Supplied dates demonstrate the required interval and production scope.",
+          "required_evidence_groups": [
+            {
+              "id": "test-01-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-13-1",
+                  "quote": "Restoration exercise record RS-26 is dated 8 August 2026 and covers the contracted production configuration. The previous exercise was 20 August 2025; the next exercise is scheduled within 12 months. The result records successful recovery of every tested production dependency and no material failures."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P07-R3",
+          "status": "not_applicable",
+          "rationale": "The supplied result explicitly has no material failures.",
+          "required_evidence_groups": [
+            {
+              "id": "test-01-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-13-1",
+                  "quote": "Restoration exercise record RS-26 is dated 8 August 2026 and covers the contracted production configuration. The previous exercise was 20 August 2025; the next exercise is scheduled within 12 months. The result records successful recovery of every tested production dependency and no material failures."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "test-02",
+      "policy_id": "test-continuity",
+      "split": "reserved_test",
+      "title": "Marketing targets do not replace binding commitments",
+      "tags": [
+        "marketing_distractor",
+        "stale_evidence",
+        "partial_remediation"
+      ],
+      "relationship": {
+        "purpose": "High-criticality scheduling service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-14-1",
+          "filename": "evidence-14-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Larkspur Scheduling — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nA marketing page advertises typical recovery in 2 hours, but the signed service schedule disclaims a binding recovery deadline and permits loss of up to 6 hours of committed customer transactions.\n\nThe supplied restoration record is dated 1 February 2024; its scope is the contracted production configuration. The supplier confirms that no later exercise has been performed.\n\nThat exercise contains unresolved material failure F-9. The action log says to redesign the restore dependency order, but leaves the completion-date field unassigned.\n",
+          "sha256": "f0030439a65028c6c7b801641d73e26ec629fb5604b24c3b926001fa9e4a35e7",
+          "characters": 685
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P07-R1",
+          "status": "fail",
+          "rationale": "The binding schedule has no recovery guarantee and permits transaction loss above the3h ceiling.",
+          "required_evidence_groups": [
+            {
+              "id": "test-02-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-14-1",
+                  "quote": "A marketing page advertises typical recovery in 2 hours, but the signed service schedule disclaims a binding recovery deadline and permits loss of up to 6 hours of committed customer transactions."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P07-R2",
+          "status": "fail",
+          "rationale": "A confirmed last exercise in2024 exceeds12months as of2026-09-17.",
+          "required_evidence_groups": [
+            {
+              "id": "test-02-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-14-1",
+                  "quote": "The supplied restoration record is dated 1 February 2024; its scope is the contracted production configuration. The supplier confirms that no later exercise has been performed."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P07-R3",
+          "status": "fail",
+          "rationale": "The unresolved material failure has an action but explicitly lacks a target date.",
+          "required_evidence_groups": [
+            {
+              "id": "test-02-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-14-1",
+                  "quote": "That exercise contains unresolved material failure F-9. The action log says to redesign the restore dependency order, but leaves the completion-date field unassigned."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}

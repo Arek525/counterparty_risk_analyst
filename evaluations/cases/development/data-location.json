@@ -1,0 +1,252 @@
+{
+  "policy": {
+    "id": "dev-region",
+    "split": "development",
+    "organization": "Sfera Metrics",
+    "document": {
+      "id": "policy-04",
+      "filename": "policy-04.md",
+      "kind": "policy",
+      "language": "pl",
+      "evidence_type": "declaration",
+      "text": "# Sfera Metrics — Standard lokalizacji danych\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Miejsce przechowywania\n\nDane osobowe Sfera, w tym repliki, kopie zapasowe i dzienniki diagnostyczne, muszą być przechowywane wyłącznie na terenie Europejskiego Obszaru Gospodarczego (EOG).\n\n## 2. Zdalny dostęp\n\nDostęp zdalny do danych osobowych Sfera spoza EOG wymaga uprzedniej, pisemnej zgody Sfera dla wskazanego kraju i celu. Samo przechowywanie danych w EOG nie stanowi takiej zgody.\n\n## 3. Zmiana lokalizacji\n\nDostawca musi powiadomić Sfera o planowanej zmianie kraju przechowywania danych co najmniej 21 dni kalendarzowych przed zmianą.\n",
+      "sha256": "d743f3324e9811bf142010a63d1d26ad223860c8a4d7f8baa43f6941a91e2c41",
+      "characters": 921
+    },
+    "expected_requirements": [
+      {
+        "id": "P04-R1",
+        "title": "Miejsce przechowywania",
+        "description": "Dane osobowe Sfera, w tym repliki, kopie zapasowe i dzienniki diagnostyczne, muszą być przechowywane wyłącznie na terenie Europejskiego Obszaru Gospodarczego (EOG).",
+        "applicability_text": "Przetwarzanie danych osobowych",
+        "severity": "High",
+        "components": [
+          "dane osobowe",
+          "wyłącznie EOG",
+          "repliki, kopie i dzienniki"
+        ],
+        "source": {
+          "document_id": "policy-04",
+          "quote": "Dane osobowe Sfera, w tym repliki, kopie zapasowe i dzienniki diagnostyczne, muszą być przechowywane wyłącznie na terenie Europejskiego Obszaru Gospodarczego (EOG)."
+        }
+      },
+      {
+        "id": "P04-R2",
+        "title": "Zdalny dostęp",
+        "description": "Dostęp zdalny do danych osobowych Sfera spoza EOG wymaga uprzedniej, pisemnej zgody Sfera dla wskazanego kraju i celu. Samo przechowywanie danych w EOG nie stanowi takiej zgody.",
+        "applicability_text": "Przetwarzanie danych osobowych",
+        "severity": "High",
+        "components": [
+          "zdalny dostęp spoza EOG",
+          "zgoda przed dostępem",
+          "pisemna, kraj i cel"
+        ],
+        "source": {
+          "document_id": "policy-04",
+          "quote": "Dostęp zdalny do danych osobowych Sfera spoza EOG wymaga uprzedniej, pisemnej zgody Sfera dla wskazanego kraju i celu. Samo przechowywanie danych w EOG nie stanowi takiej zgody."
+        }
+      },
+      {
+        "id": "P04-R3",
+        "title": "Zmiana lokalizacji",
+        "description": "Dostawca musi powiadomić Sfera o planowanej zmianie kraju przechowywania danych co najmniej 21 dni kalendarzowych przed zmianą.",
+        "applicability_text": "Zmiana kraju przechowywania danych",
+        "severity": "High",
+        "components": [
+          "zmiana kraju",
+          "minimum 21 dni",
+          "powiadomienie przed zmianą"
+        ],
+        "source": {
+          "document_id": "policy-04",
+          "quote": "Dostawca musi powiadomić Sfera o planowanej zmianie kraju przechowywania danych co najmniej 21 dni kalendarzowych przed zmianą."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "dev-07",
+      "policy_id": "dev-region",
+      "split": "development",
+      "title": "English evidence against Polish policy",
+      "tags": [
+        "cross_language",
+        "geographic_scope",
+        "minimum_bound"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-07-1",
+          "filename": "evidence-07-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Estuary Hosting — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nAll Sfera personal data in primary stores, replicas, backups and diagnostic logs is stored only in Ireland or Norway. The current deployment uses no storage country outside the EEA.\n\nSupport personnel in India routinely read Sfera personal data remotely. Sfera has issued no written approval for access from India; the supplier considers EEA storage sufficient authorization.\n\nThe contracted service sends Sfera written notice at least 28 calendar days before any planned change of storage country.\n",
+          "sha256": "d3f6bf4f0204d3586b6f6e18bfd8395cc4affbb2c1a23bfcfbf662a99a66a533",
+          "characters": 637
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P04-R1",
+          "status": "pass",
+          "rationale": "Ireland and Norway are in the EEA; all named storage categories are covered.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-07-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-07-1",
+                  "quote": "All Sfera personal data in primary stores, replicas, backups and diagnostic logs is stored only in Ireland or Norway. The current deployment uses no storage country outside the EEA."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P04-R2",
+          "status": "fail",
+          "rationale": "India access without prior written approval is explicitly admitted.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-07-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-07-1",
+                  "quote": "Support personnel in India routinely read Sfera personal data remotely. Sfera has issued no written approval for access from India; the supplier considers EEA storage sufficient authorization."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P04-R3",
+          "status": "pass",
+          "rationale": "28 days satisfies the minimum of 21 days.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-07-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-07-1",
+                  "quote": "The contracted service sends Sfera written notice at least 28 calendar days before any planned change of storage country."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "dev-08",
+      "policy_id": "dev-region",
+      "split": "development",
+      "title": "A later annex has explicit, narrow precedence",
+      "tags": [
+        "polish",
+        "amendment_precedence",
+        "minimum_bound"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-08-1",
+          "filename": "evidence-08-1.md",
+          "kind": "evidence",
+          "language": "pl",
+          "evidence_type": "declaration",
+          "text": "# Koral Operations — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nZałącznik bazowy z 1 września 2026 r. wskazuje wyłącznie Irlandię jako kraj przechowywania wszystkich danych Sfera: danych głównych, replik, kopii i dzienników. Wersja bazowa przewiduje zawiadomienie 30 dni przed zmianą kraju.\n\nPodpisany 10 września 2026 r. aneks zastępuje wyłącznie termin zawiadomienia o zmianie kraju: obowiązuje 14 dni kalendarzowych przed zmianą. Pozostałe postanowienia załącznika bazowego pozostają w mocy.\n\nPersonel ma zdalny dostęp do danych Sfera wyłącznie z Irlandii. Dostęp spoza EOG jest technicznie zablokowany i nie ma żadnych wyjątków.\n",
+          "sha256": "a35174354bd6502fa218ed412eba2ebf05227c03db38c702eb8b76d7554109e3",
+          "characters": 708
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P04-R1",
+          "status": "pass",
+          "rationale": "The amendment does not change Ireland-only storage or the listed data categories.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-08-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-08-1",
+                  "quote": "Załącznik bazowy z 1 września 2026 r. wskazuje wyłącznie Irlandię jako kraj przechowywania wszystkich danych Sfera: danych głównych, replik, kopii i dzienników. Wersja bazowa przewiduje zawiadomienie 30 dni przed zmianą kraju."
+                }
+              ]
+            },
+            {
+              "id": "dev-08-R1-E2",
+              "any_of": [
+                {
+                  "document_id": "evidence-08-1",
+                  "quote": "Podpisany 10 września 2026 r. aneks zastępuje wyłącznie termin zawiadomienia o zmianie kraju: obowiązuje 14 dni kalendarzowych przed zmianą. Pozostałe postanowienia załącznika bazowego pozostają w mocy."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P04-R2",
+          "status": "not_applicable",
+          "rationale": "No remote access from outside the EEA takes place; that condition does not arise.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-08-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-08-1",
+                  "quote": "Personel ma zdalny dostęp do danych Sfera wyłącznie z Irlandii. Dostęp spoza EOG jest technicznie zablokowany i nie ma żadnych wyjątków."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P04-R3",
+          "status": "fail",
+          "rationale": "The binding amendment reduces advance notice to14days, below21; this is resolved precedence, not conflict.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-08-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-08-1",
+                  "quote": "Podpisany 10 września 2026 r. aneks zastępuje wyłącznie termin zawiadomienia o zmianie kraju: obowiązuje 14 dni kalendarzowych przed zmianą. Pozostałe postanowienia załącznika bazowego pozostają w mocy."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "policy": {
+    "id": "dev-data",
+    "split": "development",
+    "organization": "Alder Research",
+    "document": {
+      "id": "policy-01",
+      "filename": "policy-01.md",
+      "kind": "policy",
+      "language": "en",
+      "evidence_type": "declaration",
+      "text": "# Alder Research — Data lifecycle standard\n\nVersion 1.0. Effective 1 September 2026.\n\nThis standard defines the three supplier obligations reviewed for the named service. Descriptions of internal filing and contacts do not create additional supplier duties. Evidence is assessed as of 17 September 2026; an exception applies only where its conditions are documented.\n\n## 1. Encryption throughout storage\n\nFor services processing personal data, the supplier must encrypt customer data at rest in primary storage, replicas, diagnostic logs and backups.\n\n## 2. Erasure deadline and legal holds\n\nFor services processing personal data, the supplier must erase customer data, including backups, within 45 calendar days of contract termination. An identified statutory preservation duty may delay erasure only for the specified records; held records must be isolated from ordinary processing and erased when that duty expires.\n\n## 3. Deletion confirmation\n\nFor services processing personal data, the supplier must deliver a deletion confirmation identifying completed erasure and any statutory holds within 50 calendar days of contract termination.\n",
+      "sha256": "be7748ffaf2ba3096fd5507024fd6cfd6179ddd020515702329e2b56e4f0ef5c",
+      "characters": 1142
+    },
+    "expected_requirements": [
+      {
+        "id": "P01-R1",
+        "title": "Encryption throughout storage",
+        "description": "For services processing personal data, the supplier must encrypt customer data at rest in primary storage, replicas, diagnostic logs and backups.",
+        "applicability_text": "Services processing personal data",
+        "severity": "High",
+        "components": [
+          "personal-data scope",
+          "encryption at rest",
+          "primary storage, replicas, logs and backups"
+        ],
+        "source": {
+          "document_id": "policy-01",
+          "quote": "For services processing personal data, the supplier must encrypt customer data at rest in primary storage, replicas, diagnostic logs and backups."
+        }
+      },
+      {
+        "id": "P01-R2",
+        "title": "Erasure deadline and legal holds",
+        "description": "For services processing personal data, the supplier must erase customer data, including backups, within 45 calendar days of contract termination. An identified statutory preservation duty may delay erasure only for the specified records; held records must be isolated from ordinary processing and erased when that duty expires.",
+        "applicability_text": "Services processing personal data",
+        "severity": "High",
+        "components": [
+          "45-day maximum",
+          "contract termination trigger",
+          "backups included",
+          "only identified statutory records exempt",
+          "isolation and erasure after hold"
+        ],
+        "source": {
+          "document_id": "policy-01",
+          "quote": "For services processing personal data, the supplier must erase customer data, including backups, within 45 calendar days of contract termination. An identified statutory preservation duty may delay erasure only for the specified records; held records must be isolated from ordinary processing and erased when that duty expires."
+        }
+      },
+      {
+        "id": "P01-R3",
+        "title": "Deletion confirmation",
+        "description": "For services processing personal data, the supplier must deliver a deletion confirmation identifying completed erasure and any statutory holds within 50 calendar days of contract termination.",
+        "applicability_text": "Services processing personal data",
+        "severity": "High",
+        "components": [
+          "confirmation within 50 days of termination",
+          "completed erasure",
+          "statutory holds disclosed"
+        ],
+        "source": {
+          "document_id": "policy-01",
+          "quote": "For services processing personal data, the supplier must deliver a deletion confirmation identifying completed erasure and any statutory holds within 50 calendar days of contract termination."
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "dev-01",
+      "policy_id": "dev-data",
+      "split": "development",
+      "title": "Shorter maximum deadline satisfies the whole obligation",
+      "tags": [
+        "maximum_bound",
+        "complete_evidence"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-01-1",
+          "filename": "evidence-01-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Copperhaven Services — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nCustomer personal data is encrypted at rest in primary storage, replicas, diagnostic logs and backups; the same storage control covers every customer tenant.\n\nOur termination runbook erases the customer tenant, replicas, diagnostic logs and backup copies no later than day 28 after contract termination. No statutory preservation duty applies to this service.\n\nThe customer receives a deletion confirmation by day 35 after termination; it lists the completed erasure of all storage categories and explicitly records that there are no statutory holds.\n",
+          "sha256": "6302ae59774d0007a8a1eedef2d63efeef77bb87aaa3691ee259809fa1516d1e",
+          "characters": 694
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P01-R1",
+          "status": "pass",
+          "rationale": "All four storage categories are explicitly encrypted.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-01-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-01-1",
+                  "quote": "Customer personal data is encrypted at rest in primary storage, replicas, diagnostic logs and backups; the same storage control covers every customer tenant."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P01-R2",
+          "status": "pass",
+          "rationale": "28 days is within the maximum 45; the trigger and backup scope match.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-01-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-01-1",
+                  "quote": "Our termination runbook erases the customer tenant, replicas, diagnostic logs and backup copies no later than day 28 after contract termination. No statutory preservation duty applies to this service."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P01-R3",
+          "status": "pass",
+          "rationale": "35 days is within 50 and the confirmation includes both required subjects.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-01-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-01-1",
+                  "quote": "The customer receives a deletion confirmation by day 35 after termination; it lists the completed erasure of all storage categories and explicitly records that there are no statutory holds."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    },
+    {
+      "id": "dev-02",
+      "policy_id": "dev-data",
+      "split": "development",
+      "title": "Valid preservation exception alongside an explicit encryption failure",
+      "tags": [
+        "exception",
+        "partial_compliance",
+        "missing_information"
+      ],
+      "relationship": {
+        "purpose": "Hosted business service Assessment reference date: 2026-09-17.",
+        "data_shared": "Customer personal data",
+        "system_access": "No privileged customer-system access",
+        "business_criticality": "high",
+        "personal_data": true,
+        "privileged_access": false
+      },
+      "documents": [
+        {
+          "id": "evidence-02-1",
+          "filename": "evidence-02-1.md",
+          "kind": "evidence",
+          "language": "en",
+          "evidence_type": "declaration",
+          "text": "# Elmbrook Platforms — Service assurance packet\n\nStatement date: 17 September 2026. Scope: the contracted customer service described below.\n\nEncryption covers primary databases and replicas. Diagnostic logs containing customer personal data and backup copies are stored without encryption.\n\nA tax retention duty identified as order AR-2026-18 requires only the named invoice records to be kept until 31 December 2026. Those records are isolated from ordinary processing and will be erased on 1 January 2027, immediately after the duty expires.\n\nAll other customer records, diagnostic logs, replicas and backup copies are erased within 40 calendar days of contract termination; backups containing held invoice records remain isolated under the same order.\n\nWe issue a closure confirmation eventually after the archive cycle. This packet contains no deadline for that confirmation and does not specify its contents.\n",
+          "sha256": "7ac1ff1f2e1365cc4f57f3bcc22c309ba0b30a47606d9abef642602d6ce2fc17",
+          "characters": 914
+        }
+      ],
+      "full_document_comparison": "expected_eligible",
+      "expected_assessments": [
+        {
+          "requirement_id": "P01-R1",
+          "status": "fail",
+          "rationale": "Unencrypted personal-data logs and backups explicitly violate the storage scope.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-02-R1-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-02-1",
+                  "quote": "Encryption covers primary databases and replicas. Diagnostic logs containing customer personal data and backup copies are stored without encryption."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P01-R2",
+          "status": "pass",
+          "rationale": "The identified invoice hold satisfies the narrow exception; non-held data meets the maximum deadline.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-02-R2-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-02-1",
+                  "quote": "A tax retention duty identified as order AR-2026-18 requires only the named invoice records to be kept until 31 December 2026. Those records are isolated from ordinary processing and will be erased on 1 January 2027, immediately after the duty expires."
+                }
+              ]
+            },
+            {
+              "id": "dev-02-R2-E2",
+              "any_of": [
+                {
+                  "document_id": "evidence-02-1",
+                  "quote": "All other customer records, diagnostic logs, replicas and backup copies are erased within 40 calendar days of contract termination; backups containing held invoice records remain isolated under the same order."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "P01-R3",
+          "status": "unknown",
+          "rationale": "The packet leaves the confirmation deadline and required contents unspecified; eventual issue does not establish compliance.",
+          "required_evidence_groups": [
+            {
+              "id": "dev-02-R3-E1",
+              "any_of": [
+                {
+                  "document_id": "evidence-02-1",
+                  "quote": "We issue a closure confirmation eventually after the archive cycle. This packet contains no deadline for that confirmation and does not specify its contents."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "notes": null
+      }
+    }
+  ]
+}
