@@ -16,6 +16,81 @@ with source-linked findings below.
 
 ![Recorded Gemini assessment in the local demo interface](docs/report.png)
 
+## How it works
+
+```mermaid
+flowchart TD
+    UI[Next.js: documents, requirements, cases, reports] --> API[FastAPI: sessions and authorization]
+    API --> Store[(PostgreSQL + document volume)]
+    API -->|Explicit full-policy extraction| Gemini[Gemini: structured interpretation]
+    Gemini -->|Requirements with source quotations| API
+    Store --> Worker[Durable Python worker]
+    Worker --> E5[Local multilingual E5: document and requirement embeddings]
+    E5 --> Vectors[(pgvector)]
+    Vectors --> Retrieve[Hybrid ranking: semantic similarity + keywords]
+    Retrieve -->|One requirement + selected evidence + relationship| Gemini
+    Gemini --> Validate[Schema and quotation validation]
+    Validate --> Save[Persist each completed assessment]
+    Save --> Store
+    Store --> Review[Reviewer: accept, reject, or request information]
+    Review --> API
+```
+
+1. **Upload organization policies.** Text-based PDF, Markdown and TXT become readable
+   source text with stable document versions. The UI shows whole documents. Internal
+   chunks support retrieval and citation anchoring.
+2. **Extract and approve requirements.** An explicit action sends the selected policy text
+   to Gemini. The resulting obligations include applicability and exact source quotations.
+   Reviewers approve the version; ordinary viewing reuses stored extraction. Incorrect
+   extraction can be regenerated, while revised documents create a new policy version.
+3. **Describe the relationship and upload counterparty evidence.** Personal data, access
+   and criticality affect applicability. Documents are labeled as declarations or independent
+   support. The worker indexes them using pinned `multilingual-e5-small` on local CPU.
+4. **Assess each requirement.** Hybrid ranking combines semantic similarity and keyword
+   matches, selecting up to eight evidence chunks. Gemini returns `pass`, `fail`, `unknown`,
+   `conflict` or `not_applicable`, an explanation, quotations and missing-information requests.
+5. **Validate, persist and review.** Backend code checks response structure and quotation
+   grounding, aggregates risk/completeness, and saves progress. A reviewer makes the business
+   decision. An information request is saved text that can be copied to email; the app does not send it.
+
+Gemini interprets the documents. Application code controls identity, access, source versions,
+retrieval boundaries, validation, job recovery and decision permissions. Neither a model response
+nor instructions embedded in an uploaded document can grant permissions or authorize a decision.
+
+Completed requirement assessments survive an interrupted run. Explicit resume reuses them;
+a provider call interrupted before persistence may still need repeating. Accepted/rejected cases
+are closed to analyst changes. Requesting information leaves the case open for new documents
+and a new report; the reviewed report stays unchanged.
+
+## Try the workflow
+
+These screenshots show the bundled synthetic Northstar/Atlas example. Sign in as reviewer
+to explore its saved requirements and Gemini report without making model calls.
+
+First, open **Policies** to review the extracted requirements, their applicability and links
+to the original policy passages. Approval fixes the version used by subsequent analyses.
+
+![Approved policy requirements with applicability and source links](docs/policy-requirements.png)
+
+Next, open the counterparty case to collect its evidence documents and describe the relationship:
+what data is shared, which systems are accessible and how critical the service is.
+
+![Counterparty case with evidence upload, relationship context and saved analyses](docs/counterparty-case.png)
+
+After analysis, follow a finding's citation to inspect the exact supporting passage.
+**Open full document** provides the surrounding source text for a closer review.
+
+![Citation window highlighting the supporting passage in the counterparty document](docs/source-citation.png)
+
+Finally, use the report to accept, reject or request information. An analyst can supply
+additional evidence for an information request and generate another report. For your own
+assessment, start by uploading a policy, explicitly extracting and approving its requirements,
+then creating a case and uploading counterparty evidence.
+
+**Delete** actions remove saved application records subject to reference and active-operation
+guards. Delete referencing reports before policy sets, and policy sets before their source
+files. Deletion does not erase existing backups or provider-held records.
+
 ## What the evaluation shows
 
 On a small reserved synthetic set, hybrid retrieval used **15.1% fewer input + output tokens**
@@ -67,52 +142,6 @@ to inspect the expected answers, actual Gemini explanations, quotations and per-
 Limitations include single observations, small short policies, authoring bias, shared synthetic
 background templates, only English/Polish text, and pending independent human review.
 
-## How it works
-
-```mermaid
-flowchart TD
-    UI[Next.js: documents, requirements, cases, reports] --> API[FastAPI: sessions and authorization]
-    API --> Store[(PostgreSQL + document volume)]
-    API -->|Explicit full-policy extraction| Gemini[Gemini: structured interpretation]
-    Gemini -->|Requirements with source quotations| API
-    Store --> Worker[Durable Python worker]
-    Worker --> E5[Local multilingual E5: document and requirement embeddings]
-    E5 --> Vectors[(pgvector)]
-    Vectors --> Retrieve[Hybrid ranking: semantic similarity + keywords]
-    Retrieve -->|One requirement + selected evidence + relationship| Gemini
-    Gemini --> Validate[Schema and quotation validation]
-    Validate --> Save[Persist each completed assessment]
-    Save --> Store
-    Store --> Review[Reviewer: accept, reject, or request information]
-    Review --> API
-```
-
-1. **Upload organization policies.** Text-based PDF, Markdown and TXT become readable
-   source text with stable document versions. The UI shows whole documents. Internal
-   chunks support retrieval and citation anchoring.
-2. **Extract and approve requirements.** An explicit action sends the selected policy text
-   to Gemini. The resulting obligations include applicability and exact source quotations.
-   Reviewers approve the version; ordinary viewing reuses stored extraction. Incorrect
-   extraction can be regenerated, while revised documents create a new policy version.
-3. **Describe the relationship and upload counterparty evidence.** Personal data, access
-   and criticality affect applicability. Documents are labeled as declarations or independent
-   support. The worker indexes them using pinned `multilingual-e5-small` on local CPU.
-4. **Assess each requirement.** Hybrid ranking combines semantic similarity and keyword
-   matches, selecting up to eight evidence chunks. Gemini returns `pass`, `fail`, `unknown`,
-   `conflict` or `not_applicable`, an explanation, quotations and missing-information requests.
-5. **Validate, persist and review.** Backend code checks response structure and quotation
-   grounding, aggregates risk/completeness, and saves progress. A reviewer makes the business
-   decision. An information request is saved text that can be copied to email; the app does not send it.
-
-Gemini interprets the documents. Application code controls identity, access, source versions,
-retrieval boundaries, validation, job recovery and decision permissions. Neither a model response
-nor instructions embedded in an uploaded document can grant permissions or authorize a decision.
-
-Completed requirement assessments survive an interrupted run. Explicit resume reuses them;
-a provider call interrupted before persistence may still need repeating. Accepted/rejected cases
-are closed to analyst changes. Requesting information leaves the case open for new documents
-and a new report; the reviewed report stays unchanged.
-
 ## Run locally
 
 Install Docker with Compose v2, then:
@@ -155,35 +184,6 @@ Docker volume. No embedding API key is required. Later indexing reuses that cach
 The API and frontend bind to loopback; PostgreSQL remains on the Docker network.
 `FRONTEND_PORT`/`API_PORT` change exposed ports; adjust `ALLOWED_ORIGINS` for another frontend origin.
 In `.env`, single-quote values containing `$` to avoid Compose interpolation.
-
-## Try the workflow
-
-These screenshots show the bundled synthetic Northstar/Atlas example. Sign in as reviewer
-to explore its saved requirements and Gemini report without making model calls.
-
-First, open **Policies** to review the extracted requirements, their applicability and links
-to the original policy passages. Approval fixes the version used by subsequent analyses.
-
-![Approved policy requirements with applicability and source links](docs/policy-requirements.png)
-
-Next, open the counterparty case to collect its evidence documents and describe the relationship:
-what data is shared, which systems are accessible and how critical the service is.
-
-![Counterparty case with evidence upload, relationship context and saved analyses](docs/counterparty-case.png)
-
-After analysis, follow a finding's citation to inspect the exact supporting passage.
-**Open full document** provides the surrounding source text for a closer review.
-
-![Citation window highlighting the supporting passage in the counterparty document](docs/source-citation.png)
-
-Finally, use the report to accept, reject or request information. An analyst can supply
-additional evidence for an information request and generate another report. For your own
-assessment, start by uploading a policy, explicitly extracting and approving its requirements,
-then creating a case and uploading counterparty evidence.
-
-**Delete** actions remove saved application records subject to reference and active-operation
-guards. Delete referencing reports before policy sets, and policy sets before their source
-files. Deletion does not erase existing backups or provider-held records.
 
 ## Verification and repository map
 
