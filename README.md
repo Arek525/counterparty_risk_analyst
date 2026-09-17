@@ -1,24 +1,116 @@
 # AI Counterparty & Compliance Analyst
 
-Assess technology counterparties against your organization's reviewed security and
-privacy policies. Upload documents, approve structured requirements, run an
-assessment, inspect cited evidence and record a human decision. Save and copy a
-plain-text request for missing information from the report.
+Compare a supplier's documents with your organization's policies, inspect the evidence
+behind each finding, and record a human decision. The application turns uploaded policies
+into reviewable requirements, retrieves relevant counterparty passages, and asks Gemini to
+assess each requirement in the context of the business relationship.
 
-The local MVP includes an English Next.js interface, FastAPI, PostgreSQL/pgvector,
-and a durable LangGraph worker. New analyses use
-**semantic-v2**: each reviewed requirement is assessed against retrieved evidence
-and relationship context. Gemini performs interpretation when explicitly configured.
-A pinned multilingual E5 model prepares embeddings locally on CPU.
+**Python · FastAPI · PostgreSQL/pgvector · LangGraph · local multilingual E5 · Gemini · Next.js**
 
-**New analyses in default demo mode call no LLM and conservatively return unknown assessments.**
-Its policy proposals are source-review placeholders, not extracted obligations.
-No API key is needed to explore the workflow. Demo results and mocked tests do not
-establish real-model quality. All bundled organizations and documents are synthetic.
+This is a runnable portfolio application with persistent workflows, two-role authorization,
+source-linked reports and a reproducible evaluation. All bundled companies and documents
+are synthetic. It supports decisions; it does not certify compliance.
 
-## Start
+![Recorded Gemini assessment in the local demo interface](docs/report.png)
 
-Install Docker with Compose v2, then run from this directory:
+## What the evaluation shows
+
+On a small reserved synthetic set, hybrid retrieval used **15.1% fewer input + output tokens**
+than sending all evidence chunks, with the same status agreement on **15 paired assessments**.
+This is agreement with agent-authored reference labels, **not independently human-validated accuracy**.
+
+| Paired comparison: 5 cases / 15 requirements | Hybrid retrieval | Full context |
+|---|---:|---:|
+| Status agreement with reference labels | 15/15 | 15/15 |
+| Input tokens | 32,387 | 39,031 |
+| Output tokens | 4,651 | 4,604 |
+| Total assessment tokens | **37,038** | **43,635** |
+| Median provider HTTP time | 1.78 s | 1.74 s |
+| Sufficient quoted support, non-independent agent review | 15/15 | 14/15 |
+
+The full context baseline uses the same model, prompt, output schema and citation metadata;
+only evidence selection changes. It is a controlled all-chunks baseline, not an optimized
+alternative full-document prompt. One additional case exceeded the application's
+25,000-character input cap in this arm; it is excluded from paired savings, not truncated.
+Hybrid completed all six reserved cases: **18/18 status agreements**, with **21/21 annotated
+evidence groups retrieved** and no false passes among nine fail/unknown/conflict references.
+
+The useful qualification is **where savings came from**:
+
+- Four short paired cases had identical input-token counts. Output variation made hybrid's
+  combined total 0.5% higher. Retrieval offered no input saving there.
+- One long paired case, with 13,833 source characters and three requirements, used **30.9%
+  fewer combined tokens**. This single case accounts for the observed overall saving.
+- Three policy extractions cost another **4,915 tokens**, shared by both approaches.
+  Adding that cost once to each paired arm reduces the saving to **13.6%**.
+- No latency advantage was demonstrated. Timings exclude API/worker queues; rate-limit
+  pacing and local indexing are recorded separately. Token reduction is not a dollar-cost estimate.
+
+Extraction recovered all **9/9 reference obligations** in the final set according to
+non-independent agent review. All completed outputs passed the production source validator.
+However, one full-context conflict quotation omitted an important same-period/precedence
+qualifier present in the source. **Finding a quotation is different from proving a conclusion.**
+
+Development exposed missing-information, applicability and exception-handling errors and
+informed prompt revisions. The final development pass still had **one false pass (35/36 status
+agreements)** despite recovering all annotated evidence. The reserved test was run after
+freezing code and prompts, with no tuning on its results. Its perfect status agreement on
+18 requirements is not evidence of general reliability.
+
+The [evaluation guide](evaluations/README.md) links the topic-organized documents, expected
+answers, protocol, runnable code and **one results artifact containing every provider attempt**.
+Limitations include single observations, small short policies, authoring bias, shared synthetic
+background templates, only English/Polish text, and pending independent human review.
+
+## How it works
+
+```mermaid
+flowchart TD
+    UI[Next.js: documents, requirements, cases, reports] --> API[FastAPI: sessions and authorization]
+    API --> Store[(PostgreSQL + document volume)]
+    API -->|Explicit full-policy extraction| Gemini[Gemini: structured interpretation]
+    Gemini -->|Requirements with source quotations| API
+    Store --> Worker[Durable LangGraph worker]
+    Worker --> E5[Local multilingual E5: document and requirement embeddings]
+    E5 --> Vectors[(pgvector)]
+    Vectors --> Retrieve[Hybrid ranking: semantic similarity + keywords]
+    Retrieve -->|One requirement + selected evidence + relationship| Gemini
+    Gemini --> Validate[Schema and quotation validation]
+    Validate --> Save[Persist each completed assessment]
+    Save --> Store
+    Store --> Review[Reviewer: accept, reject, or request information]
+    Review --> API
+```
+
+1. **Upload organization policies.** Text-based PDF, Markdown and TXT become readable
+   source text with stable document versions. The UI shows whole documents. Internal
+   chunks support retrieval and citation anchoring.
+2. **Extract and approve requirements.** An explicit action sends the selected policy text
+   to Gemini. The resulting obligations include applicability and exact source quotations.
+   Reviewers approve the version; ordinary viewing reuses stored extraction. Incorrect
+   extraction can be regenerated, while revised documents create a new policy version.
+3. **Describe the relationship and upload counterparty evidence.** Personal data, access
+   and criticality affect applicability. Documents are labeled as declarations or independent
+   support. The worker indexes them using pinned `multilingual-e5-small` on local CPU.
+4. **Assess each requirement.** Hybrid ranking combines semantic similarity and keyword
+   matches, selecting up to eight evidence chunks. Gemini returns `pass`, `fail`, `unknown`,
+   `conflict` or `not_applicable`, an explanation, quotations and missing-information requests.
+5. **Validate, persist and review.** Backend code checks response structure and quotation
+   grounding, aggregates risk/completeness, and saves progress. A reviewer makes the business
+   decision. An information request is saved text that can be copied to email; the app does not send it.
+
+Gemini interprets the documents. Application code controls identity, access, source versions,
+retrieval boundaries, validation, job recovery and decision permissions. Neither a model response
+nor instructions embedded in an uploaded document can grant permissions or authorize a decision.
+
+Completed requirement assessments survive an interrupted run. Explicit resume reuses them;
+a provider call interrupted before persistence may still need repeating. Accepted/rejected cases
+are closed to analyst changes. Requesting information leaves the case open for new documents
+and a new report; the reviewed report stays unchanged.
+
+## Run locally
+
+Install Docker with Compose v2, then:
 
 ```bash
 cp -n .env.example .env
@@ -26,232 +118,94 @@ docker compose up --build -d --wait
 docker compose run --rm -e MODEL_MODE=demo seed
 ```
 
-Open [the application](http://localhost:3000) or [API docs](http://localhost:8000/docs).
-Select a demo account on the login screen. All seeded passwords are
-`Demo-only-2026!`:
+Open [the application](http://localhost:3000) or [API documentation](http://localhost:8000/docs).
+Select a seeded account; each demo password is `Demo-only-2026!`.
 
-| Account | Access |
+| Account | Permissions |
 |---|---|
-| `analyst@northstar.demo` | All organization cases, counterparty evidence and analyses until acceptance or rejection |
-| `reviewer@northstar.demo` | Organization cases, policy approval, decisions and final case review |
+| `analyst@northstar.demo` | Collaborate on organization cases; upload counterparty evidence, run analyses and draft information requests while cases are open |
+| `reviewer@northstar.demo` | Also manage organization policies, approve requirements, edit information requests and record decisions |
 | `analyst@other.demo` | Separate organization for isolation demonstrations |
 
-`seed` is explicit and repeatable. It creates three accounts using two roles,
-four Northstar policy documents, 20 narrative requirements extracted by Gemini,
-and an Atlas case with its declaration and a recorded Gemini assessment report.
-The fixture is [gemini-example.json](datasets/synthetic/gemini-example.json): it
-records the model, prompt version, token usage, document hashes and retrieval scores.
-Seeding validates the source files and remaps citations to the new database IDs.
-It never calls Gemini. Recorded reports are labeled in the UI; new analyses in demo
-mode still return conservative unknown results. The example awaits a reviewer decision.
-The policy's approved state is a demonstration setup, not independent human review.
-Repeated seeding preserves existing records and does not recreate deleted examples.
-An already initialized workspace is not overwritten or reset by this command.
-Analysts collaborate on all cases within their organization. Only reviewers manage company
-policy sources and requirements, record decisions and delete whole cases.
-An accepted or rejected decision closes the case to analyst changes. A request for
-information leaves it open for new evidence and another analysis; reviewed reports stay unchanged.
-Document/reference and active-operation deletion guards apply to both roles.
+The explicit, repeatable seed creates four policies, 20 **recorded Gemini requirements**,
+and an Atlas case with a **recorded Gemini report**. It makes no provider calls and validates
+fixture document hashes and citations. The UI labels recorded results. Existing records are
+preserved; seeding does not reset your workspace. The approved example is demo setup,
+not independent policy review.
 
-For a fresh empty workspace with just the Northstar analyst and reviewer, seed accounts only:
+**New analyses in default demo mode call no LLM and return conservative unknown findings.**
+Demo policy extraction provides source-review placeholders. For meaningful new interpretation,
+set `MODEL_MODE=gemini`, `GEMINI_API_KEY` and an explicitly chosen `GEMINI_MODEL` in your private
+`.env`, then recreate API and worker with `docker compose up -d`. No automatic model substitution,
+billing activation or paid fallback is configured. Never commit the key.
+
+For accounts without bundled documents, use:
 
 ```bash
 docker compose run --rm -e MODEL_MODE=demo seed python -m counterparty.bootstrap --fixtures /datasets --accounts-only
 ```
 
-This command creates accounts; it does not erase existing data. The login screen lists only
-seeded active demo accounts. Existing administrators migrate to reviewer; retired auditor
-accounts are disabled and their sessions revoked, preserving historical authorship.
+First indexing downloads approximately 487 MB of pinned public E5 artifacts into a persistent
+Docker volume. No embedding API key is required. Later indexing reuses that cache locally.
+The API and frontend bind to loopback; PostgreSQL remains on the Docker network.
+`FRONTEND_PORT`/`API_PORT` change exposed ports; adjust `ALLOWED_ORIGINS` for another frontend origin.
+In `.env`, single-quote values containing `$` to avoid Compose interpolation.
 
-Use the reviewer account for the complete demo journey. Demo credentials are for
-local synthetic use only. `DEMO_MODE=false` disables
-seeded account login; this is not a production identity-management system.
+## Try the workflow
 
-The frontend and API bind to loopback; the database stays on
-the Docker network. `FRONTEND_PORT`/`API_PORT` can change exposed ports; also adjust
-`ALLOWED_ORIGINS` for a nondefault frontend origin. First build requires network
-access to public image/package registries. On first indexing, the worker also
-automatically downloads 487 MB of pinned public model artifacts (no account/key)
-into the persistent `model-cache` volume. A verified cache supports offline reuse;
-subsequent demo operation uses local services. Database passwords are passed separately from the URL. In
-`.env`, single-quote values containing `$` to avoid Compose interpolation.
+Sign in as reviewer, open **Policies**, inspect the recorded requirements and follow a quotation
+to its full source. Open the recorded **Atlas** case and report to see Gemini findings without
+making API calls. Compare the declared controls with gaps in independent assurance and access scope.
 
-## Walk through the application
+For your own assessment, upload a policy, explicitly extract and approve its requirements,
+create a case, describe the relationship and upload evidence. Run analysis, inspect the source
+links, then accept, reject or request information. An analyst can supply additional evidence
+for an information request and generate another report.
 
-1. Open **Policies** and inspect the approved synthetic policy set. Upload a text
-   PDF, Markdown or TXT and open its **Full document** view. Source excerpts and
-   technical indexing controls are secondary details; the original remains downloadable.
-2. Click **Extract requirements**, or select documents through **New policy set**.
-   Extraction reads the complete selected policy text within the limits below and
-   saves its result. Opening that version or repeating the same extraction reuses
-   the saved result. **Regenerate requirements** explicitly confirms new model API
-   calls and creates a new draft; viewing a document never triggers extraction.
-3. Review each requirement's description, applicability, severity and exact source
-   quotation, then approve the version. Requirements cannot be edited or cloned.
-   Regenerate an incorrect extraction, or upload revised source documents and
-   extract a new set when the policy changes. The worker prepares and caches embeddings
-   for the approved requirements in the background.
-4. Open **Cases**, create a relationship context, and upload counterparty evidence.
-   Label each source as a declaration or independent support. Run an analysis
-   against an approved policy once its requirements and evidence are ready.
-   All new analyses use hybrid retrieval (keywords and semantic similarity).
-5. Watch progress as the worker assesses requirements sequentially. A failed run
-   exposes **Resume unfinished requirements**. Saved completed assessments are
-   reused; unfinished work may make additional API calls. Partial results are not
-   presented as a final report.
-6. Inspect risk, evidence completeness and finding status separately. Each finding
-   places the policy requirement and its source next to the counterparty evidence,
-   with an explanation. Open citations to inspect exact excerpts and the full source.
-   Missing evidence does not prove compliance. A possible discrepancy is not
-   automatically a contradiction.
-7. If evidence is missing, the analyst can save an information-request draft.
-   The saved draft is read-only for the analyst; the reviewer can edit it before
-   recording a request for information. Copy the final text to your email client;
-   the application does not send messages.
-8. The reviewer records acceptance, rejection or a request for information with
-   a rationale. The worker resumes its saved workflow after that decision.
-   A request for information lets the analyst upload a reply as evidence and run
-   a new assessment; the previous report and review remain unchanged. Acceptance
-   or rejection closes the case to further analyst changes.
+**Delete** actions remove saved application records subject to reference and active-operation
+guards. Delete referencing reports before policy sets, and policy sets before their source
+files. Deletion does not erase existing backups or provider-held records.
 
-For a synthetic example, upload
-`datasets/synthetic/evidence/atlas-assurance-pack.md` as a **Counterparty declaration**
-in a high-criticality case with personal data and privileged access. The pack is
-not the independent report it describes. Inspect the support-portal assurance
-exclusion and US support-access boundary. No fixed completeness percentage or
-finding count is promised for a real-model assessment. Demo mode conservatively
-leaves interpretation unresolved.
+## Verification and repository map
 
-Historical tiny scenarios remain under `backend/tests/fixtures/regression` for tests
-and are never seeded. Older approved policy versions and reports remain readable;
-new assessments use the semantic workflow. An English interface does not imply
-universal policy understanding.
-
-## Architecture and data flow
-
-```mermaid
-flowchart LR
-    Browser[Browser / Next.js] --> API[FastAPI: identity and permissions]
-    API --> DB[(PostgreSQL + pgvector)]
-    API --> Files[Persistent document volume]
-    Worker[Worker / LangGraph] <--> DB
-    Worker --> Adapter[Demo or optional Gemini adapter]
-```
-
-The API captures immutable input versions before queuing a run. The worker retrieves
-scoped evidence using pgvector and the approved requirement embeddings. Saved
-retrieval provenance retains queries, scores, eligible chunks and model configuration.
-For each requirement, the configured model interprets applicability and evidence,
-returning a validated status, explanation and source quotations. The application
-checks quotation grounding and aggregates risk and completeness using versioned
-code. A matching quotation proves source resolution, not semantic entailment.
-
-Each completed requirement assessment is persisted before the next begins. Explicit
-retry resumes unfinished work without repeating saved completed assessments, including
-completed paid model calls. A provider call interrupted before its result is saved
-may still be repeated. The finished report pauses at a durable human-review checkpoint.
-Neither a document nor a model grants permissions or authorizes a write.
-
-See the [current architecture](docs/architecture.md) for module boundaries,
-trust rules and durable execution, and [evaluation methodology/results](evaluations/README.md)
-for reproducible experiments. Historical rule-pipeline scores do not validate
-semantic-v2; retrieval measurements do not establish correctness of interpretation.
-
-## Verification
-
-Backend tests run against disposable PostgreSQL databases, independent of the app:
+The current evaluation work was checked with **188 backend tests**, including disposable
+PostgreSQL integration tests, quota failure, saved-step recovery and evaluation accounting.
+Provider responses in ordinary tests are mocked; the live evaluation above is separate.
 
 ```bash
+# Backend, database integration and evaluation-accounting tests
 docker compose -f compose.test.yaml up --build --abort-on-container-exit --exit-code-from tests
-docker compose -f compose.test.yaml run --rm --no-deps tests ruff check .
-docker compose -f compose.test.yaml run --rm --no-deps tests ruff format --check .
-docker compose -f compose.test.yaml down
-```
 
-Frontend checks require Node 24 and Chrome (or `npx playwright install chrome`):
-
-```bash
+# Frontend: Node 24 and Chrome required
 cd frontend
 npm ci
 npm run build
 npm run typecheck
 npm run test:e2e
-E2E_REAL_API=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e
+# Explicit demo-stack integration test; creates synthetic records
+E2E_REAL_API=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e:real
 ```
 
-Historical compatibility cases run as ordinary backend regression tests.
-The real-stack browser test covers upload, indexing, worker execution, complete
-requirement coverage, exact source citations and the saved human decision. It
-requires a seeded **demo-mode** stack and rejects Gemini before creating records.
-It writes synthetic cases to that stack. Other browser tests use mocked HTTP.
-CI runs both without provider keys; demo results do not establish model quality.
+| Location | Purpose |
+|---|---|
+| `backend/src/counterparty/` | API, authorization, ingestion, model adapter, retrieval, durable worker and schema migrations |
+| `frontend/` | English interface and browser tests |
+| `backend/tests/` | Technical regression and database integration tests |
+| `datasets/synthetic/` | Seed documents and authentic recorded Gemini example |
+| `evaluations/cases/` | Development/reserved policy families with documents, proposed answers and evidence annotations |
+| `evaluations/run.py`, `protocol.json`, `results.json` | Reproduction, methodology and complete measured attempts |
+| `docs/` | Focused [architecture](docs/architecture.md), [operations](docs/operations.md) and [retrieval](docs/retrieval.md) detail |
 
-## Optional real model
+## Boundaries
 
-Leave `MODEL_MODE=demo` to run without external credentials. To evaluate Gemini,
-provide **`GEMINI_API_KEY` and an explicitly selected `GEMINI_MODEL`** in your local
-`.env`. Verify the model's availability, account quotas and data terms first.
-No billing activation or paid fallback is configured. Never commit the key.
+Policy extraction accepts up to 100,000 source characters and a 125,000-character payload;
+its output cap is 16,384 tokens. Each assessment has a 25,000-character input and 4,096-token
+output cap. Runs accept up to 100 requirements and 500 evidence chunks, with bounded retries.
+Oversized inputs fail explicitly. These application limits are not claims about a model's
+maximum context window.
 
-Choose a model available to your account; there is no automatic substitution.
-The maintained checks and their limitations are documented in
-[evaluations](evaluations/README.md).
-
-Set `MODEL_MODE=gemini` and recreate API/worker via `docker compose up -d`.
-For the explicit current-pipeline integration check, see the
-[evaluation guide](evaluations/README.md#explicit-current-pipeline-smoke-check).
-Keep `DEMO_MODE=true` for local demo accounts. Configured-provider failures are
-reported; they never silently switch to demo responses. Requests are bounded;
-pricing is unknown (`null`) until checked externally.
-
-## Removing saved data
-
-Use **Delete report**, **Delete case**, **Delete policy set** or the document's
-**Delete** action. A case deletion includes its reports and evidence documents;
-a report deletion includes its decision and saved analysis progress. Delete
-referencing reports before a policy set, and referencing policy sets before their
-source documents. Deletion applies to active application storage, not existing
-backups or model-provider records.
-
-Source links open the full original text and highlight the exact cited passage.
-Mechanical search chunks are not shown as excerpts. If the passage cannot be
-located unambiguously, the document view says so instead of highlighting a guess.
-
-## Operations and limitations
-
-```bash
-docker compose logs api worker migrate
-docker compose run --rm migrate alembic current
-docker compose run --rm migrate alembic check
-docker compose down
-```
-
-`down` preserves database, document and model-cache volumes. See
-[backup, restore and retention](docs/operations.md) before deleting
-volumes. The migrations build/update database structure; they do not analyze files.
-
-Policy extraction accepts at most 100,000 source characters across selected documents,
-with a 125,000-character model payload limit and 16,384 maximum output tokens.
-Each requirement assessment has a 25,000-character input limit and 4,096 maximum
-output tokens. Runs accept at most 100 requirements and 500 evidence chunks, with
-at most three attempts per requirement. Oversized inputs fail explicitly rather
-than silently dropping policy text. Full-document extraction does not guarantee
-that the model identifies every obligation or correctly interprets exceptions.
-
-This is a local portfolio MVP, not legal certification or production assurance.
-OCR, real business integrations, public hosting, enterprise administration,
-PDF report export and MCP are outside this release.
-Scanned PDFs receive an unsupported-input error. The app database account owns
-its schema; public deployment needs separate restricted credentials, managed
-identity, TLS, shared quota controls and operational review.
-
-## Repository
-
-- `backend/src/counterparty/`: API/domain, ingestion, adapters, semantic assessment and risk aggregation,
-  worker and packaged database migrations.
-- `frontend/`: Next.js UI and browser tests.
-- `datasets/synthetic/`: four substantial policies, an Atlas assurance pack and a recorded Gemini example.
-- `backend/tests/fixtures/`: small documents used only by regression tests.
-- `evaluations/`: local retrieval benchmark, explicit Gemini smoke check.
-- `docs/`: architecture, operations and retrieval measurements; generated API docs live at `/docs`.
-- `.github/workflows/ci.yml`: reproducible checks without paid model calls.
+The project does not implement OCR, external message delivery, production identity management
+or public hosting. Demo accounts are for local synthetic use. Public deployment would require
+managed identity, TLS, restricted database credentials and operational controls; see
+[operations](docs/operations.md). `docker compose down` preserves volumes. Do not remove volumes
+containing data you need.
