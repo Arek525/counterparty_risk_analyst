@@ -49,7 +49,6 @@ def domain_setup(database_url, migration_config, tmp_path):
             ("analyst", "analyst", organizations[0]),
             ("peer", "analyst", organizations[0]),
             ("reviewer", "reviewer", organizations[0]),
-            ("auditor", "auditor", organizations[0]),
             ("foreign", "reviewer", organizations[1]),
         ):
             session.add(
@@ -164,38 +163,42 @@ async def test_auth_session_origin_logout_and_expiry(domain_setup, client_factor
         assert (await client.get("/api/demo/accounts")).status_code == 404
 
 
-async def test_case_tenant_ownership_and_read_only_roles(domain_setup, client_factory):
+async def test_cases_are_shared_within_organization_and_hidden_across_tenants(
+    domain_setup, client_factory
+):
     settings, _ = domain_setup
     async with client_factory(settings) as client:
         await login(client)
         created = await case(client)
         document = await upload(client, EVIDENCE, "evidence.md", created["id"])
-        await login(client, "peer")
-        assert (await client.get("/api/cases")).json() == []
-        for path in (
+        paths = (
             f"/api/cases/{created['id']}",
             f"/api/documents/{document['id']}",
             f"/api/documents/{document['id']}/download",
             f"/api/documents?case_id={created['id']}",
-        ):
-            assert (await client.get(path)).status_code == 404
-        await login(client, "foreign")
-        assert (await client.get(f"/api/cases/{created['id']}")).status_code == 404
-        await login(client, "auditor")
+        )
+        await login(client, "peer")
         assert len((await client.get("/api/cases")).json()) == 1
+        for path in paths:
+            assert (await client.get(path)).status_code == 200
         assert (
-            await client.post("/api/cases", json={"name": "x", "counterparty_name": "x"})
-        ).status_code == 403
-        assert (await client.delete(f"/api/documents/{document['id']}")).status_code == 403
+            await client.patch(f"/api/cases/{created['id']}", json={"name": "Peer update"})
+        ).status_code == 200
+        assert (await client.post(f"/api/documents/{document['id']}/reindex")).status_code == 200
+        await upload(client, EVIDENCE + b" Peer evidence.", "peer.md", created["id"])
+        await login(client, "foreign")
+        assert (await client.get("/api/cases")).json() == []
+        for path in paths:
+            assert (await client.get(path)).status_code == 404
         assert (
-            await client.patch(f"/api/cases/{created['id']}", json={"name": "x"})
-        ).status_code == 403
+            await client.patch(f"/api/cases/{created['id']}", json={"name": "Foreign update"})
+        ).status_code == 404
 
 
 async def test_upload_validation_hash_dedup_versions_and_deletion(domain_setup, client_factory):
     settings, engine = domain_setup
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         first = await upload(client, name="../../policy.md")
         assert first["filename"] == "policy.md"
         assert first["sha256"] == hashlib.sha256(POLICY).hexdigest()
@@ -252,7 +255,7 @@ async def test_upload_validation_hash_dedup_versions_and_deletion(domain_setup, 
 async def test_policy_review_roles_and_removed_editing_endpoints(domain_setup, client_factory):
     settings, _ = domain_setup
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         document = await upload(client)
         policy = await proposed(client, document["id"])
         assert policy["status"] == "draft" and len(policy["requirements"]) == 1
@@ -264,6 +267,7 @@ async def test_policy_review_roles_and_removed_editing_endpoints(domain_setup, c
             )
         ).status_code == 404
         assert (await client.post(f"/api/policies/{policy['id']}/clone")).status_code == 404
+        await login(client)
         assert (await client.post(f"/api/policies/{policy['id']}/approve")).status_code == 403
         await login(client, "foreign")
         assert (await client.get(f"/api/policies/{policy['id']}")).status_code == 404
@@ -284,7 +288,7 @@ async def test_policy_review_roles_and_removed_editing_endpoints(domain_setup, c
 async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, client_factory):
     settings, engine = domain_setup
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         created = await case(client)
         document = await upload(client)
         policy = await proposed(client, document["id"])
@@ -337,17 +341,24 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         assert (await client.get("/api/audit")).json()[0]["event"] == "auth.login"
 
 
-async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, tmp_path):
+async def test_explicit_bootstrap_is_idempotent(
+    database_url, migration_config, tmp_path, monkeypatch
+):
     command.upgrade(migration_config, "head")
     settings = Settings(database_url=database_url, storage_path=str(tmp_path / "storage"))
     engine = create_engine_for_settings(settings)
     fixtures = Path("/datasets/synthetic")
     if not fixtures.exists():
         fixtures = Path(__file__).resolve().parents[2] / "datasets" / "synthetic"
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Seeding must not call Gemini")
+
+    monkeypatch.setattr("counterparty.analysis.adapters.GeminiAdapter.generate", forbidden)
     try:
         first = bootstrap(engine, settings, fixtures)
-        assert first == {"users": 5, "policies": 1, "cases": 0, "documents": 4}
-        from counterparty.models import ApprovalRequest, AuditEvent, Document, IntegrationCall
+        assert first == {"users": 3, "policies": 1, "cases": 1, "documents": 5}
+        from counterparty.models import AuditEvent, Document
 
         def seed_state():
             with Session(engine) as session:
@@ -360,6 +371,51 @@ async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, 
                 )
 
         original = seed_state()
+        from counterparty.analysis.schemas import validate_source
+        from counterparty.analysis.semantic import validate_narrative_requirements
+        from counterparty.documents import chunks_for
+        from counterparty.models import Decision
+        from counterparty.worker import process_one, setup_checkpoints
+
+        with Session(engine) as session:
+            run = session.scalar(select(AnalysisRun))
+            run_id = run.id
+            assert run.status == "awaiting_review" and run.model_mode == "gemini"
+            assert run.report["recorded_example"]["model_name"] == run.report["model_name"]
+            assert run.assessment_progress["completed"] == len(original[1])
+            assert any(f["status"] == "pass" for f in run.report["findings"])
+            policy = session.scalar(select(PolicySetVersion))
+            chunks = chunks_for(session, session.scalars(select(Document)).all())
+            validate_narrative_requirements(policy.requirements, chunks)
+            for finding in run.report["findings"]:
+                validate_source(finding["requirement_source"], chunks)
+                for citation in finding["evidence"]:
+                    validate_source(
+                        {k: v for k, v in citation.items() if k != "evidence_type"}, chunks
+                    )
+            assert all(
+                "description" in req and "operator" not in req for req in policy.requirements
+            )
+            before_report = run.report.copy()
+            reviewer = session.scalar(select(User).where(User.role == "reviewer"))
+            session.add(
+                Decision(
+                    organization_id=run.organization_id,
+                    run_id=run.id,
+                    actor_id=reviewer.id,
+                    decision="needs_information",
+                    rationale="Clarify missing assurance",
+                )
+            )
+            run.status = "completed"
+            session.commit()
+        setup_checkpoints(engine)
+        assert process_one(engine, settings) is True
+        with Session(engine) as session:
+            run = session.get(AnalysisRun, run_id)
+            assert run.status == "completed" and run.report["workflow_complete"] is True
+            assert run.report["findings"] == before_report["findings"]
+            assert run.report["recorded_example"] == before_report["recorded_example"]
         assert bootstrap(engine, settings, fixtures) == {
             "users": 0,
             "policies": 0,
@@ -370,15 +426,22 @@ async def test_explicit_bootstrap_is_idempotent(database_url, migration_config, 
         assert len(original[1]) == 20
         with Session(engine) as session:
             assert session.scalar(select(func.count()).select_from(Organization)) == 2
-            assert session.scalar(select(func.count()).select_from(User)) == 5
-            assert session.scalar(select(func.count()).select_from(Document)) == 4
-            assert session.scalar(select(func.count()).select_from(AuditEvent)) == 1
-            assert session.scalar(select(AuditEvent)).event == "synthetic.policy_seeded"
-            for entity in (ApprovalRequest, IntegrationCall):
-                assert session.scalar(select(func.count()).select_from(entity)) == 0
+            assert session.scalar(select(func.count()).select_from(User)) == 3
+            assert session.scalar(select(func.count()).select_from(Document)) == 5
+            assert (
+                session.scalar(
+                    select(func.count())
+                    .select_from(AuditEvent)
+                    .where(
+                        AuditEvent.event.in_(("synthetic.policy_seeded", "synthetic.report_seeded"))
+                    )
+                )
+                == 2
+            )
+
             assert session.scalar(select(func.count()).select_from(PolicySetVersion)) == 1
-            assert session.scalar(select(func.count()).select_from(AssessmentCase)) == 0
-            assert session.scalar(select(func.count()).select_from(AnalysisRun)) == 0
+            assert session.scalar(select(func.count()).select_from(AssessmentCase)) == 1
+            assert session.scalar(select(func.count()).select_from(AnalysisRun)) == 1
     finally:
         engine.dispose()
 
@@ -447,14 +510,14 @@ async def test_policy_mode_uses_app_settings_and_model_errors_are_json(
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     settings.model_mode = "demo"
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         document = await upload(client)
         policy = await proposed(client, document["id"])
         assert policy["requirements"]
     settings.model_mode = "gemini"
     monkeypatch.setenv("MODEL_MODE", "demo")
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         response = await client.post(
             "/api/policies/propose",
             json={
@@ -479,7 +542,7 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
 
     settings, engine = domain_setup
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         created = await case(client)
         document = await upload(client)
         policy = await proposed(client, document["id"])
@@ -528,14 +591,12 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
         assert (await client.get(f"/api/runs/{run['id']}")).json()["input_snapshot"] == snapshot
 
 
-async def test_index_readiness_reindex_authorization_and_lexical_availability(
-    domain_setup, client_factory
-):
+async def test_index_readiness_reindex_authorization_and_hybrid_only(domain_setup, client_factory):
     from counterparty.models import Document
 
     settings, engine = domain_setup
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         created = await case(client)
         policy_doc = await upload(client)
         policy = await proposed(client, policy_doc["id"])
@@ -544,8 +605,13 @@ async def test_index_readiness_reindex_authorization_and_lexical_availability(
         await client.post(f"/api/policies/{policy['id']}/approve")
         body = {"policy_version_id": policy["id"], "retrieval_variant": "hybrid"}
         assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 409
-        body["retrieval_variant"] = "lexical"
-        assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 201
+        for variant in ("lexical", "semantic"):
+            body["retrieval_variant"] = variant
+            assert (
+                await client.post(f"/api/cases/{created['id']}/runs", json=body)
+            ).status_code == 422
+        del body["retrieval_variant"]
+        assert (await client.post(f"/api/cases/{created['id']}/runs", json=body)).status_code == 409
         status = (await client.get("/api/embedding-status")).json()
         assert status["status"] == "unavailable" and status["fresh"] is False
         from counterparty.models import WorkerModelState
@@ -563,15 +629,91 @@ async def test_index_readiness_reindex_authorization_and_lexical_availability(
         status = (await client.get("/api/embedding-status")).json()
         assert status["status"] == "unavailable" and status["fresh"] is False
         index_all(engine, settings)
+        run = await client.post(f"/api/cases/{created['id']}/runs", json=body)
+        assert run.status_code == 201, run.text
+        assert run.json()["retrieval_variant"] == "hybrid"
+        assert run.json()["input_snapshot"]["retrieval_fingerprint"]
         assert (await client.post(f"/api/documents/{doc['id']}/reindex")).json()[
             "index_status"
         ] == "pending"
         assert (await client.post(f"/api/documents/{doc['id']}/reindex")).json()[
             "index_attempts"
         ] == 0
-        await login(client, "auditor")
-        assert (await client.post(f"/api/documents/{doc['id']}/reindex")).status_code == 403
+        await login(client)
+        assert (await client.post(f"/api/documents/{doc['id']}/reindex")).status_code == 200
+        assert (await client.post(f"/api/documents/{policy_doc['id']}/reindex")).status_code == 403
         await login(client, "foreign")
         assert (await client.post(f"/api/documents/{doc['id']}/reindex")).status_code == 404
         with Session(engine) as session:
             assert session.get(Document, UUID(doc["id"])).index_status == "pending"
+
+
+async def test_audit_resolves_actor_email_without_cross_organization_leakage(
+    domain_setup, client_factory
+):
+    from counterparty.models import AuditEvent
+
+    settings, engine = domain_setup
+    async with client_factory(settings) as client:
+        await login(client, "reviewer")
+        with Session(engine) as session:
+            reviewer = session.scalar(select(User).where(User.email == "reviewer@example.test"))
+            foreign = session.scalar(select(User).where(User.email == "foreign@example.test"))
+            session.add_all(
+                [
+                    AuditEvent(
+                        organization_id=reviewer.organization_id, event="system.test", details={}
+                    ),
+                    AuditEvent(
+                        organization_id=reviewer.organization_id,
+                        actor_id=foreign.id,
+                        event="foreign.reference",
+                        details={},
+                    ),
+                ]
+            )
+            session.commit()
+        events = (await client.get("/api/audit")).json()
+        assert (
+            next(e for e in events if e["event"] == "auth.login")["actor_email"]
+            == "reviewer@example.test"
+        )
+        assert next(e for e in events if e["event"] == "system.test")["actor_email"] is None
+        assert next(e for e in events if e["event"] == "foreign.reference")["actor_email"] is None
+        await login(client, "foreign")
+        events = (await client.get("/api/audit")).json()
+        assert {e["actor_email"] for e in events} == {"foreign@example.test"}
+
+
+@pytest.mark.parametrize("damage", ["source_hash", "quote", "missing_finding"])
+async def test_recorded_seed_rejects_changed_sources_or_report(
+    database_url, migration_config, tmp_path, damage
+):
+    import json
+    import shutil
+
+    from counterparty.models import Document
+
+    command.upgrade(migration_config, "head")
+    fixtures = tmp_path / "fixtures"
+    shutil.copytree(Path("/datasets/synthetic"), fixtures)
+    path = fixtures / "gemini-example.json"
+    example = json.loads(path.read_text())
+    if damage == "source_hash":
+        example["documents"][0]["sha256"] = "0" * 64
+    elif damage == "quote":
+        example["policy"]["requirements"][0]["source"]["quote"] = "An invented obligation"
+    else:
+        example["report"]["findings"].pop()
+    path.write_text(json.dumps(example))
+    settings = Settings(database_url=database_url, storage_path=str(tmp_path / "storage"))
+    engine = create_engine_for_settings(settings)
+    try:
+        with pytest.raises(ValueError):
+            bootstrap(engine, settings, fixtures)
+        with Session(engine) as session:
+            for model in (User, AssessmentCase, Document, PolicySetVersion, AnalysisRun):
+                assert session.scalar(select(func.count()).select_from(model)) == 0
+        assert not list((tmp_path / "storage").rglob("*.md"))
+    finally:
+        engine.dispose()

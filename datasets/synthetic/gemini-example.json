@@ -1,0 +1,1890 @@
+{
+  "format_version": 1,
+  "captured_at": "2026-09-17T13:19:36.195Z",
+  "provenance": "Recorded from the real Gemini API on synthetic documents. Policy approval is a demonstration setup, not independent human review. No final counterparty decision is seeded.",
+  "model_name": "gemini-3.5-flash-lite",
+  "documents": [
+    {
+      "id": "2cea830b-5323-4c91-ad71-494c6f428b39",
+      "filename": "information-security.md",
+      "path": "policies/information-security.md",
+      "sha256": "3aaed2be8a5bf12f40354b0ea4457e1cb82fb2edccf16fea52734a84bb6ca65c",
+      "kind": "policy",
+      "chunks": [
+        {
+          "id": "1872cc67-de05-493c-a99f-07176d362fe3",
+          "location": {
+            "line_end": 12,
+            "line_start": 1
+          },
+          "sha256": "763a9c63cedc0b0175ae27de753575991f9dd1fd046d3451e1598b735d273cb4"
+        },
+        {
+          "id": "19409479-dd5c-4613-be3b-e7d41b800254",
+          "location": {
+            "line_end": 22,
+            "line_start": 13
+          },
+          "sha256": "70d310213d48d183e8144fa6eea130e67bdf6664d61f49c5e6415b27e05611db"
+        },
+        {
+          "id": "4e5a3f62-beb5-4b00-bf4f-50a92109619c",
+          "location": {
+            "line_end": 36,
+            "line_start": 23
+          },
+          "sha256": "fc905ca4b2c028354b0ea4934840fd9ecdb3502feb97f56163e20366b7bbbf7d"
+        },
+        {
+          "id": "72eb6e67-19bc-4b51-9df5-bd8587b90254",
+          "location": {
+            "line_end": 44,
+            "line_start": 37
+          },
+          "sha256": "6ca690bf7d6e96341d85c38ec77f6693731b65b68d99376cd9080db38299f85b"
+        },
+        {
+          "id": "77c476df-bf12-44db-b50a-a41f0e0d76f0",
+          "location": {
+            "line_end": 54,
+            "line_start": 45
+          },
+          "sha256": "47a8780f2ef32f438ffc5d0003c275c2815b156f1e67cb2fc23763294fe28602"
+        },
+        {
+          "id": "19293328-648c-436c-bd0f-a1250edd80ca",
+          "location": {
+            "line_end": 64,
+            "line_start": 55
+          },
+          "sha256": "c4cc77f3e929ea02c5fb9e1945659fbea5c2d59347ab877c95d4257b0bcf0f70"
+        },
+        {
+          "id": "d64d786e-6f13-4310-924b-7cef29f7f5eb",
+          "location": {
+            "line_end": 74,
+            "line_start": 65
+          },
+          "sha256": "b5598cbf609cdf364644dd345811c49279ca3d779259c85cdf9d1a3f501b253e"
+        },
+        {
+          "id": "75b79992-fd53-4be6-b741-fa8bae8b4dcc",
+          "location": {
+            "line_end": 82,
+            "line_start": 75
+          },
+          "sha256": "59417fa87559de789e79ef81488bc477c08e1f72b3b56e3cfb78918114984153"
+        },
+        {
+          "id": "a9bdc995-9903-4bf2-90ee-a1f24b3dcabb",
+          "location": {
+            "line_end": 83,
+            "line_start": 83
+          },
+          "sha256": "25d40f8d7900f6cce5e8886aae5c19fa07741ce5dfa1838cb166732032310e0b"
+        }
+      ]
+    },
+    {
+      "id": "c22abea6-f46e-4bf0-a774-1fed816eca9e",
+      "filename": "privacy-data-handling.md",
+      "path": "policies/privacy-data-handling.md",
+      "sha256": "4429268938774c51efc399b2f9d535ca5cd4a304650b0498bdaef8776ff2e41e",
+      "kind": "policy",
+      "chunks": [
+        {
+          "id": "6ff59de6-eae5-40b1-80da-c67aee41c361",
+          "location": {
+            "line_end": 12,
+            "line_start": 1
+          },
+          "sha256": "33d390e315a6827acafbab7d9c955efe4cc1516b457080f9d229321bf1913867"
+        },
+        {
+          "id": "e951ba0f-49bb-4b6d-8680-db5330df0bb4",
+          "location": {
+            "line_end": 24,
+            "line_start": 13
+          },
+          "sha256": "fdceb4f660ee2eaca68ece788f2881f1d8af3a876e604138dbf90b07d7978a73"
+        },
+        {
+          "id": "75699400-a394-4554-91eb-c362efe53837",
+          "location": {
+            "line_end": 34,
+            "line_start": 25
+          },
+          "sha256": "4670ac0ecaeebafc9b0155e279c916570e83227f93c5b977a8d1a49cbbefbc70"
+        },
+        {
+          "id": "6a27ed42-2a17-4d81-8e2a-ea2d14776ea4",
+          "location": {
+            "line_end": 46,
+            "line_start": 35
+          },
+          "sha256": "3bffc4098891670cebf3ccb2ace50783f184d98dffa31c6cdca51988343a046a"
+        },
+        {
+          "id": "5a2e4b8e-c15c-44be-b167-31fd02c84f8f",
+          "location": {
+            "line_end": 60,
+            "line_start": 47
+          },
+          "sha256": "c03c052c7f30216d0d97b2c6c800d23bf517589634b5b00529c8120faa6ce9e9"
+        },
+        {
+          "id": "6cf03aa7-418f-4d4f-be28-57ec9f9bec0b",
+          "location": {
+            "line_end": 66,
+            "line_start": 61
+          },
+          "sha256": "5e313f898cf205c48c73417cc554751202bc1ff655d42a2be0ec48d94a8c2a11"
+        },
+        {
+          "id": "e8abbbb1-85c9-4a64-8b8c-02178e21e54d",
+          "location": {
+            "line_end": 76,
+            "line_start": 67
+          },
+          "sha256": "86e6e08dcdd4a768bf4dfd70b7561c89b12612aed6b6e515df95946b2e00e1aa"
+        },
+        {
+          "id": "27fd81f1-ae94-492e-8c47-229047f78bbf",
+          "location": {
+            "line_end": 83,
+            "line_start": 77
+          },
+          "sha256": "3ecf45a4089df6c8a30c69cbd920fdd30dc89f29610dfdeb677cbbb5748a82c4"
+        }
+      ]
+    },
+    {
+      "id": "1b7073ae-074a-4f47-9b72-b8594a0fb324",
+      "filename": "supplier-governance.md",
+      "path": "policies/supplier-governance.md",
+      "sha256": "f1ac772a28500a7aeb64b7eec2f410a9282e5fff032b4b30262d3bcfb12a5e6b",
+      "kind": "policy",
+      "chunks": [
+        {
+          "id": "3b47c435-4d0e-4c04-87a4-967fea623979",
+          "location": {
+            "line_end": 12,
+            "line_start": 1
+          },
+          "sha256": "0d3791d82d63e323728859476f4806f0f1e151f87b59b9c3ea84d44a68e2c7f9"
+        },
+        {
+          "id": "2d76f568-262e-49fd-8728-a36ad3bf247f",
+          "location": {
+            "line_end": 20,
+            "line_start": 13
+          },
+          "sha256": "7b88680a3c98005757629b50794c953fd97d0c9fce8243b59c13b866f66baf02"
+        },
+        {
+          "id": "098f383a-1573-4988-a316-3c0337b5350c",
+          "location": {
+            "line_end": 34,
+            "line_start": 21
+          },
+          "sha256": "b6c3b4cdc12f377e7ebdac69181f5a864741a2ec9b429c3586d9680e70aa2cc8"
+        },
+        {
+          "id": "d14b5977-0fdc-49fb-8fb7-dadad4ccc9f0",
+          "location": {
+            "line_end": 42,
+            "line_start": 35
+          },
+          "sha256": "bfd0d4b4974472b00defe872123bf2410b099ec928339e7ac93032f1890860d0"
+        },
+        {
+          "id": "24b68a65-069c-4ce8-8c33-cfe68f881f91",
+          "location": {
+            "line_end": 52,
+            "line_start": 43
+          },
+          "sha256": "4b1a78cab4783f7269b96381fdd5f6091ce930842d61f9d326b0af2c81ded061"
+        },
+        {
+          "id": "3f6ccf7d-e962-4fa1-b2dc-6323cd85aacf",
+          "location": {
+            "line_end": 62,
+            "line_start": 53
+          },
+          "sha256": "6bc63ecb0d321c18525a30fa5c425f400680ea0c3d89e6ac68b918081730f946"
+        },
+        {
+          "id": "175a01f6-9318-4f3e-a08a-7b047c37f158",
+          "location": {
+            "line_end": 70,
+            "line_start": 63
+          },
+          "sha256": "795bec0cf97754d4786545d6ad23645554c6fd93dd794fcceafb0ffe0633ea09"
+        },
+        {
+          "id": "1b996529-ea60-4a2e-b742-bf5392623dde",
+          "location": {
+            "line_end": 78,
+            "line_start": 71
+          },
+          "sha256": "acbda2e216eceb3d55ac5008e0878d9c4f882e084005aaee77f7a1561e74eb27"
+        },
+        {
+          "id": "092bddc5-22c1-40a6-850a-473549cd70df",
+          "location": {
+            "line_end": 79,
+            "line_start": 79
+          },
+          "sha256": "8891196c3a27db5b6d7be45bdbbd185b975e723fcef4997e851c58b924a9f431"
+        }
+      ]
+    },
+    {
+      "id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca",
+      "filename": "incident-response.md",
+      "path": "policies/incident-response.md",
+      "sha256": "d4674e874cc88754421256f233dd53e9ff53806cfc9af2a3326f5a9da76b1998",
+      "kind": "policy",
+      "chunks": [
+        {
+          "id": "36c608e4-7fc4-431e-bba8-48a07043fbe2",
+          "location": {
+            "line_end": 12,
+            "line_start": 1
+          },
+          "sha256": "37af31619485963c18da5f0f1b4f30f0bccc5851a940ed3daf973cf343e04e1d"
+        },
+        {
+          "id": "5b0dbb3f-b511-4886-978c-6444d49ef3ee",
+          "location": {
+            "line_end": 20,
+            "line_start": 13
+          },
+          "sha256": "96d53149d8db5e8841333bd7326a5214b1e054dce6155b95306f2011d158ae9d"
+        },
+        {
+          "id": "5503f49d-1c9c-4acc-baef-cad74dee776a",
+          "location": {
+            "line_end": 30,
+            "line_start": 21
+          },
+          "sha256": "4b62f07c9d8b29c2e92cf7aaa3888b8cf3ecded5e6da02a7e8d043b1d1a5f395"
+        },
+        {
+          "id": "c33d7f59-8979-45e3-85d5-f76d3cb5cfde",
+          "location": {
+            "line_end": 42,
+            "line_start": 31
+          },
+          "sha256": "84d89f98731e65aa897e169bb7ac875580a2a477c57575442bace341876150a5"
+        },
+        {
+          "id": "fd106dc5-cd6d-42e5-a9db-7252c2422587",
+          "location": {
+            "line_end": 52,
+            "line_start": 43
+          },
+          "sha256": "6e624d4100783e3734361895839ff753ad517dd6cce2df13a4a554ccc1936676"
+        },
+        {
+          "id": "6cbd1143-88a9-48c8-9767-f665c2a94f0d",
+          "location": {
+            "line_end": 62,
+            "line_start": 53
+          },
+          "sha256": "6d4c5eb6111a480ae2ea92a778752f59c14b4b572011f58e7e657b54efd14690"
+        },
+        {
+          "id": "37c1280c-297b-40db-b719-5fcb595e7569",
+          "location": {
+            "line_end": 70,
+            "line_start": 63
+          },
+          "sha256": "81c8ab71a802e9728909e7b858068bdb09210aa30c70c36f67b04e3c29db3351"
+        },
+        {
+          "id": "e05a6bc5-1f53-4724-a876-acc8ed657d32",
+          "location": {
+            "line_end": 78,
+            "line_start": 71
+          },
+          "sha256": "91ba82ea524969f8e51a951caadb63c6ccce8825b8e128702ecf1c6f95e9d93d"
+        },
+        {
+          "id": "5a28d994-d252-40e3-8cdf-046b3a1e116c",
+          "location": {
+            "line_end": 79,
+            "line_start": 79
+          },
+          "sha256": "12bc663f899ec799c900ac63a70835906c54ca95c10ca7df424c6da31ecccf41"
+        }
+      ]
+    },
+    {
+      "id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+      "filename": "atlas-assurance-pack.md",
+      "path": "evidence/atlas-assurance-pack.md",
+      "sha256": "cfafcc6b2c4a95722eb8226779b69f0663510820ea7d0b7db37981644e0adfe3",
+      "kind": "evidence",
+      "chunks": [
+        {
+          "id": "8bd424bb-b112-4129-93a1-bac25b11eb07",
+          "location": {
+            "line_end": 12,
+            "line_start": 1
+          },
+          "sha256": "9f6acd3ec94fcf66579d1cde37feb74bfe32023dd68f7ede80ac045ace3d7641"
+        },
+        {
+          "id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+          "location": {
+            "line_end": 30,
+            "line_start": 13
+          },
+          "sha256": "568d895a34caea162ee982614312e696d5424850ee462e06b9c61abfd02843e0"
+        },
+        {
+          "id": "3df7d343-3847-4038-ba3b-abc7bf998be9",
+          "location": {
+            "line_end": 41,
+            "line_start": 31
+          },
+          "sha256": "eff9b51c68ed757844efa041aeef84dca07fc2368e8a2034fd4e35945cdf7d69"
+        },
+        {
+          "id": "eeecb1a2-37f2-46bd-8322-7fa2de8960b0",
+          "location": {
+            "line_end": 49,
+            "line_start": 42
+          },
+          "sha256": "bb42428f6c5331de087d2c0c6fa83c75eef6178b3bd35a6cf876381bfef29727"
+        },
+        {
+          "id": "1b45ac9c-9f2a-4874-9232-3b315d2f674e",
+          "location": {
+            "line_end": 57,
+            "line_start": 50
+          },
+          "sha256": "e456f9fcd7db5fae7f7a368124b7b76b71f9c8c87429357e5177a89f3e96b752"
+        },
+        {
+          "id": "aad0ea4f-d438-4447-8e0f-fd7e5214372e",
+          "location": {
+            "line_end": 65,
+            "line_start": 58
+          },
+          "sha256": "52d4d9d2df9c5c08de36bf8eedf8ab5433b66d7512464463158740e64772f471"
+        },
+        {
+          "id": "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5",
+          "location": {
+            "line_end": 73,
+            "line_start": 66
+          },
+          "sha256": "148b2e097c95cb32417b09c120d3dfb9a4e62af5e0f2414ff0567402b4a15274"
+        },
+        {
+          "id": "859cc687-3c88-4a03-bde7-77980c5359a6",
+          "location": {
+            "line_end": 81,
+            "line_start": 74
+          },
+          "sha256": "ee6a7d007ed59a238b22f2d3a9c54d15e68d2e2a54fd63055b0162e80d36a576"
+        },
+        {
+          "id": "7c7af9e9-37a6-4807-9473-cb6f9236df54",
+          "location": {
+            "line_end": 89,
+            "line_start": 82
+          },
+          "sha256": "50744edbe8e954dcdedfaad37ff31f76b1f3b1b01a74f2f448d19aa881b792c2"
+        },
+        {
+          "id": "6f8115cf-a12b-40f4-8093-d12ad2457e41",
+          "location": {
+            "line_end": 97,
+            "line_start": 90
+          },
+          "sha256": "bc9a05919d1387582ad163e838065ca395ef59bd92c1656bbfa349a28c3c0351"
+        },
+        {
+          "id": "4a2d2f67-6125-4fee-94cb-51940a3720ca",
+          "location": {
+            "line_end": 105,
+            "line_start": 98
+          },
+          "sha256": "24af4c27d10fbc3eeb3a43281d0dccbf447e3aa4946fe2d34c482d448daab1c0"
+        },
+        {
+          "id": "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+          "location": {
+            "line_end": 113,
+            "line_start": 106
+          },
+          "sha256": "04f169d435624b449be08c44be09b2db8879ddafac7628cec90a953dcb386b47"
+        },
+        {
+          "id": "28ab4f2b-afdf-471d-af3e-320e9b487435",
+          "location": {
+            "line_end": 129,
+            "line_start": 114
+          },
+          "sha256": "513d1b0edf9ff68ed1bfe3259adbfd3bd85080b7a4d9eb3d84d72a98909e1625"
+        },
+        {
+          "id": "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c",
+          "location": {
+            "line_end": 138,
+            "line_start": 130
+          },
+          "sha256": "f38ead7c280b498280958ce0f00fef3849d8890fe7067a65ac621aba38f4922d"
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "name": "Northstar Labs Third-Party Assurance Standard — recorded Gemini example",
+    "requirements": [
+      {
+        "id": "GOV-01",
+        "title": "Supplier relationship accountability",
+        "source": {
+          "quote": "GOV-01 — Severity: Medium. Supplier relationship accountability.\n\nThe supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service.",
+          "chunk_id": "098f383a-1573-4988-a316-3c0337b5350c",
+          "location": {
+            "line_end": 34,
+            "line_start": 21
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "severity": "Medium",
+        "description": "The supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service.",
+        "applicability_text": "All assessed suppliers."
+      },
+      {
+        "id": "GOV-02",
+        "title": "Assurance response quality",
+        "source": {
+          "quote": "GOV-02 — Severity: Medium. Assurance response quality.\n\nThe supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations.",
+          "chunk_id": "d14b5977-0fdc-49fb-8fb7-dadad4ccc9f0",
+          "location": {
+            "line_end": 42,
+            "line_start": 35
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "severity": "Medium",
+        "description": "The supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations.",
+        "applicability_text": "All assessed suppliers."
+      },
+      {
+        "id": "GOV-03",
+        "title": "Contractual flow-down",
+        "source": {
+          "quote": "GOV-03 — Severity: High. Contractual flow-down.\n\nThe supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery.",
+          "chunk_id": "24b68a65-069c-4ce8-8c33-cfe68f881f91",
+          "location": {
+            "line_end": 52,
+            "line_start": 43
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "severity": "High",
+        "description": "The supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery.",
+        "applicability_text": "All assessed suppliers."
+      },
+      {
+        "id": "GOV-04",
+        "title": "Continuity and exit for critical services",
+        "source": {
+          "quote": "GOV-04 — Severity: High. Applies when business criticality is high.\n\nFor high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities.",
+          "chunk_id": "3f6ccf7d-e962-4fa1-b2dc-6323cd85aacf",
+          "location": {
+            "line_end": 62,
+            "line_start": 53
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "severity": "High",
+        "description": "For high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities.",
+        "applicability_text": "Applies when business criticality is high."
+      },
+      {
+        "id": "SEC-03",
+        "title": "Supplier accountability for security",
+        "source": {
+          "quote": "SEC-03 — Severity: Medium. Supplier accountability for security.\n\nThe supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service.",
+          "chunk_id": "4e5a3f62-beb5-4b00-bf4f-50a92109619c",
+          "location": {
+            "line_end": 36,
+            "line_start": 23
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "severity": "Medium",
+        "description": "The supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service.",
+        "applicability_text": "Technology suppliers storing Northstar data or accessing Northstar systems."
+      },
+      {
+        "id": "SEC-01",
+        "title": "Multi-factor authentication for privileged access",
+        "source": {
+          "quote": "SEC-01 — Severity: High. Applies when privileged access is present.\n\nFor relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service.",
+          "chunk_id": "4e5a3f62-beb5-4b00-bf4f-50a92109619c",
+          "location": {
+            "line_end": 36,
+            "line_start": 23
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "severity": "High",
+        "description": "For relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service.",
+        "applicability_text": "Applies when privileged access is present."
+      },
+      {
+        "id": "SEC-04",
+        "title": "Least-privilege access and prompt revocation",
+        "source": {
+          "quote": "SEC-04 — Severity: High. Applies when privileged access is present.\n\nFor relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end.",
+          "chunk_id": "72eb6e67-19bc-4b51-9df5-bd8587b90254",
+          "location": {
+            "line_end": 44,
+            "line_start": 37
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "severity": "High",
+        "description": "For relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end.",
+        "applicability_text": "Applies when privileged access is present."
+      },
+      {
+        "id": "SEC-02",
+        "title": "Data encryption at rest",
+        "source": {
+          "quote": "SEC-02 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups.",
+          "chunk_id": "77c476df-bf12-44db-b50a-a41f0e0d76f0",
+          "location": {
+            "line_end": 54,
+            "line_start": 45
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "severity": "High",
+        "description": "For relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups.",
+        "applicability_text": "Applies when personal data is processed."
+      },
+      {
+        "id": "SEC-05",
+        "title": "Vulnerability management",
+        "source": {
+          "quote": "SEC-05 — Severity: High. Vulnerability management.\n\nThe supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions.",
+          "chunk_id": "19293328-648c-436c-bd0f-a1250edd80ca",
+          "location": {
+            "line_end": 64,
+            "line_start": 55
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "severity": "High",
+        "description": "The supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions.",
+        "applicability_text": "Technology suppliers storing Northstar data or accessing Northstar systems."
+      },
+      {
+        "id": "SEC-06",
+        "title": "Independent assurance evidence",
+        "source": {
+          "quote": "SEC-06 — Severity: Medium. Applies when business criticality is high.\n\nFor high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions.",
+          "chunk_id": "d64d786e-6f13-4310-924b-7cef29f7f5eb",
+          "location": {
+            "line_end": 74,
+            "line_start": 65
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "severity": "Medium",
+        "description": "For high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions.",
+        "applicability_text": "Applies when business criticality is high."
+      },
+      {
+        "id": "IR-01",
+        "title": "Initial incident notification",
+        "source": {
+          "quote": "IR-01 — Severity: High. Applies to qualifying incidents in every relationship.\n\nThe supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery.",
+          "chunk_id": "5503f49d-1c9c-4acc-baef-cad74dee776a",
+          "location": {
+            "line_end": 30,
+            "line_start": 21
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "severity": "High",
+        "description": "The supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery.",
+        "applicability_text": "Applies to qualifying incidents in every relationship."
+      },
+      {
+        "id": "IR-02",
+        "title": "Evidence preservation and investigation timeline",
+        "source": {
+          "quote": "IR-02 — Severity: High. Applies to qualifying incidents in every relationship.\n\nThe supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar.",
+          "chunk_id": "c33d7f59-8979-45e3-85d5-f76d3cb5cfde",
+          "location": {
+            "line_end": 42,
+            "line_start": 31
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "severity": "High",
+        "description": "The supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar.",
+        "applicability_text": "Applies to qualifying incidents in every relationship."
+      },
+      {
+        "id": "IR-03",
+        "title": "Containment and recovery updates",
+        "source": {
+          "quote": "IR-03 — Severity: Medium. Applies to qualifying incidents in every relationship.\n\nThe supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks.",
+          "chunk_id": "fd106dc5-cd6d-42e5-a9db-7252c2422587",
+          "location": {
+            "line_end": 52,
+            "line_start": 43
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "severity": "Medium",
+        "description": "The supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks.",
+        "applicability_text": "Applies to qualifying incidents in every relationship."
+      },
+      {
+        "id": "IR-04",
+        "title": "Root cause and corrective action report",
+        "source": {
+          "quote": "IR-04 — Severity: Medium. Applies to confirmed incidents in every relationship.",
+          "chunk_id": "6cbd1143-88a9-48c8-9767-f665c2a94f0d",
+          "location": {
+            "line_end": 62,
+            "line_start": 53
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "severity": "Medium",
+        "description": "For confirmed incidents, the supplier must deliver a scoped root-cause and corrective-action report identifying contributing factors, accountable remediation owners and verification of closure.",
+        "applicability_text": "Applies to confirmed incidents in every relationship."
+      },
+      {
+        "id": "PRI-01",
+        "title": "Signed Data Processing Agreement",
+        "source": {
+          "quote": "PRI-01 — Severity: High. Applies when personal data is processed.\nFor relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins.",
+          "chunk_id": "e951ba0f-49bb-4b6d-8680-db5330df0bb4",
+          "location": {
+            "line_end": 24,
+            "line_start": 13
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "severity": "High",
+        "description": "For relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins.",
+        "applicability_text": "Applies when personal data is processed."
+      },
+      {
+        "id": "PRI-05",
+        "title": "Purpose limitation and data minimization",
+        "source": {
+          "quote": "PRI-05 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need.",
+          "chunk_id": "75699400-a394-4554-91eb-c362efe53837",
+          "location": {
+            "line_end": 34,
+            "line_start": 25
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "severity": "High",
+        "description": "For relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need.",
+        "applicability_text": "Applies when personal data is processed."
+      },
+      {
+        "id": "PRI-03",
+        "title": "Primary hosting location in the EU",
+        "source": {
+          "quote": "PRI-03 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU.",
+          "chunk_id": "6a27ed42-2a17-4d81-8e2a-ea2d14776ea4",
+          "location": {
+            "line_end": 46,
+            "line_start": 35
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "severity": "High",
+        "description": "For relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU.",
+        "applicability_text": "Applies when personal data is processed."
+      },
+      {
+        "id": "PRI-04",
+        "title": "Subprocessor inventory and change review",
+        "source": {
+          "quote": "PRI-04 — Severity: Medium. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards.",
+          "chunk_id": "5a2e4b8e-c15c-44be-b167-31fd02c84f8f",
+          "location": {
+            "line_end": 60,
+            "line_start": 47
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "severity": "Medium",
+        "description": "For relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards.",
+        "applicability_text": "Applies when personal data is processed."
+      },
+      {
+        "id": "PRI-02",
+        "title": "Return, deletion and preservation boundaries",
+        "source": {
+          "quote": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles.",
+          "chunk_id": "6cf03aa7-418f-4d4f-be28-57ec9f9bec0b",
+          "location": {
+            "line_end": 66,
+            "line_start": 61
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "severity": "High",
+        "description": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles.",
+        "applicability_text": "Applies when personal data is processed."
+      },
+      {
+        "id": "PRI-06",
+        "title": "Assistance with individual requests",
+        "source": {
+          "quote": "PRI-06 — Severity: Medium. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process.",
+          "chunk_id": "e8abbbb1-85c9-4a64-8b8c-02178e21e54d",
+          "location": {
+            "line_end": 76,
+            "line_start": 67
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "severity": "Medium",
+        "description": "For relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process.",
+        "applicability_text": "Applies when personal data is processed."
+      }
+    ]
+  },
+  "case": {
+    "name": "Atlas — recorded Gemini assessment",
+    "counterparty_name": "Atlas Compute Services (synthetic)",
+    "relationship": {
+      "purpose": "Hosted customer operations analytics",
+      "data_shared": "Customer contact and usage data (synthetic example)",
+      "personal_data": true,
+      "system_access": "Privileged support access to the analytics administration console",
+      "privileged_access": true,
+      "business_criticality": "high"
+    }
+  },
+  "extraction_metrics": {
+    "calls": 1,
+    "cost_usd": null,
+    "input_tokens": 18185,
+    "output_tokens": 5173,
+    "citation_corrections": 1
+  },
+  "report": {
+    "risk": "Medium",
+    "facts": [],
+    "metrics": {
+      "calls": 21,
+      "cost_usd": null,
+      "input_tokens": 105002,
+      "output_tokens": 6660
+    },
+    "summary": "Gemini semantic assessment with source-grounded citations. Risk: Medium. Evidence completeness: 90.0%. Reviewer decision required.",
+    "findings": [
+      {
+        "title": "Supplier relationship accountability",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Atlas has assigned the Head of Platform Security as the security owner for this service. Assurance Operations maintains the contact route and coordinates evidence requests.",
+            "chunk_id": "eeecb1a2-37f2-46bd-8322-7fa2de8960b0",
+            "location": {
+              "line_end": 49,
+              "line_start": 42
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "Atlas has named an accountable relationship owner and security owner, specifically assigning the Head of Platform Security as the security owner and establishing Atlas Assurance Operations to maintain contact and escalation routes.",
+        "requirement_id": "GOV-01",
+        "requirement_source": {
+          "quote": "GOV-01 — Severity: Medium. Supplier relationship accountability.\n\nThe supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service.",
+          "chunk_id": "098f383a-1573-4988-a316-3c0337b5350c",
+          "location": {
+            "line_end": 34,
+            "line_start": 21
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service."
+      },
+      {
+        "title": "Assurance response quality",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Document owner: Atlas Assurance Operations. Approved for synthetic review: Atlas Service Director. Version: 1.0. Issued: 2026-09-15. Evidence type: supplier declaration. Coverage period: 2026-Q3. Service scope: Atlas hosted analytics service for Northstar Labs.",
+            "chunk_id": "8bd424bb-b112-4129-93a1-bac25b11eb07",
+            "location": {
+              "line_end": 12,
+              "line_start": 1
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "Scope: Atlas hosted analytics service for Northstar Labs\nPeriod: 2026-Q3",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "The latest independent assurance report covers the production platform and its established operational controls. It excludes the newly acquired support portal. Atlas has begun an extension review, but the report has not yet been expanded to cover that portal.",
+            "chunk_id": "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+            "location": {
+              "line_end": 113,
+              "line_start": 106
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "The supplier has provided an assurance pack (Atlas Compute Services — 2026 Service Assurance Pack) that includes a current service control declaration and supporting context. The documentation explicitly identifies the assessed service ('Atlas hosted analytics service for Northstar Labs'), the coverage period ('2026-Q3'), and dates/versions (Issued: 2026-09-15, Version: 1.0). Furthermore, the assurance pack clearly states its evidence limits and known exclusions (such as the exclusion of the newly acquired support portal in register A-09), thereby fulfilling all conditions of requirement GOV-02.",
+        "requirement_id": "GOV-02",
+        "requirement_source": {
+          "quote": "GOV-02 — Severity: Medium. Assurance response quality.\n\nThe supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations.",
+          "chunk_id": "d14b5977-0fdc-49fb-8fb7-dadad4ccc9f0",
+          "location": {
+            "line_end": 42,
+            "line_start": 35
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations."
+      },
+      {
+        "title": "Contractual flow-down",
+        "status": "unknown",
+        "evidence": [],
+        "severity": "High",
+        "explanation": "The provided assurance pack mentions subprocessor relationships and names Meridian Support Services as a support provider, but it does not contain explicit evidence or text confirming that the supplier contractually flows down all applicable Northstar service obligations to subcontractors and retains accountability for their delivery, as required by GOV-03. Therefore, the status is unknown due to missing contractual evidence.",
+        "requirement_id": "GOV-03",
+        "requirement_source": {
+          "quote": "GOV-03 — Severity: High. Contractual flow-down.\n\nThe supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery.",
+          "chunk_id": "24b68a65-069c-4ce8-8c33-cfe68f881f91",
+          "location": {
+            "line_end": 52,
+            "line_start": 43
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "missing_information": [
+          "Contractual clauses or flow-down terms explicitly requiring subcontractors to adhere to Northstar service obligations and confirming the supplier's ongoing accountability for subcontractor delivery."
+        ],
+        "requirement_description": "The supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery."
+      },
+      {
+        "title": "Continuity and exit for critical services",
+        "status": "unknown",
+        "evidence": [],
+        "severity": "High",
+        "explanation": "The requirement mandates that for high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return, and transition responsibilities. Although the relationship is classified as high criticality, the provided evidence packs and declarations describe asset inventories, access lifecycles, and vulnerability/change management, but do not contain explicit confirmation or documentation of a maintained business continuity plan or a tested exit plan covering recovery dependencies, data return, and transition responsibilities.",
+        "requirement_id": "GOV-04",
+        "requirement_source": {
+          "quote": "GOV-04 — Severity: High. Applies when business criticality is high.\n\nFor high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities.",
+          "chunk_id": "3f6ccf7d-e962-4fa1-b2dc-6323cd85aacf",
+          "location": {
+            "line_end": 62,
+            "line_start": 53
+          },
+          "document_id": "1b7073ae-074a-4f47-9b72-b8594a0fb324"
+        },
+        "missing_information": [
+          "Business continuity plan for the high-criticality service scope",
+          "Tested exit plan covering recovery dependencies, Northstar data return, and transition responsibilities"
+        ],
+        "requirement_description": "For high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities."
+      },
+      {
+        "title": "Supplier accountability for security",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Atlas has assigned the Head of Platform Security as the security owner for this service. Assurance Operations maintains the contact route and coordinates evidence requests. The service inventory includes the application tier, database clusters, identity provider, processing queue, storage services and administrative portal.",
+            "chunk_id": "eeecb1a2-37f2-46bd-8322-7fa2de8960b0",
+            "location": {
+              "line_end": 49,
+              "line_start": 42
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "Atlas has assigned the Head of Platform Security as the security owner and maintains a service inventory that includes the application tier, database clusters, identity provider, processing queue, storage services, and administrative portal, satisfying the requirement to name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service.",
+        "requirement_id": "SEC-03",
+        "requirement_source": {
+          "quote": "SEC-03 — Severity: Medium. Supplier accountability for security.\n\nThe supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service.",
+          "chunk_id": "4e5a3f62-beb5-4b00-bf4f-50a92109619c",
+          "location": {
+            "line_end": 36,
+            "line_start": 23
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service."
+      },
+      {
+        "title": "Multi-factor authentication for privileged access",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "MFA is enabled for every privileged account, including supplier support accounts.",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The requirement SEC-01 mandates that for relationships with privileged access, the supplier must enable multi-factor authentication (MFA) for every privileged account, including supplier support accounts. The relationship context confirms that privileged access is present ('system_access': 'Privileged support access to the analytics administration console', 'privileged_access': true). The supplier's assurance declaration explicitly confirms compliance with this obligation: 'MFA is enabled for every privileged account, including supplier support accounts.' Therefore, the evidence supports the fulfillment of all applicable conditions for this requirement.",
+        "requirement_id": "SEC-01",
+        "requirement_source": {
+          "quote": "SEC-01 — Severity: High. Applies when privileged access is present.\n\nFor relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service.",
+          "chunk_id": "4e5a3f62-beb5-4b00-bf4f-50a92109619c",
+          "location": {
+            "line_end": 36,
+            "line_start": 23
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service."
+      },
+      {
+        "title": "Least-privilege access and prompt revocation",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "An Atlas manager requests support access for a named operational role and identifies the service responsibilities it supports. The service owner approves the role, and an identity administrator applies the entitlement. The record links the request, approval and effective access. Privileged support sessions require an approved task reference and generate operational events.",
+            "chunk_id": "1b45ac9c-9f2a-4874-9232-3b315d2f674e",
+            "location": {
+              "line_end": 57,
+              "line_start": 50
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "When duties change or employment ends, the personnel event initiates an access review and removal workflow. The access team checks both the central identity provider and service-specific entitlements. Periodic reconciliation compares active assignments with the approved role register.",
+            "chunk_id": "aad0ea4f-d438-4447-8e0f-fd7e5214372e",
+            "location": {
+              "line_end": 65,
+              "line_start": 58
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The requirement SEC-04 applies when privileged access is present, which is the case for this relationship involving privileged support access to the analytics administration console. The evidence confirms that Atlas implements least-privilege access and prompt revocation workflows. Specifically, section 5 states that an Atlas manager requests support access for a named operational role, the service owner approves it, and an identity administrator applies the entitlement with records linking request, approval, and effective access. Furthermore, when duties change or employment ends, personnel events initiate an access review and removal workflow checking both central identity provider and service-specific entitlements.",
+        "requirement_id": "SEC-04",
+        "requirement_source": {
+          "quote": "SEC-04 — Severity: High. Applies when privileged access is present.\n\nFor relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end.",
+          "chunk_id": "72eb6e67-19bc-4b51-9df5-bd8587b90254",
+          "location": {
+            "line_end": 44,
+            "line_start": 37
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end."
+      },
+      {
+        "title": "Data encryption at rest",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Encryption at rest is enabled across production storage, replicas, logs and backups containing Northstar data.",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The requirement SEC-02 mandates that for relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs, and backups. The relationship applicability condition is met as personal data (customer contact and usage data) is processed. The supplier control declaration explicitly confirms that 'Encryption at rest is enabled across production storage, replicas, logs and backups containing Northstar data.' Therefore, the supplier's declared control satisfies all material conditions of SEC-02.",
+        "requirement_id": "SEC-02",
+        "requirement_source": {
+          "quote": "SEC-02 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups.",
+          "chunk_id": "77c476df-bf12-44db-b50a-a41f0e0d76f0",
+          "location": {
+            "line_end": 54,
+            "line_start": 45
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups."
+      },
+      {
+        "title": "Vulnerability management",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Atlas collects findings from dependency checks, infrastructure scanning, external reports and operator observations. Platform Security triages each finding using severity, exposure and the affected service function. The change owner records the proposed response and links it to the release workflow. The process recognizes that a public administrative endpoint and an isolated development component have different exposure even when their reported severity is similar.",
+            "chunk_id": "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5",
+            "location": {
+              "line_end": 73,
+              "line_start": 66
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "A normal correction passes through review, test execution and approval before deployment. The release record connects the original finding with the resulting change. Emergency corrections can use an accelerated route with an explicit reason and follow-up review. Exceptions identify the affected component, compensating measures and responsible owner. A redacted sample in register A-08 illustrates a dependency finding, the selected mitigation, its test evidence and the subsequent closure decision.",
+            "chunk_id": "859cc687-3c88-4a03-bde7-77980c5359a6",
+            "location": {
+              "line_end": 81,
+              "line_start": 74
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The supplier operates a documented vulnerability and patch process that satisfies all material elements of requirement SEC-05. Specifically, Atlas collects findings from dependency checks, infrastructure scanning, external reports, and operator observations, triaging each finding using severity, exposure, and affected service function. Normal corrections undergo review, test execution, and approval before deployment. Emergency corrections use an accelerated route with explicit reasons and follow-up reviews, while exceptions identify affected components, compensating measures, and responsible owners.",
+        "requirement_id": "SEC-05",
+        "requirement_source": {
+          "quote": "SEC-05 — Severity: High. Vulnerability management.\n\nThe supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions.",
+          "chunk_id": "19293328-648c-436c-bd0f-a1250edd80ca",
+          "location": {
+            "line_end": 64,
+            "line_start": 55
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions."
+      },
+      {
+        "title": "Independent assurance evidence",
+        "status": "fail",
+        "evidence": [
+          {
+            "quote": "Document owner: Atlas Assurance Operations. Approved for synthetic review: Atlas Service Director. Version: 1.0. Issued: 2026-09-15. Evidence type: supplier declaration. Coverage period: 2026-Q3. Service scope: Atlas hosted analytics service for Northstar Labs.",
+            "chunk_id": "8bd424bb-b112-4129-93a1-bac25b11eb07",
+            "location": {
+              "line_end": 12,
+              "line_start": 1
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "References to an outside assessor explain the claimed scope of that assessor's work; they do not turn this pack into an independent report.",
+            "chunk_id": "8bd424bb-b112-4129-93a1-bac25b11eb07",
+            "location": {
+              "line_end": 12,
+              "line_start": 1
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "The latest independent assurance report covers the production platform and its established operational controls. It excludes the newly acquired support portal. Atlas has begun an extension review, but the report has not yet been expanded to cover that portal.",
+            "chunk_id": "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+            "location": {
+              "line_end": 113,
+              "line_start": 106
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "The requirement (SEC-06) applies because business criticality is high. It mandates that the supplier provide current independent assurance evidence identifying the assessed service, covered controls, review period, and material exclusions. However, the provided documentation consists solely of a supplier declaration ('Evidence type: supplier declaration') authored by Atlas, and explicitly notes that references to an outside assessor 'do not turn this pack into an independent report'. Furthermore, the independent assurance report excludes the newly acquired support portal, which is part of the operational inventory for this high-criticality relationship. Therefore, the supplier has failed to provide the required independent assurance evidence for all scoped components.",
+        "requirement_id": "SEC-06",
+        "requirement_source": {
+          "quote": "SEC-06 — Severity: Medium. Applies when business criticality is high.\n\nFor high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions.",
+          "chunk_id": "d64d786e-6f13-4310-924b-7cef29f7f5eb",
+          "location": {
+            "line_end": 74,
+            "line_start": 65
+          },
+          "document_id": "2cea830b-5323-4c91-ad71-494c6f428b39"
+        },
+        "missing_information": [],
+        "requirement_description": "For high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions."
+      },
+      {
+        "title": "Initial incident notification",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Incident notification is 12 hours after awareness of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery.",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The supplier requirement IR-01 mandates that the supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials, or service delivery. The evidence in the Atlas service control declaration states that 'Incident notification is 12 hours after awareness of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery.' Since 12 hours is shorter than and satisfies the maximum 24 calendar hours deadline required by IR-01, the requirement is met.",
+        "requirement_id": "IR-01",
+        "requirement_source": {
+          "quote": "IR-01 — Severity: High. Applies to qualifying incidents in every relationship.\n\nThe supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery.",
+          "chunk_id": "5503f49d-1c9c-4acc-baef-cad74dee776a",
+          "location": {
+            "line_end": 30,
+            "line_start": 21
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery."
+      },
+      {
+        "title": "Evidence preservation and investigation timeline",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "The incident workspace records observations, actions and decision times. Relevant operational evidence is isolated through a restricted route with an identified custodian. The timeline distinguishes an observed event from a hypothesis and preserves later corrections. Containment and recovery updates describe material changes in impact and unresolved risks.",
+            "chunk_id": "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+            "location": {
+              "line_end": 113,
+              "line_start": 106
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The supplier declaration confirms that incident handling processes preserve relevant operational evidence and maintain a timestamped timeline of observations, containment actions, and recovery decisions. The evidence establishes that the incident workspace records observations, actions, and decision times, and isolates relevant operational evidence through a restricted route with an identified custodian.",
+        "requirement_id": "IR-02",
+        "requirement_source": {
+          "quote": "IR-02 — Severity: High. Applies to qualifying incidents in every relationship.\n\nThe supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar.",
+          "chunk_id": "c33d7f59-8979-45e3-85d5-f76d3cb5cfde",
+          "location": {
+            "line_end": 42,
+            "line_start": 31
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar."
+      },
+      {
+        "title": "Containment and recovery updates",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Containment and recovery updates describe material changes in impact and unresolved risks.",
+            "chunk_id": "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+            "location": {
+              "line_end": 113,
+              "line_start": 106
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "The requirement IR-03 mandates that the supplier provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks. The selected evidence from Atlas's assurance pack explicitly declares and confirms this process by stating: 'Containment and recovery updates describe material changes in impact and unresolved risks.' Furthermore, the incident workspace documentation and procedures establish that tracking and updates continue through the lifecycle of incidents until closure. The evidence supports every applicable material condition of the requirement.",
+        "requirement_id": "IR-03",
+        "requirement_source": {
+          "quote": "IR-03 — Severity: Medium. Applies to qualifying incidents in every relationship.\n\nThe supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks.",
+          "chunk_id": "fd106dc5-cd6d-42e5-a9db-7252c2422587",
+          "location": {
+            "line_end": 52,
+            "line_start": 43
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "missing_information": [],
+        "requirement_description": "The supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks."
+      },
+      {
+        "title": "Root cause and corrective action report",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "For confirmed incidents, the closure package includes contributing factors, corrective actions, owners and verification status.",
+            "chunk_id": "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+            "location": {
+              "line_end": 113,
+              "line_start": 106
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "The requirement IR-04 mandates that for confirmed incidents, the supplier must deliver a scoped root-cause and corrective-action report identifying contributing factors, accountable remediation owners, and verification of closure. Evidence chunk 3361e42a-3d5e-4952-a258-0770bfe61ad0 explicitly states: 'For confirmed incidents, the closure package includes contributing factors, corrective actions, owners and verification status.' This fully satisfies all material conditions of the requirement.",
+        "requirement_id": "IR-04",
+        "requirement_source": {
+          "quote": "IR-04 — Severity: Medium. Applies to confirmed incidents in every relationship.",
+          "chunk_id": "6cbd1143-88a9-48c8-9767-f665c2a94f0d",
+          "location": {
+            "line_end": 62,
+            "line_start": 53
+          },
+          "document_id": "93fa448c-5b10-4bfb-b6c6-dbd8d4df13ca"
+        },
+        "missing_information": [],
+        "requirement_description": "For confirmed incidents, the supplier must deliver a scoped root-cause and corrective-action report identifying contributing factors, accountable remediation owners and verification of closure."
+      },
+      {
+        "title": "Signed Data Processing Agreement",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "DPA is signed for the assessed service before processing begins.",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "| A-04 | Executed processing schedule | Contract parties, source agreement | Northstar service scope |",
+            "chunk_id": "28ab4f2b-afdf-471d-af3e-320e9b487435",
+            "location": {
+              "line_end": 129,
+              "line_start": 114
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The requirement PRI-01 applies when personal data is processed, which is met in this relationship since customer contact and usage data are shared. The supplier declaration explicitly confirms that a Data Processing Agreement is signed for the assessed service before processing begins. Furthermore, the document register lists register A-04 as the executed processing schedule and Northstar service schedule, supporting the declared signed state.",
+        "requirement_id": "PRI-01",
+        "requirement_source": {
+          "quote": "PRI-01 — Severity: High. Applies when personal data is processed.\nFor relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins.",
+          "chunk_id": "e951ba0f-49bb-4b6d-8680-db5330df0bb4",
+          "location": {
+            "line_end": 24,
+            "line_start": 13
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins."
+      },
+      {
+        "title": "Purpose limitation and data minimization",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "The service schedule limits the assessed use to customer operations analytics for Northstar. It identifies the data categories supplied by Northstar and the expected service outputs. Atlas does not describe an additional product-training purpose in that schedule. Customer configuration can exclude unnecessary fields at import.",
+            "chunk_id": "859cc687-3c88-4a03-bde7-77980c5359a6",
+            "location": {
+              "line_end": 81,
+              "line_start": 74
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The supplier declares and documents that personal data processing is limited to customer operations analytics for Northstar and that customer configuration can exclude unnecessary fields, satisfying the requirement for purpose limitation and data minimization under the relationship terms.",
+        "requirement_id": "PRI-05",
+        "requirement_source": {
+          "quote": "PRI-05 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need.",
+          "chunk_id": "75699400-a394-4554-91eb-c362efe53837",
+          "location": {
+            "line_end": 34,
+            "line_start": 25
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need."
+      },
+      {
+        "title": "Primary hosting location in the EU",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Hosting region is EU for primary storage and processing of the assessed service.",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The requirement states that for relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU. The selected evidence explicitly declares that the hosting region is in the EU for primary storage and processing of the assessed service, satisfying the requirement.",
+        "requirement_id": "PRI-03",
+        "requirement_source": {
+          "quote": "PRI-03 — Severity: High. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU.",
+          "chunk_id": "6a27ed42-2a17-4d81-8e2a-ea2d14776ea4",
+          "location": {
+            "line_end": 46,
+            "line_start": 35
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU."
+      },
+      {
+        "title": "Subprocessor inventory and change review",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Atlas maintains an advance-change process for the inventory. Assurance Operations routes proposed material changes to the customer contact before they take effect under the agreed schedule. The notice describes the changed activity and access boundary so Northstar can decide what additional review is needed.",
+            "chunk_id": "6f8115cf-a12b-40f4-8093-d12ad2457e41",
+            "location": {
+              "line_end": 97,
+              "line_start": 90
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          },
+          {
+            "quote": "The subprocessor inventory identifies each entity's function, access category and location. The infrastructure operator supports regional production operation. Meridian Support Services provides specialist incident diagnosis from the United States under a task-based authorization route.",
+            "chunk_id": "7c7af9e9-37a6-4807-9473-cb6f9236df54",
+            "location": {
+              "line_end": 89,
+              "line_start": 82
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "The relationship involves processing personal data (customer contact and usage data) for hosted customer operations analytics. Under PRI-04, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards. The evidence demonstrates that Atlas maintains a subprocessor inventory identifying each entity's function, access category, and location (such as Meridian Support Services in the US), and routes proposed material changes to the customer contact before they take effect so Northstar can review the access boundary and transfer safeguards.",
+        "requirement_id": "PRI-04",
+        "requirement_source": {
+          "quote": "PRI-04 — Severity: Medium. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards.",
+          "chunk_id": "5a2e4b8e-c15c-44be-b167-31fd02c84f8f",
+          "location": {
+            "line_end": 60,
+            "line_start": 47
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards."
+      },
+      {
+        "title": "Return, deletion and preservation boundaries",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Retention period is 21 days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles.",
+            "chunk_id": "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+            "location": {
+              "line_end": 30,
+              "line_start": 13
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "High",
+        "explanation": "The supplier's control declaration establishes a retention and deletion period of 21 days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles. Because this period is shorter than the maximum deadline of 30 calendar days required by PRI-02 while maintaining the exact same triggers and conditional exclusions, the supplier satisfies the requirement.",
+        "requirement_id": "PRI-02",
+        "requirement_source": {
+          "quote": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles.",
+          "chunk_id": "6cf03aa7-418f-4d4f-be28-57ec9f9bec0b",
+          "location": {
+            "line_end": 66,
+            "line_start": 61
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles."
+      },
+      {
+        "title": "Assistance with individual requests",
+        "status": "pass",
+        "evidence": [
+          {
+            "quote": "Northstar sends authenticated requests through the agreed service support route. Atlas's operations team can locate an account's service records and support access, correction, removal or export instructions.",
+            "chunk_id": "7c7af9e9-37a6-4807-9473-cb6f9236df54",
+            "location": {
+              "line_end": 89,
+              "line_start": 82
+            },
+            "document_id": "5873e1d6-2ac4-4266-ac93-5f66b0b400ed",
+            "evidence_type": "declaration"
+          }
+        ],
+        "severity": "Medium",
+        "explanation": "The requirement (PRI-06) mandates that for relationships processing personal data, the supplier must support Northstar with access, correction, deletion, and export requests using the agreed authenticated request process. The relationship processes personal data (customer contact and usage data). Evidence from the supplier assurance pack explicitly establishes that Northstar sends authenticated requests through the agreed service support route, and Atlas's operations team provides support for locating account service records and handling access, correction, removal, or export instructions.",
+        "requirement_id": "PRI-06",
+        "requirement_source": {
+          "quote": "PRI-06 — Severity: Medium. Applies when personal data is processed.\n\nFor relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process.",
+          "chunk_id": "e8abbbb1-85c9-4a64-8b8c-02178e21e54d",
+          "location": {
+            "line_end": 76,
+            "line_start": 67
+          },
+          "document_id": "c22abea6-f46e-4bf0-a774-1fed816eca9e"
+        },
+        "missing_information": [],
+        "requirement_description": "For relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process."
+      }
+    ],
+    "questions": [
+      "Contractual clauses or flow-down terms explicitly requiring subcontractors to adhere to Northstar service obligations and confirming the supplier's ongoing accountability for subcontractor delivery.",
+      "Business continuity plan for the high-criticality service scope",
+      "Tested exit plan covering recovery dependencies, Northstar data return, and transition responsibilities"
+    ],
+    "model_mode": "gemini",
+    "model_name": "gemini-3.5-flash-lite",
+    "completeness": 90,
+    "discrepancies": [],
+    "rules_version": "semantic-risk-v2",
+    "prompt_version": "semantic-assessment-v4",
+    "decision_status": "pending_review",
+    "workflow_version": "assessment-v1",
+    "workflow_complete": false
+  },
+  "retrieval_snapshot": {
+    "config": {
+      "model": "intfloat/multilingual-e5-small",
+      "rrf_k": 5,
+      "top_k": 8,
+      "backend": "pgvector-exact",
+      "lexical": "unicode-log-count-v1",
+      "pooling": "masked-mean-l2-then-window-mean-l2",
+      "runtime": "onnxruntime-1.30.0-cpu-fp32",
+      "prefixes": {
+        "query": "query: ",
+        "passage": "passage: "
+      },
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "artifacts": {
+        "model.onnx": {
+          "bytes": 470268510,
+          "sha256": "ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665"
+        },
+        "tokenizer.json": {
+          "bytes": 17082730,
+          "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39"
+        }
+      },
+      "dimension": 384,
+      "retrieval": "e5-v1",
+      "tokenizer": "tokenizers-0.23.2",
+      "windowing": "complete-content-tokens-repeat-prefix-v2-no-double-boundary",
+      "algorithms": {
+        "hybrid": "weighted-rrf-3-1-k5-v1",
+        "lexical": "unicode-log-count-v1",
+        "semantic": "cosine-v1"
+      },
+      "max_chunks": 500,
+      "max_tokens": 512,
+      "window_overlap": 64,
+      "query_composition": "title-field-v1",
+      "rrf_lexical_weight": 1,
+      "rrf_semantic_weight": 3
+    },
+    "scores": {
+      "IR-01": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8418224108762271,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.877924919128418,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8498862981796265,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8426875127162792,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8351353406906128,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8339940905570984,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8443719744682312,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8367635607719421,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8450702932518911,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8628926277160645,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8620237368948385,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8221774101257324,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.853640079498291,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8235594034194946
+      },
+      "IR-02": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8485834851438849,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8723471760749817,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8569677472114563,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8555562751160946,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8640530705451965,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8420752882957458,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8618679046630859,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8506489992141724,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8448211458218796,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8716180324554443,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8562820808971552,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8356738090515137,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8706008195877075,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8369052410125732
+      },
+      "IR-03": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8608220046023818,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8639518184719364,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8585390021158515,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8611101334294653,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.866573468855212,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8412754724889491,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8631811305068637,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.858636634512355,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.844134995690896,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.878421797940523,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8508698775586689,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8316018186090268,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8575212529276369,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8199576950123731
+      },
+      "IR-04": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8574949758498367,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8563522696495056,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8515268564224243,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8613958615480624,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8762035965919495,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8569266200065613,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8644347786903381,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8589228391647339,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8546408924246381,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8731648921966553,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.84471162690853,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8611899614334106,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8404282331466675,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8409521579742432
+      },
+      "GOV-01": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8316254863627404,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.826378583908081,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8501620888710022,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8316610703367318,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.817371129989624,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8452298641204834,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8159610629081726,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8386471271514893,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8440739419504385,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8372130393981934,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.842510546520667,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8187136650085449,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8498368263244629,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8068721294403076
+      },
+      "GOV-02": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8389747392825708,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8482906818389893,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8519156575202942,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8316856870557576,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8416934013366699,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8297486305236816,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8162813186645508,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8331106305122375,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8373104832953517,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8523780107498169,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8336940060166722,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8324777483940125,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8355932235717773,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8392429351806641
+      },
+      "GOV-03": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8434386504721243,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8399214744567871,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8302843570709229,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8494255199857215,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8092963099479675,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8349640369415283,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8210421800613403,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8448848724365234,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8322417040015297,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8406651020050049,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.832084680559775,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.7921028733253479,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8427116870880127,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8062812685966492
+      },
+      "GOV-04": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8573999319910962,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8782918118921467,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8562228338784827,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8644663610736347,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.853148247395404,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8486646666724884,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8625071305783731,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8553723947814824,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8427179613159268,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8651294966080638,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8514114529735716,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8471681132068671,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.85543933079956,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8212885505345036
+      },
+      "PRI-01": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8313628086853868,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8847452402114868,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8461166620254517,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8557926671443188,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8130897283554077,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8446617126464844,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8294132947921753,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8517572283744812,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8649218001915113,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8509339690208435,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8536770598196111,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8284945487976074,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8485684394836426,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8145075440406799
+      },
+      "PRI-02": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8453866495307285,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8947585821151733,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8565935492515564,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8647073765011843,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8341876268386841,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8558743000030518,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8688634634017944,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8781826496124268,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8462163714299439,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8550123572349548,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8680830856586426,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8347865343093872,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8663390874862671,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8379420638084412
+      },
+      "PRI-03": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8305227407968865,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8586273193359375,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8467288613319397,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8383453142149844,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8196589350700378,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.857366144657135,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8265607357025146,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8458986878395081,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8555326971729232,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.836850106716156,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8414591205554942,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.843602180480957,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8545293211936951,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8063009977340698
+      },
+      "PRI-04": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8468110996355718,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8760007767676443,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8752092271793872,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8663140952902447,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8312066994659126,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8576344421345722,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8509774385717644,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8853350418406738,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8800659847220332,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8701990997554007,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8690300402912557,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.852173107603424,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8822003743409726,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.832833667655752
+      },
+      "PRI-05": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8250458136228211,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8579488652333283,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8349090467366296,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8594924127753027,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.802988076299074,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8455779208415131,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8330163011853788,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8503715053311443,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8438368598076877,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8609955567418208,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8570735369368515,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.811114335391353,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8582096355619921,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8198755627833478
+      },
+      "PRI-06": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8486949711260182,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.867756988637358,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8712806961322042,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.864098183160912,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8240005023479615,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8568702595493278,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8452039016844008,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8686851521934618,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8895751437164976,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.865418817562426,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.862399987125396,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8326319704244132,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8707019946188332,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8101762774639216
+      },
+      "SEC-01": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.836649323602001,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8809850215911865,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8603761196136475,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8550948755471375,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8171678781509399,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8414911031723022,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.824151873588562,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8428502678871155,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8702935499127851,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8418117165565491,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.861011888414976,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.822527289390564,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8543218374252319,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8175551891326904
+      },
+      "SEC-02": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8354995499700177,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8855258226394653,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8610250949859619,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8557621495652843,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8322677612304688,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8532013893127441,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8575456142425537,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.863548755645752,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8555295381265619,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8593457937240601,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8581868665870094,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8515865206718445,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8744848966598511,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8261566758155823
+      },
+      "SEC-03": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8590638893563718,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8663146495819092,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8729103207588196,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8601126927170963,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8245090246200562,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8412331938743591,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8230806589126587,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8522786498069763,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8569800172436263,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8498267531394958,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8506851449812995,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8338965177536011,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.9018469452857971,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8256976008415222
+      },
+      "SEC-04": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.827980662226101,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8386513590812683,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8528833985328674,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8336314211377929,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8397483229637146,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8354611396789551,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.846600353717804,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.84932541847229,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8432875182203974,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8371996879577637,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8319103369686112,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8508656024932861,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8269503116607666,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8212407827377319
+      },
+      "SEC-05": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.867255951978444,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8526512980461121,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8557056188583374,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8514671579440585,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8233743906021118,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8467434644699097,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8455923795700073,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.8611680269241333,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8390726947231721,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8536413311958313,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8367180477594751,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8267862796783447,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.8544400930404663,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8200546503067017
+      },
+      "SEC-06": {
+        "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5": 0.8536481515660335,
+        "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f": 0.8627125024795532,
+        "1b45ac9c-9f2a-4874-9232-3b315d2f674e": 0.8675394058227539,
+        "28ab4f2b-afdf-471d-af3e-320e9b487435": 0.8544805304551286,
+        "3361e42a-3d5e-4952-a258-0770bfe61ad0": 0.8584768176078796,
+        "3df7d343-3847-4038-ba3b-abc7bf998be9": 0.8406345248222351,
+        "4a2d2f67-6125-4fee-94cb-51940a3720ca": 0.8397417068481445,
+        "6f8115cf-a12b-40f4-8093-d12ad2457e41": 0.843321681022644,
+        "7c7af9e9-37a6-4807-9473-cb6f9236df54": 0.8359489939182412,
+        "859cc687-3c88-4a03-bde7-77980c5359a6": 0.8551103472709656,
+        "8bd424bb-b112-4129-93a1-bac25b11eb07": 0.8426420939756067,
+        "aad0ea4f-d438-4447-8e0f-fd7e5214372e": 0.8476686477661133,
+        "eeecb1a2-37f2-46bd-8322-7fa2de8960b0": 0.85853111743927,
+        "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c": 0.8377559781074524
+      }
+    },
+    "queries": {
+      "IR-01": "Initial incident notification\nThe supplier must notify Northstar within 24 calendar hours after becoming aware of a suspected or confirmed incident affecting Northstar data, systems, credentials or service delivery.\nApplies to qualifying incidents in every relationship.",
+      "IR-02": "Evidence preservation and investigation timeline\nThe supplier must preserve relevant incident evidence and maintain a timestamped timeline of observations, containment actions and recovery decisions affecting Northstar.\nApplies to qualifying incidents in every relationship.",
+      "IR-03": "Containment and recovery updates\nThe supplier must provide containment and recovery updates to Northstar through incident closure, including material changes to assessed impact and unresolved recovery risks.\nApplies to qualifying incidents in every relationship.",
+      "IR-04": "Root cause and corrective action report\nFor confirmed incidents, the supplier must deliver a scoped root-cause and corrective-action report identifying contributing factors, accountable remediation owners and verification of closure.\nApplies to confirmed incidents in every relationship.",
+      "GOV-01": "Supplier relationship accountability\nThe supplier must name an accountable relationship owner and provide a maintained contact and escalation route for the assessed service.\nAll assessed suppliers.",
+      "GOV-02": "Assurance response quality\nThe supplier must provide accurate assurance responses with dated supporting evidence that identifies the assessed service, coverage period and known limitations.\nAll assessed suppliers.",
+      "GOV-03": "Contractual flow-down\nThe supplier must flow down the applicable Northstar service obligations to subcontractors performing those activities and retain accountability for their delivery.\nAll assessed suppliers.",
+      "GOV-04": "Continuity and exit for critical services\nFor high-criticality services, the supplier must maintain a continuity plan and a tested exit plan covering recovery dependencies, Northstar data return and transition responsibilities.\nApplies when business criticality is high.",
+      "PRI-01": "Signed Data Processing Agreement\nFor relationships processing personal data, the supplier must have a signed DPA with Northstar before processing begins.\nApplies when personal data is processed.",
+      "PRI-02": "Return, deletion and preservation boundaries\nFor relationships processing personal data, the supplier must complete deletion of Northstar personal data within 30 calendar days after service termination or an authenticated deletion request, excluding documented preservation obligations and technically isolated backup cycles.\nApplies when personal data is processed.",
+      "PRI-03": "Primary hosting location in the EU\nFor relationships processing personal data, the supplier must keep primary hosting and processing for the assessed service in the EU.\nApplies when personal data is processed.",
+      "PRI-04": "Subprocessor inventory and change review\nFor relationships processing personal data, the supplier must maintain a current subprocessor inventory and give Northstar advance notice of changes so Privacy can review access scope and transfer safeguards.\nApplies when personal data is processed.",
+      "PRI-05": "Purpose limitation and data minimization\nFor relationships processing personal data, the supplier must process Northstar data only for documented purposes and minimize the data used to what those purposes need.\nApplies when personal data is processed.",
+      "PRI-06": "Assistance with individual requests\nFor relationships processing personal data, the supplier must support Northstar with access, correction, deletion and export requests using the agreed authenticated request process.\nApplies when personal data is processed.",
+      "SEC-01": "Multi-factor authentication for privileged access\nFor relationships with privileged access, the supplier must enable MFA for every privileged account, including supplier support accounts accessing Northstar systems or the assessed service.\nApplies when privileged access is present.",
+      "SEC-02": "Data encryption at rest\nFor relationships processing personal data, the supplier must keep Northstar data encrypted at rest across production storage, replicas, logs and backups.\nApplies when personal data is processed.",
+      "SEC-03": "Supplier accountability for security\nThe supplier must name an accountable security owner and maintain a current inventory of controls and assets supporting the assessed service.\nTechnology suppliers storing Northstar data or accessing Northstar systems.",
+      "SEC-04": "Least-privilege access and prompt revocation\nFor relationships with privileged access, supplier personnel must receive approved least-privilege access and have that access revoked promptly when their duties change or end.\nApplies when privileged access is present.",
+      "SEC-05": "Vulnerability management\nThe supplier must operate a documented vulnerability and patch process that prioritizes remediation using severity, exposure and service impact, including testing, change approval and tracked exceptions.\nTechnology suppliers storing Northstar data or accessing Northstar systems.",
+      "SEC-06": "Independent assurance evidence\nFor high-criticality services, the supplier must provide current independent assurance evidence identifying the assessed service, covered controls, review period and material exclusions.\nApplies when business criticality is high."
+    },
+    "variant": "hybrid",
+    "chunk_ids": [
+      "10789d97-eaa4-4fa8-b9ad-692b3f87d2b5",
+      "197902a2-fdbf-47b9-9b98-b5a5cb95ad3f",
+      "1b45ac9c-9f2a-4874-9232-3b315d2f674e",
+      "28ab4f2b-afdf-471d-af3e-320e9b487435",
+      "3361e42a-3d5e-4952-a258-0770bfe61ad0",
+      "3df7d343-3847-4038-ba3b-abc7bf998be9",
+      "4a2d2f67-6125-4fee-94cb-51940a3720ca",
+      "6f8115cf-a12b-40f4-8093-d12ad2457e41",
+      "7c7af9e9-37a6-4807-9473-cb6f9236df54",
+      "859cc687-3c88-4a03-bde7-77980c5359a6",
+      "8bd424bb-b112-4129-93a1-bac25b11eb07",
+      "aad0ea4f-d438-4447-8e0f-fd7e5214372e",
+      "eeecb1a2-37f2-46bd-8322-7fa2de8960b0",
+      "f47fe5ef-c4ed-4097-acc7-e4895f4e7a8c"
+    ],
+    "fingerprint": "800ce15e8c69d74e89ab87bc2965eff571505bbdaf79c8570a8cdacbb60597e3",
+    "document_ids": [
+      "5873e1d6-2ac4-4266-ac93-5f66b0b400ed"
+    ],
+    "query_version": "narrative-v1"
+  },
+  "prompt_sha256": {
+    "EXTRACTION_INSTRUCTION": "07d75b57028307a398374b8252260e75fe70a59c3e04d7ee15ce56d56a0ac74a",
+    "ASSESSMENT_INSTRUCTION": "1baa2e3c7e01459878e38018d54ae60fdb64890e758f904445ee51fe90027f28"
+  }
+}

@@ -9,13 +9,11 @@ from sqlalchemy.orm import Session
 
 from counterparty.models import (
     AnalysisRun,
-    ApprovalRequest,
     AssessmentCase,
     AuditEvent,
     Decision,
     Document,
     DocumentChunk,
-    IntegrationCall,
     PolicySetVersion,
     User,
 )
@@ -62,13 +60,6 @@ async def test_delete_case_purges_content_files_checkpoints_and_dependents(
             files={"file": ("evidence.txt", b"Private counterparty document.")},
         )
         assert uploaded.status_code == 201, uploaded.text
-        proposal = await client.post(
-            f"/api/runs/{run_id}/ticket-proposals",
-            json={"title": "Private title", "body": "Private body"},
-        )
-        assert proposal.status_code == 201, proposal.text
-        approval_id = proposal.json()["id"]
-        assert (await client.post(f"/api/approvals/{approval_id}/approve")).status_code == 200
         with Session(engine) as session:
             doc = session.scalar(select(Document).where(Document.case_id == case_id))
             path = Path(settings.storage_path) / doc.storage_key
@@ -84,8 +75,6 @@ async def test_delete_case_purges_content_files_checkpoints_and_dependents(
         for model in (
             AnalysisRun,
             Decision,
-            ApprovalRequest,
-            IntegrationCall,
             AssessmentCase,
             Document,
             DocumentChunk,
@@ -142,34 +131,29 @@ async def test_deletion_guards_worker_row_and_reference_locks(workflow_setup, cl
         assert (await client.get(f"/api/policies/{policy_id}")).status_code == 200
 
 
-async def test_delete_approval_keeps_run_and_enforces_permissions(workflow_setup, client_factory):
+async def test_analyst_cannot_delete_reviewed_information_request(workflow_setup, client_factory):
     engine, settings, (run_id, user_id, org_id) = workflow_setup
-    assert process_one(engine, settings)
+    with Session(engine) as session:
+        session.add(
+            Decision(
+                organization_id=org_id,
+                run_id=run_id,
+                actor_id=user_id,
+                decision="needs_information",
+                rationale="Add current evidence and run another assessment.",
+            )
+        )
+        session.get(User, user_id).role = "analyst"
+        session.commit()
     async with client_factory(settings) as client:
         await login(client)
-        proposal = await client.post(
-            f"/api/runs/{run_id}/ticket-proposals", json={"title": "Title", "body": "Body"}
-        )
-        approval_id = proposal.json()["id"]
-        with Session(engine) as session:
-            session.get(User, user_id).role = "auditor"
-            session.commit()
-        for url in (f"/api/approvals/{approval_id}", f"/api/runs/{run_id}"):
-            assert (await client.delete(url)).status_code == 403
+        response = await client.delete(f"/api/runs/{run_id}")
+        assert response.status_code == 403
+        assert (await client.get(f"/api/runs/{run_id}")).status_code == 200
         with Session(engine) as session:
             session.get(User, user_id).role = "reviewer"
             session.commit()
-        assert (await client.post(f"/api/approvals/{approval_id}/approve")).status_code == 200
-        assert (await client.delete(f"/api/approvals/{approval_id}")).status_code == 200
-        assert (await client.get(f"/api/runs/{run_id}")).status_code == 200
-        assert (await client.get(f"/api/runs/{run_id}/tickets")).json() == []
-        assert (await client.delete(f"/api/approvals/{approval_id}")).status_code == 404
-    with Session(engine) as session:
-        assert session.scalar(select(func.count()).select_from(IntegrationCall)) == 0
-        assert all(
-            event.event not in {"ticket.proposed", "ticket.approved"}
-            for event in session.scalars(select(AuditEvent))
-        )
+        assert (await client.delete(f"/api/runs/{run_id}")).status_code == 200
 
 
 async def test_document_references_indexing_and_policy_extraction_guards(
@@ -215,7 +199,9 @@ async def test_document_references_indexing_and_policy_extraction_guards(
         assert (await client.delete(f"/api/documents/{doc_id}")).status_code == 200
 
 
-async def test_deletion_respects_case_owner_and_tenant(workflow_setup, client_factory):
+async def test_deletion_respects_reviewer_only_cases_and_shared_reports(
+    workflow_setup, client_factory
+):
     from counterparty.organizations import Organization
 
     engine, settings, (run_id, user_id, _) = workflow_setup
@@ -237,8 +223,8 @@ async def test_deletion_respects_case_owner_and_tenant(workflow_setup, client_fa
         session.commit()
     async with client_factory(settings) as client:
         await login(client)
-        assert (await client.delete(f"/api/cases/{case_id}")).status_code == 404
-        assert (await client.delete(f"/api/runs/{run_id}")).status_code == 404
+        assert (await client.delete(f"/api/cases/{case_id}")).status_code == 403
+        assert (await client.delete(f"/api/runs/{run_id}")).status_code == 200
         with Session(engine) as session:
             foreign = Organization(slug="foreign-deletion", name="Other", is_synthetic=True)
             session.add(foreign)
@@ -268,6 +254,8 @@ async def test_bootstrap_does_not_restore_deleted_seed(workflow_setup, client_fa
             },
         )
         assert response.status_code == 200
+        case = (await client.get("/api/cases")).json()[0]
+        assert (await client.delete(f"/api/cases/{case['id']}")).status_code == 200
         policy = (await client.get("/api/policies")).json()[0]
         assert (await client.delete(f"/api/policies/{policy['id']}")).status_code == 200
         for doc_id in policy["document_ids"]:

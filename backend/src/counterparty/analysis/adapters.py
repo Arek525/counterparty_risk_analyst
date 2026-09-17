@@ -7,11 +7,21 @@ import threading
 import time
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 
 class ModelError(RuntimeError):
     pass
+
+
+def schema_field_names(node):
+    if isinstance(node, dict):
+        return set(node.get("properties", {})).union(
+            *(schema_field_names(value) for value in node.values())
+        )
+    if isinstance(node, list):
+        return set().union(*(schema_field_names(value) for value in node))
+    return set()
 
 
 class GeminiAdapter:
@@ -127,6 +137,24 @@ class GeminiAdapter:
                         if attempt == 1:
                             raise ModelError("Gemini unavailable within bounded retries") from exc
                         time.sleep(1)
+                    except ValidationError as exc:
+                        # Never expose model output, unknown field names, or validator context.
+                        fields = schema_field_names(provider_schema)
+                        details = []
+                        for error in exc.errors(include_input=False, include_context=False)[:5]:
+                            location = (
+                                ".".join(
+                                    str(part)
+                                    if isinstance(part, int) or part in fields
+                                    else "[field]"
+                                    for part in error["loc"]
+                                )
+                                or "response"
+                            )
+                            details.append(f"{location}: {error['type']}")
+                        raise ModelError(
+                            "Gemini output failed schema validation (" + "; ".join(details) + ")"
+                        ) from exc
                     except (ValueError, KeyError, IndexError, TypeError) as exc:
                         raise ModelError("Gemini output failed schema validation") from exc
             raise ModelError("Gemini request did not complete")

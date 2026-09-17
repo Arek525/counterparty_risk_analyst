@@ -1,6 +1,8 @@
 """Analysis contracts run without PostgreSQL or provider credentials."""
 
+import json
 import math
+from pathlib import Path
 
 import pytest
 
@@ -433,8 +435,7 @@ def test_structured_source_location_preserved():
 def test_two_repository_policies_and_all_demo_scenarios():
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[2] / "datasets" / "synthetic" / "regression"
-    assert root.exists(), "Mount datasets at /datasets when running in the test container"
+    root = Path(__file__).parent / "fixtures" / "regression"
     policies = {}
     for name in ["northstar", "orchard"]:
         text = (root / "policies" / f"{name}.md").read_text()
@@ -580,3 +581,74 @@ def test_model_prompt_retains_customer_and_partner_roles_with_internal_duties(mo
 
     monkeypatch.setattr(GeminiAdapter, "generate", generate)
     assert propose_requirements(policies, "gemini") == expected
+
+
+def test_gemini_validation_diagnostics_do_not_expose_model_text(monkeypatch):
+    import json
+
+    import httpx
+
+    from counterparty.analysis.semantic import SemanticAssessment
+
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-test-key")
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-test")
+    monkeypatch.setattr(GeminiAdapter, "_last_call", 0)
+    real_client = httpx.Client
+    output = {"status": "secret-output", "explanation": "private", "secret-field": "private"}
+    response = {
+        "candidates": [
+            {"finishReason": "STOP", "content": {"parts": [{"text": json.dumps(output)}]}}
+        ]
+    }
+    monkeypatch.setattr(
+        httpx,
+        "Client",
+        lambda **kw: real_client(
+            transport=httpx.MockTransport(lambda request: httpx.Response(200, json=response)), **kw
+        ),
+    )
+    with pytest.raises(ModelError) as caught:
+        GeminiAdapter().generate("Assess", {}, SemanticAssessment)
+    message = str(caught.value)
+    assert "status: literal_error" in message
+    assert "[field]: extra_forbidden" in message
+    assert "secret" not in message and "private" not in message
+
+    output.clear()
+    output.update(status="conflict", explanation="Conflicting declarations.", evidence=[])
+    response["candidates"][0]["content"]["parts"][0]["text"] = json.dumps(output)
+    with pytest.raises(ModelError, match="assessment_evidence_required"):
+        GeminiAdapter().generate("Assess", {}, SemanticAssessment)
+
+
+@pytest.mark.parametrize(
+    "case",
+    json.loads((Path(__file__).parent / "fixtures/regression-cases.json").read_text())["cases"],
+    ids=lambda case: case["id"],
+)
+def test_historical_regression_examples(case):
+    requirements = [
+        {
+            "id": f"r{i}",
+            "title": item["field"],
+            "applicability": {},
+            "evaluation_method": "deterministic",
+            **item,
+        }
+        for i, item in enumerate(case["requirements"])
+    ]
+    chunks = [
+        chunk(text, id=f"e{i}", evidence_type="declaration") for i, text in enumerate(case["texts"])
+    ]
+    report = analyze(snapshot(chunks, requirements, case.get("relationship", {})))
+    assert [finding["status"] for finding in report["findings"]] == case["expected_statuses"]
+    assert report["risk"] == case["expected_risk"]
+    assert report["completeness"] == case["expected_completeness"]
+    assert {(fact["field"], fact["value"]) for fact in report["facts"]} == {
+        (field, value) for field, value in case["expected_facts"]
+    }
+    from counterparty.analysis.schemas import validate_source
+
+    for finding in report["findings"]:
+        for citation in finding["evidence"]:
+            validate_source({k: v for k, v in citation.items() if k != "evidence_type"}, chunks)

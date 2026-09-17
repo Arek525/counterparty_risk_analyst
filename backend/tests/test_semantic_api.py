@@ -41,7 +41,7 @@ async def test_full_text_cached_extraction_and_explicit_regeneration(
 
     monkeypatch.setattr("counterparty.analysis.semantic.propose_narrative_requirements", extract)
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         original = (
             "Support must be approved for each incident. " * 80
             + "\nFinal exception remains visible."
@@ -98,7 +98,7 @@ async def test_failed_extraction_is_saved_not_silently_retried(
 
     monkeypatch.setattr("counterparty.analysis.semantic.propose_narrative_requirements", fail)
     async with client_factory(settings) as client:
-        await login(client)
+        await login(client, "reviewer")
         doc = await upload(client)
         body = {"name": "Failed extraction", "document_ids": [doc["id"]]}
         first = (await client.post("/api/policies/propose", json=body)).json()
@@ -124,7 +124,7 @@ async def test_retry_preserves_completed_steps_and_blocks_completed_reports(
         relationship = await case(client)
         response = await client.post(
             f"/api/cases/{relationship['id']}/runs",
-            json={"policy_version_id": policy["id"], "retrieval_variant": "lexical"},
+            json={"policy_version_id": policy["id"]},
         )
         assert response.status_code == 201, response.text
         run_id = response.json()["id"]
@@ -138,9 +138,40 @@ async def test_retry_preserves_completed_steps_and_blocks_completed_reports(
                 "findings": [{"requirement_id": "done"}],
             }
             session.commit()
+        detail = (await client.get(f"/api/runs/{run_id}")).json()
+        assert detail["retry_blocked_reason"] is None
         resumed = await client.post(f"/api/runs/{run_id}/retry")
         assert resumed.status_code == 200 and resumed.json()["progress"]["completed"] == 1
         assert (await client.post(f"/api/runs/{run_id}/retry")).status_code == 409
         with Session(engine) as session:
             run = session.get(AnalysisRun, UUID(run_id))
             assert run.assessment_progress["findings"] == [{"requirement_id": "done"}]
+
+
+async def test_exhausted_requirement_exposes_retry_block_reason(domain_setup, client_factory):
+    from test_domain import case, proposed
+
+    settings, engine = domain_setup
+    async with client_factory(settings) as client:
+        await login(client, "reviewer")
+        doc = await upload(client)
+        policy = await proposed(client, doc["id"])
+        await client.post(f"/api/policies/{policy['id']}/approve")
+        relationship = await case(client)
+        response = await client.post(
+            f"/api/cases/{relationship['id']}/runs",
+            json={"policy_version_id": policy["id"]},
+        )
+        run_id = response.json()["id"]
+        with Session(engine) as session:
+            run = session.get(AnalysisRun, UUID(run_id))
+            run.status = "failed"
+            run.assessment_progress = {
+                "completed_ids": ["done"],
+                "attempts": {"done": 3, "next": 3},
+            }
+            session.commit()
+        detail = (await client.get(f"/api/runs/{run_id}")).json()
+        denied = await client.post(f"/api/runs/{run_id}/retry")
+        assert denied.status_code == 409
+        assert detail["retry_blocked_reason"] == denied.json()["detail"]

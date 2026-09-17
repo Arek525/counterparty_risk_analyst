@@ -81,7 +81,7 @@ export default function AuditPage() {
                   <div className="timeline-content">
                     <h3>{titleCase(event.event)}</h3>
                     <p>
-                      {event.actor_name ??
+                      {event.actor_email ?? event.actor_name ??
                         (event.actor_id
                           ? `User ${event.actor_id}`
                           : "System")}{" "}

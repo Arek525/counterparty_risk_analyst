@@ -97,8 +97,8 @@ export default function CasesPage() {
                 </span>
                 <div className="row-actions">
                   <Link className="arrow-link" href={`/cases/${item.id}`}>Open <Icon name="arrow" /></Link>
-                  <DeleteButton endpoint={`/api/cases/${item.id}`} label="Delete" ariaLabel={`Delete ${item.name}`} onDeleted={load}
-                    confirmation={`Permanently delete “${item.name}”, its documents, reports, decisions and local ticket records? Shared policies remain. This cannot be undone.`} />
+                  <DeleteButton reviewerOnly endpoint={`/api/cases/${item.id}`} label="Delete" ariaLabel={`Delete ${item.name}`} onDeleted={load}
+                    confirmation={`Permanently delete “${item.name}”, its documents, reports and decisions? Shared policies remain. This cannot be undone.`} />
                 </div>
               </div>
             </article>

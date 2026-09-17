@@ -1,144 +1,54 @@
-# Evaluation scope
+# Evaluation
 
-The existing `run.py`, demo/Gemini reports and gates below are **historical
-hash-retrieval regressions**, even when their extractor is Gemini. Their variant
-name `hybrid` describes the historical lexical-plus-hash algorithm, not current
-runtime E5 retrieval. Do not compare their finding accuracy with retrieval recall.
+This directory contains one reproducible local retrieval benchmark and an explicit
+live-provider smoke check. Historical regression fixtures live under `backend/tests/`.
+All documents and labels are synthetic. There is not yet an independently reviewed
+quality evaluation of the complete semantic-v2 pipeline.
 
-Current pretrained multilingual retrieval is evaluated separately by
-`semantic_retrieval.py` against frozen `multilingual-retrieval.json`; results live
-in `results-semantic.json`. See [method and measurements](../docs/verification/embeddings.md).
-Routine tests do not download a model or call paid providers.
+## Local retrieval benchmark
 
-# Analysis evaluation
+- [multilingual-retrieval.json](multilingual-retrieval.json): 24 passages and 12
+  bilingual queries with expected relevant passages.
+- [semantic_retrieval.py](semantic_retrieval.py): compares lexical, semantic and
+  hybrid ranking using the pinned multilingual E5 model.
+- [results-semantic.json](results-semantic.json): recorded development measurement.
+- [Method and limitations](../docs/retrieval.md): preprocessing,
+  metrics and interpretation. This measures retrieval, not LLM assessment quality.
+- [real_embedding_check.py](real_embedding_check.py): real model/cache and database
+  integration checks, separate from ordinary tests.
 
-Run from the repository root in the backend Python environment:
-
-```bash
-PYTHONPATH=backend/src python evaluations/run.py
-PYTHONPATH=backend/src python evaluations/run.py --check
-PYTHONPATH=backend/src python -m pytest evaluations/test_gate.py
-PYTHONPATH=backend/src python evaluations/run.py --mode gemini
-```
-
-`--check` writes the same reviewable reports and exits 1 if hybrid status or risk
-accuracy is below 90%, citation resolution is below 100%, either pipeline obeys
-the adversarial instruction, or a required case is missing. The dedicated gate
-tests include deliberate failures to verify CI catches regressions. The gate is
-only for the fixed demo dataset; `--check --mode gemini` is rejected before calls.
-Default evaluation without `--check` remains a reporting command.
-
-The real-model command
-requires `GEMINI_API_KEY` and an explicitly chosen `GEMINI_MODEL`; missing values
-write `pending_credentials` to `results-gemini.json` and exit 2. No real model calls
-were made for the committed demo report. Separate live results now exist for
-`gemini-3.5-flash-lite`: [report](report-gemini.md), [first baseline](results-gemini-baseline.json),
-and [verification notes](../docs/verification/gemini.md). Dataset review and broader
-quality validation remain unfinished. Never add credentials to Git.
-
-`held_out.json` is a small versioned synthetic regression set separate from the
-Northstar/Orchard development examples in `datasets/synthetic`. Gold labels are
-hand-authored for this project, not independently reviewed. Ten cases cover complete,
-missing, high-with-missing, direct contradiction, different scope/period, regional
-ambiguity, inapplicability, synonym retrieval, arbitrary manual policy and injection.
-Results retain each generated report so metric totals can be inspected.
-This corpus has now been used to fix real-provider integration and prompts, so
-it is a development regression set, not an untouched final test set.
-
-The extraction metric matches field/value pairs, not scope or period accuracy.
-Citation resolution checks exact quote/document/location, not semantic entailment.
-Retrieval recall@3 checks manually listed relevant chunks. Analysis uses top8 and
-can therefore behave differently from the top3 retrieval metric on larger inputs.
-Report completeness compares resolved applicable findings against expected labels.
-Authorization, recovery and UI behavior have separate integration checks.
-
-## Demo and provider boundaries
-
-API runs can persist scoped pgvector cosine similarities in the immutable snapshot.
-The engine consumes those stored similarities for hybrid ranking. This offline
-benchmark computes the same cosine scores locally and does not measure PostgreSQL
-query latency or database scope isolation.
-
-Demo is an English pattern extractor and 128-dimensional signed hash embeddings
-with a small alias vocabulary (`demo-hash-v1`). It does not run an LLM. Supported
-fields: `retention_days`, `notification_hours`, `hosting_region`,
-`subprocessors_region`, `mfa`, `encryption_at_rest`, `dpa_signed`. Other custom
-policies remain editable manual requirements with unknown findings. Uploaded
-policies need human review and approval; proposal thresholds come from their text.
-Application output is English; source quotations keep their original language.
-No Polish extraction quality claim is made.
-Compound statements isolate values by named-control clauses; decimal thresholds
-remain numeric. Pattern extraction still does not provide general language
-understanding. Real-model citation validation establishes source resolution, not
-semantic entailment of the extracted value; reviewer assessment and provider
-evaluation remain necessary.
-
-Gemini uses REST `generateContent`, JSON schema structured output and local
-Pydantic validation. Sources must resolve to the eligible snapshot. It cannot assign
-risk, change access controls, execute rules, approve decisions or create tickets.
-Metadata controls whether evidence is a declaration or independent supporting
-material. Local code calculates findings/risk with a fixed operator allowlist.
-
-Provider limits: 48,000 input characters, 4,096 output tokens, 250,000 response
-bytes, 25-second read timeout/5-second connect timeout, checked 60-second total
-runtime boundary, two attempts only on transient network/server errors, one active
-request per process, at least two seconds between calls. HTTP 429 stops immediately.
-No paid fallback exists; account billing is not changed. These process-local rate
-limits are not a distributed quota manager. Actual account pricing and usage must
-be checked before credentials are enabled; real cost is reported `null`, never zero.
-
-Source for the implemented optional API contract:
-[Google structured output documentation](https://ai.google.dev/gemini-api/docs/generate-content/structured-output).
-Live compatibility was checked with Gemini 3.5 Flash-Lite. Large top-level batch
-`maxItems` caused HTTP 400; these bounds remain in local Pydantic validation
-(200 facts, 100 requirements), while token/byte caps still bound provider output.
-Region aliases such as `European Union`/`EU` are canonicalized for equality and
-discrepancy checks. The original `raw_value` is retained when changed and used for
-text operators such as `contains`, so normalization cannot create substring matches.
-
-## Explicit risk rules v1
-
-A confirmed High failure yields High even if another requirement is unknown.
-Medium or Low failures yield Medium. Conflicting same-fact evidence with a failing
-value preserves that conservative severity while the finding remains conflict.
-Low requires every applicable requirement resolved and no discrepancy. Otherwise
-risk is `Unable to assess`. An all-inapplicable set has 100% evidence completeness
-but cannot establish Low risk. Completeness counts pass/fail, excluding conflicts,
-unknowns and requirements that do not apply. Human decision remains separate.
-
-Direct contradictions require equal explicit scope and period; differing or absent
-scope/period creates an ambiguity requiring review. EU hosting plus a US
-subprocessor produces a question, not an automatic contradiction or violation.
-
-
-## Northstar development corpus (2026-09-15)
-
-`northstar-gold-v1.json` separately records the 20 expected rules and literal source
-anchors (filename, source hash, full chunk location and quote). The author checked
-these labels against the supplier clauses; independent human review is pending.
-The four substantial source policies and long Atlas declaration are a development
-and acceptance set, not a held-out evaluation. Prompt changes used this set.
-The historical ten-case labels in `held_out.json` remain unchanged.
+With the backend dependencies installed and a model cache available:
 
 ```bash
-PYTHONPATH=backend/src python evaluations/northstar.py --mode demo
-# Explicit provider calls, only with authorized environment credentials:
-PYTHONPATH=backend/src python evaluations/northstar.py --mode gemini --output /tmp/northstar.json
+PYTHONPATH=backend/src python evaluations/semantic_retrieval.py --cache /path/to/model-cache
 ```
 
-The offline mode checks curated seed requirements and deterministic Atlas facts;
-it makes no claim about demo-regex policy extraction. Real mode extracts all four
-policies and analyzes the Atlas declaration. Every proposal citation must resolve.
-The runner matches requirements to gold by the cited supplier clause, allowing a
-model to choose different manual field names. Rule, applicability, severity,
-classification, missing/duplicate/internal obligations and seven exact fact values
-are checked separately. Any acceptance mismatch produces a nonzero exit code.
-Citation matching does not independently prove semantic entailment of a shortened
-quote; human review remains required.
+The command may download public model weights if absent; it does not call Gemini.
+New results go to ignored `evaluations/output/`, preserving the recorded baseline.
+The synthetic labels informed development and have not received independent human
+review. They are not an untouched held-out test or evidence of generalization.
 
-Current final Gemini result: 20/20 requirements, six deterministic and 14 manual;
-Atlas has six passes, 14 unknowns, 30% completeness, a US-support discrepancy and
-`Unable to assess` risk. See [the recorded failures, fixes and final metrics](../docs/verification/northstar.md).
-Retrieval in this result uses the existing hash-based hybrid variant; it is not an
-E5 embedding evaluation. Manual control narrative remains available in the source,
-but the evaluator deliberately does not attach or adjudicate it as a passing fact.
+## Explicit current-pipeline smoke check
+
+[semantic_smoke.mjs](semantic_smoke.mjs) runs a small source-grounded extraction and
+assessment scenario through a running application configured for Gemini. It makes
+real provider calls and creates synthetic records. It is never run by ordinary CI.
+
+```bash
+mkdir -p evaluations/output
+node evaluations/semantic_smoke.mjs evaluations/output/semantic-smoke.json
+```
+
+This verifies a bounded integration example, not broad model quality. Routine
+whole-application demo verification is in `frontend/tests/e2e/real-stack.spec.ts`.
+
+## Recorded application example
+
+The [seed fixture](../datasets/synthetic/gemini-example.json) contains real Gemini
+requirements and findings for the bundled Northstar/Atlas documents, plus source
+hashes, capture date, model, prompt version, extraction/assessment usage and retrieval
+provenance. The application seed imports it without provider calls. It is a reviewed
+development example, not gold labels or an independent model-quality measurement.
+The initial capture exposed an incorrect maximum-deadline interpretation; prompt v4
+clarified bound direction and the entire report was regenerated using the same
+extracted requirements. This example therefore informed prompt development.

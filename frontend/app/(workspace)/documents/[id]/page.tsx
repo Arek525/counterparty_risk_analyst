@@ -107,6 +107,7 @@ export default function DocumentPage() {
   }
   if (!document && !error) return <Spinner label="Loading source…" />;
   if (!document) return <ErrorNotice message={error} retry={load} />;
+  const canWrite = user?.role === "reviewer" || (user?.role === "analyst" && document.kind === "evidence" && !document.case_is_decided);
   return (
     <>
       <PageHeader
@@ -123,7 +124,7 @@ export default function DocumentPage() {
             >
               Download original
             </a>
-            {user?.role !== "auditor" && (
+            {canWrite && (
               <button
                 className="button button-danger"
                 disabled={deleting}
@@ -140,7 +141,7 @@ export default function DocumentPage() {
         <h2>Requirements</h2>
         <p>Extract requirements from the full document, then review and approve the saved draft. Reopening saved requirements uses no model API calls.</p>
         {policies.map((policy) => <p key={policy.id}><Link className="arrow-link" href={`/policies/${policy.id}`}>{policy.name} · v{policy.version} · {policy.status} · {policy.requirements.length} requirements</Link></p>)}
-        {user?.role !== "auditor" && <button className="button" disabled={extracting} onClick={extract}>{extracting ? "Extracting requirements…" : "Extract requirements"}</button>}
+        {user?.role === "reviewer" && <button className="button" disabled={extracting} onClick={extract}>{extracting ? "Extracting requirements…" : "Extract requirements"}</button>}
       </section>}
       {document.kind === "evidence" && (
         <div className="notice notice-info" style={{ marginBottom: 18 }}>
@@ -168,7 +169,7 @@ export default function DocumentPage() {
         {document.index_error && <p>{document.index_error}</p>}
         {modelStatus?.error && <p>{modelStatus.error}</p>}
         <p>Indexing runs in the background. The full source text remains available.</p>
-        {user?.role !== "auditor" && <button className="button button-small button-secondary" disabled={indexing} onClick={reindex}>{indexing ? "Queuing…" : "Reindex document"}</button>}
+        {canWrite && <button className="button button-small button-secondary" disabled={indexing} onClick={reindex}>{indexing ? "Queuing…" : "Reindex document"}</button>}
       </details>
       <p style={{ marginTop: 18 }}>
         <Link

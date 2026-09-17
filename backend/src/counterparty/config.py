@@ -20,8 +20,6 @@ class Settings(BaseSettings):
         "http://test",
     ]
     cookie_secure: bool = False
-    ticket_service_url: str = "http://tickets:8010"
-    ticket_service_token: SecretStr = SecretStr("local-demo-ticket-token")
     model_cache_path: str = "/app/model-cache"
     model_prepare_timeout_seconds: int = 600
     model_retry_seconds: int = 60

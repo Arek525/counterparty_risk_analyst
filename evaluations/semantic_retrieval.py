@@ -110,8 +110,11 @@ def main():
         type=Path,
         default=Path(__file__).with_name("multilingual-retrieval.json"),
     )
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--output", type=Path, default=Path(__file__).parent / "output/semantic-retrieval.json"
+    )
     args = parser.parse_args()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     start = time.monotonic()
     model = LocalEmbedder(args.cache)
     startup = time.monotonic() - start

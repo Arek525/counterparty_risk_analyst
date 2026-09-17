@@ -6,7 +6,9 @@ import { useAuth } from "@/context/auth-context";
 import { api, errorMessage } from "@/lib/api";
 import { ErrorNotice } from "./ui";
 
-export function DeleteButton({ endpoint, label, ariaLabel, confirmation, redirect, onDeleted }: {
+export function DeleteButton({ endpoint, label, ariaLabel, confirmation, redirect, onDeleted, reviewerOnly = false, allowed = true }: {
+  reviewerOnly?: boolean;
+  allowed?: boolean;
   endpoint: string;
   label: string;
   ariaLabel?: string;
@@ -18,7 +20,7 @@ export function DeleteButton({ endpoint, label, ariaLabel, confirmation, redirec
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  if (!user || user.role === "auditor") return null;
+  if (!user || !allowed || (reviewerOnly && user.role !== "reviewer")) return null;
 
   async function remove() {
     if (!confirm(confirmation)) return;

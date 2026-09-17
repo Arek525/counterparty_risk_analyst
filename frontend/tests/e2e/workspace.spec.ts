@@ -12,37 +12,6 @@ async function json(route: Route, body: unknown, status = 200) {
 
 async function mockApi(page: Page) {
   let loggedIn = false;
-  let ticketStep = 0;
-  const ticketResponse = () => ({
-    id: "50000000-0000-4000-8000-000000000001",
-    run_id: "run-1",
-    action: "create_ticket",
-    arguments: {
-      title: "Information request",
-      body: "Please respond.",
-      run_id: "run-1",
-      organization_id: "organization-1",
-    },
-    arguments_hash: "hash",
-    status: ["", "proposed", "approved", "executed"][ticketStep],
-    requested_by: "user-1",
-    approved_by: ticketStep >= 2 ? "user-1" : null,
-    expires_at: "2026-09-14T10:15:00Z",
-    created_at: now,
-    ticket:
-      ticketStep === 3
-        ? {
-            id: "60000000-0000-4000-8000-000000000001",
-            status: "open",
-            title: "Information request",
-            body: "Please respond.",
-            run_id: "run-1",
-            created_at: now,
-            service: "demo-ticketing",
-          }
-        : null,
-    error: null,
-  });
   await page.route("**/api/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -243,29 +212,6 @@ async function mockApi(page: Page) {
           },
         ],
       });
-    if (
-      path === "/api/runs/run-1/ticket-proposals" &&
-      request.method() === "POST"
-    ) {
-      ticketStep = 1;
-      return json(route, ticketResponse(), 201);
-    }
-    if (
-      path === "/api/approvals/50000000-0000-4000-8000-000000000001/approve" &&
-      request.method() === "POST"
-    ) {
-      ticketStep = 2;
-      return json(route, ticketResponse());
-    }
-    if (
-      path === "/api/approvals/50000000-0000-4000-8000-000000000001/execute" &&
-      request.method() === "POST"
-    ) {
-      ticketStep = 3;
-      return json(route, ticketResponse());
-    }
-    if (path === "/api/runs/run-1/tickets")
-      return json(route, ticketStep ? [ticketResponse()] : []);
     return json(
       route,
       { detail: `No mock for ${request.method()} ${path}` },
@@ -307,7 +253,7 @@ test("report separates risk, completeness and decision and opens its source", as
   ).toBeVisible();
   await expect(page.getByText("72%")).toBeVisible();
   await expect(page.getByText("Awaiting decision")).toBeVisible();
-  await expect(page.getByText("Cost unavailable")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Execution trace" })).toHaveCount(0);
   await expect(
     page.getByText("Workflow trace finalization must be retried."),
   ).toBeVisible();
@@ -337,7 +283,7 @@ test("policy cards show scope and sources without duplicate descriptions or obso
         severity: "Medium", evaluation_method: "manual", applicability: {}, source },
     ],
   }));
-  await page.route("**/api/documents", (route) => json(route, [
+  await page.route("**/api/documents?kind=policy", (route) => json(route, [
     { id: "doc-policy", filename: "information-security.md", version: 2, kind: "policy", created_at: now },
   ]));
   await page.goto("/login");
@@ -359,33 +305,6 @@ test("policy cards show scope and sources without duplicate descriptions or obso
   await expect(page.getByText("encryption_at_rest eq true")).toHaveCount(0);
 });
 
-test("ticket requires preview, approval and separate execution", async ({
-  page,
-}) => {
-  await mockApi(page);
-  await page.goto("/login");
-  await page.getByRole("button", { name: /Marta Recenzent/ }).click();
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.goto("/runs/run-1");
-
-  await page.getByRole("button", { name: "Preview proposal" }).click();
-  await expect(
-    page.getByText(/Information request — analysis/),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Save exact proposal" })
-    .click();
-  await expect(page.getByText("Awaiting approval")).toBeVisible();
-  await page.getByRole("button", { name: "Approve exact details" }).click();
-  await expect(
-    page.getByRole("button", { name: "Execute write" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Execute write" }).click();
-  await expect(
-    page.getByText(/Ticket 60000000-0000-4000-8000-000000000001/),
-  ).toBeVisible();
-});
-
 test("policy extraction is read-only, approved after review, and regenerated only explicitly", async ({ page }) => {
   await mockApi(page);
   const source = {document_id: "policy-doc", chunk_id: "policy-chunk", location: {line_start: 2}, quote: "Encrypt all customer records."};
@@ -394,7 +313,7 @@ test("policy extraction is read-only, approved after review, and regenerated onl
   let extractions = 0;
   let regenerate = false;
   await page.route("**/api/documents/policy-doc", route => json(route, document));
-  await page.route("**/api/documents", route => json(route, [document]));
+  await page.route("**/api/documents?kind=policy", route => json(route, [document]));
   await page.route("**/api/policies", route => json(route, extractions ? [policy] : []));
   await page.route("**/api/policies/propose", route => {
     extractions++;
@@ -442,7 +361,6 @@ test("failed semantic analysis resumes unfinished requirements and pairs policy 
   let retries = 0;
   let completed = false;
   await page.route("**/api/runs/resume-run", route => json(route, {id: "resume-run", case_id: "case-1", status: completed ? "awaiting_review" : retries ? "running" : "failed", retrieval_variant: "hybrid", created_at: now, progress: {completed: completed ? 2 : 1, total: 2, current_requirement_id: completed ? null : "SEC-2"}, error: retries ? null : "Provider request failed", report}));
-  await page.route("**/api/runs/resume-run/tickets", route => json(route, []));
   await page.route("**/api/runs/resume-run/retry", route => {retries++; return json(route, {});});
   await page.goto("/login");
   await page.getByRole("button", {name: /Marta Recenzent/}).click();
@@ -499,4 +417,112 @@ test("deletion requires confirmation, shows dependency errors and removes saved 
   await page.getByRole("button", {name: "Delete case", exact: true}).click();
   await expect(page).toHaveURL(/\/cases$/);
   expect(messages).toContain("The record was deleted. Original file cleanup is pending and will retry automatically.");
+});
+
+test("failed policy extraction shows its error without ready-result or review instructions", async ({ page }) => {
+  await mockApi(page);
+  await page.route("**/api/policies/failed-policy", (route) => json(route, {
+    id: "failed-policy", name: "Failed extraction", version: 1, status: "draft",
+    extraction_status: "error", extraction_error: "The source quotation could not be verified.",
+    document_ids: [], requirements: [], created_at: now,
+  }));
+  await page.route("**/api/documents?kind=policy", (route) => json(route, []));
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Marta Recenzent/ }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.goto("/policies/failed-policy");
+  await expect(page.getByRole("alert").filter({ hasText: "The source quotation could not be verified." })).toBeVisible();
+  await expect(page.getByText("No requirements", { exact: true })).toHaveCount(0);
+  await expect(page.getByText(/proposed no requirements|Extraction completed without/)).toHaveCount(0);
+  await expect(page.getByText("Version requires review", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Review full extracted wording", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Approve version", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Regenerate requirements", exact: true })).toBeVisible();
+});
+
+test("new analysis uses the server default without retrieval choices", async ({ page }) => {
+  await mockApi(page);
+  let submitted: unknown;
+  await page.route("**/api/cases/case-1/runs", async route => {
+    if (route.request().method() !== "POST") return route.fallback();
+    submitted = route.request().postDataJSON();
+    return json(route, { id: "run-1" }, 201);
+  });
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Marta Recenzent/ }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("link", { name: "Northstar assessment" }).click();
+  await page.getByRole("button", { name: "Run analysis", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Run analysis" });
+  await expect(dialog.getByRole("combobox")).toHaveCount(1);
+  await expect(dialog.getByText("Advanced retrieval options")).toHaveCount(0);
+  await expect(dialog.getByLabel("Approved policy")).toHaveValue("policy-1");
+  await dialog.getByRole("button", { name: "Run analysis", exact: true }).click();
+  await expect(page).toHaveURL(/\/runs\/run-1$/);
+  expect(submitted).toEqual({ policy_version_id: "policy-1" });
+});
+
+test("exhausted analysis explains the limit without offering resume", async ({ page }) => {
+  await mockApi(page);
+  await page.route("**/api/runs/exhausted", route => json(route, {
+    id: "exhausted", case_id: "case-1", status: "failed", retrieval_variant: "hybrid",
+    created_at: now, progress: { completed: 4, total: 8, current_requirement_id: "NS-05" },
+    error: "Gemini output failed schema validation",
+    retry_blocked_reason: "Requirement attempt limit reached; review the cause before creating a new analysis",
+  }));
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Marta Recenzent/ }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.goto("/runs/exhausted");
+  await expect(page.getByText("4 of 8 requirements assessed")).toBeVisible();
+  await expect(page.getByText(/Requirement attempt limit reached/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Resume unfinished requirements" })).toHaveCount(0);
+});
+
+for (const kind of ["policy", "evidence"] as const) {
+  test(`${kind} upload resets only after success and permits choosing the same file again`, async ({ page }) => {
+    await mockApi(page);
+    let fail = true;
+    let uploads = 0;
+    await page.route("**/api/documents?kind=policy", route => json(route, []));
+    await page.route("**/api/documents", route => {
+      if (route.request().method() !== "POST") return route.fallback();
+      uploads++;
+      return fail ? json(route, { detail: "Upload rejected" }, 400) : json(route, { id: "uploaded" }, 201);
+    });
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Marta Recenzent/ }).click();
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.goto(kind === "policy" ? "/policies" : "/cases/case-1");
+    const input = page.getByLabel(kind === "policy" ? "Policy document" : "Evidence document");
+    const file = { name: "new-policy.txt", mimeType: "text/plain", buffer: Buffer.from("Example policy.") };
+    await input.setInputFiles(file);
+    if (kind === "evidence") await page.getByLabel("Evidence type").selectOption("independent");
+    await page.getByRole("button", { name: "Add document", exact: true }).click();
+    await expect(page.getByText("Upload rejected")).toBeVisible();
+    await expect(input).not.toHaveValue("");
+    fail = false;
+    await page.getByRole("button", { name: "Add document", exact: true }).click();
+    await expect(input).toHaveValue("");
+    await expect(page.getByRole("button", { name: "Add document", exact: true })).toBeDisabled();
+    if (kind === "evidence") await expect(page.getByLabel("Evidence type")).toHaveValue("declaration");
+    await input.setInputFiles(file);
+    await expect(page.getByRole("button", { name: "Add document", exact: true })).toBeEnabled();
+    expect(uploads).toBe(2);
+  });
+}
+
+test("activity identifies people by email and automatic actions as System", async ({ page }) => {
+  await mockApi(page);
+  await page.route("**/api/audit", route => json(route, [
+    { id: "event-1", event: "document.created", actor_id: "opaque-user-id", actor_email: "reviewer@example.test", created_at: now },
+    { id: "event-2", event: "analysis.completed", actor_id: null, actor_email: null, created_at: now },
+  ]));
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Marta Recenzent/ }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.goto("/audit");
+  await expect(page.getByText(/reviewer@example.test/)).toBeVisible();
+  await expect(page.getByText(/System ·/)).toBeVisible();
+  await expect(page.getByText(/opaque-user-id/)).toHaveCount(0);
 });
