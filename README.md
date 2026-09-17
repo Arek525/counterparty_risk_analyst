@@ -11,6 +11,9 @@ This is a runnable portfolio application with persistent workflows, two-role aut
 source-linked reports and a reproducible evaluation. All bundled companies and documents
 are synthetic. It supports decisions; it does not certify compliance.
 
+The assessment report separates risk, evidence completeness and the reviewer's decision,
+with source-linked findings below.
+
 ![Recorded Gemini assessment in the local demo interface](docs/report.png)
 
 ## What the evaluation shows
@@ -153,14 +156,28 @@ In `.env`, single-quote values containing `$` to avoid Compose interpolation.
 
 ## Try the workflow
 
-Sign in as reviewer, open **Policies**, inspect the recorded requirements and follow a quotation
-to its full source. Open the recorded **Atlas** case and report to see Gemini findings without
-making API calls. Compare the declared controls with gaps in independent assurance and access scope.
+These screenshots show the bundled synthetic Northstar/Atlas example. Sign in as reviewer
+to explore its saved requirements and Gemini report without making model calls.
 
-For your own assessment, upload a policy, explicitly extract and approve its requirements,
-create a case, describe the relationship and upload evidence. Run analysis, inspect the source
-links, then accept, reject or request information. An analyst can supply additional evidence
-for an information request and generate another report.
+First, open **Policies** to review the extracted requirements, their applicability and links
+to the original policy passages. Approval fixes the version used by subsequent analyses.
+
+![Approved policy requirements with applicability and source links](docs/policy-requirements.png)
+
+Next, open the counterparty case to collect its evidence documents and describe the relationship:
+what data is shared, which systems are accessible and how critical the service is.
+
+![Counterparty case with evidence upload, relationship context and saved analyses](docs/counterparty-case.png)
+
+After analysis, follow a finding's citation to inspect the exact supporting passage.
+**Open full document** provides the surrounding source text for a closer review.
+
+![Citation window highlighting the supporting passage in the counterparty document](docs/source-citation.png)
+
+Finally, use the report to accept, reject or request information. An analyst can supply
+additional evidence for an information request and generate another report. For your own
+assessment, start by uploading a policy, explicitly extracting and approving its requirements,
+then creating a case and uploading counterparty evidence.
 
 **Delete** actions remove saved application records subject to reference and active-operation
 guards. Delete referencing reports before policy sets, and policy sets before their source
