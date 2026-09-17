@@ -12,7 +12,7 @@ from counterparty.analysis.retrieval import retrieve
 from counterparty.analysis.schemas import Source, validate_source
 from counterparty.analysis.sources import ground_model_sources, source, source_order
 
-PROMPT_VERSION = "semantic-assessment-v4"
+PROMPT_VERSION = "semantic-assessment-v6"
 RULES_VERSION = "semantic-risk-v2"
 MAX_POLICY_CHARS = 100000
 MAX_ASSESSMENT_CHARS = 25000
@@ -192,6 +192,8 @@ relationship and selected evidence. The requirement description and source quote
 conditions and exceptions: evaluate the WHOLE obligation, not an isolated number or matching term.
 First establish applicability from explicit relationship context; missing context is unknown, not
 not_applicable. not_applicable requires a concrete explanation of which scope condition is absent.
+If an obligation applies only when a specified activity occurs and explicit evidence excludes that
+activity, use not_applicable, not pass. Absence of the trigger is not proof of performing the duty.
 Interpret numerical bounds according to their direction and trigger: within, no later than,
 and at most specify a maximum; at least specifies a minimum; exactly specifies equality.
 A shorter period satisfies a maximum deadline when the trigger, scope and other conditions match.
@@ -199,6 +201,16 @@ A different number alone is not a violation. Explain which bound and starting ev
 and consider exceptions and conflicting minimum-retention obligations before judging compliance.
 Use pass only if evidence supports every applicable material condition. Use fail only for an
 explicit grounded violation after considering exceptions. Missing documents or silence is unknown.
+An unspecified deadline, unreported detail or lack of a guarantee is unknown, not an explicit
+violation. Do not infer late performance or non-performance from an incomplete description.
+A known incompatible practice or explicit refusal to meet the obligation is a violation.
+Evaluate the declared operating rules as well as recorded events: a binding procedure allowing
+conduct forbidden by the requirement is a violation even without proof that it has occurred.
+Only exceptions authorized by the approved requirement can excuse noncompliance. A counterparty's
+own exception does not waive the customer's requirement. Qualifiers such as "where available"
+do not satisfy an unconditional obligation when the evidence admits the required element is absent.
+For requirements requesting independent evidence, an absent report is unknown in this application;
+it does not establish what the unseen report says or prove the underlying control failed.
 Use conflict only for two explicit incompatible statements about the same scope and period, cite
 both as TWO SEPARATE evidence entries, one exact quotation for each incompatible statement,
 even when both statements are in the SAME chunk. Never combine both statements into one quotation.

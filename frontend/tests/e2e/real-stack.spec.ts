@@ -104,7 +104,7 @@ test("the complete MVP journey works on the real local stack", async ({
   expect(runResponse.ok()).toBeTruthy();
   const run: AnalysisRun = await runResponse.json();
   expect(run.status).toBe("awaiting_review");
-  expect(run.report?.prompt_version).toBe("semantic-assessment-v4");
+  expect(run.report?.prompt_version).toBe("semantic-assessment-v6");
   expect(run.report?.rules_version).toBe("semantic-risk-v2");
   expect(run.progress?.completed).toBe(policy!.requirements.length);
   expect(run.progress?.total).toBe(policy!.requirements.length);
