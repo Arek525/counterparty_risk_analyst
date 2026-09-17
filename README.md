@@ -62,6 +62,8 @@ freezing code and prompts, with no tuning on its results. Its perfect status agr
 
 The [evaluation guide](evaluations/README.md) links the topic-organized documents, expected
 answers, protocol, runnable code and **one results artifact containing every provider attempt**.
+For a readable comparison, [expand the six final test cases](evaluations/README.md#final-cases-inspect-the-actual-results)
+to inspect the expected answers, actual Gemini explanations, quotations and per-assessment token counts.
 Limitations include single observations, small short policies, authoring bias, shared synthetic
 background templates, only English/Polish text, and pending independent human review.
 
