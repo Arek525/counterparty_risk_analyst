@@ -33,9 +33,7 @@ async def login(client):
     assert response.status_code == 200
 
 
-async def test_delete_case_purges_content_files_checkpoints_and_dependents(
-    workflow_setup, client_factory
-):
+async def test_delete_case_purges_content_files_and_dependents(workflow_setup, client_factory):
     engine, settings, (run_id, user_id, org_id) = workflow_setup
     assert process_one(engine, settings)
     with Session(engine) as session:
@@ -64,7 +62,6 @@ async def test_delete_case_purges_content_files_checkpoints_and_dependents(
             doc = session.scalar(select(Document).where(Document.case_id == case_id))
             path = Path(settings.storage_path) / doc.storage_key
             assert path.exists()
-            assert session.scalar(text("SELECT count(*) FROM checkpoints")) > 0
         assert (await client.delete(f"/api/policies/{policy_id}")).status_code == 409
         response = await client.delete(f"/api/cases/{case_id}")
         assert response.status_code == 200, response.text
@@ -81,8 +78,6 @@ async def test_delete_case_purges_content_files_checkpoints_and_dependents(
             PolicySetVersion,
         ):
             assert session.scalar(select(func.count()).select_from(model)) == 0
-        for table in ("checkpoints", "checkpoint_blobs", "checkpoint_writes"):
-            assert session.scalar(text(f"SELECT count(*) FROM {table}")) == 0
         events = session.scalars(select(AuditEvent).where(AuditEvent.event != "auth.login")).all()
         assert {event.event for event in events} <= {"case.deleted", "policy.deleted"}
         assert all(set(event.details) == {"resource_id"} for event in events)

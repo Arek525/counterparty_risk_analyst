@@ -324,9 +324,8 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         assert (
             await client.post(f"/api/runs/{run['id']}/decision", json=decision)
         ).status_code == 409
-        from counterparty.worker import process_one, setup_checkpoints
+        from counterparty.worker import process_one
 
-        setup_checkpoints(engine)
         assert process_one(engine, settings, OfflineEncoder())
         completed = await client.post(f"/api/runs/{run['id']}/decision", json=decision)
         assert completed.status_code == 201, completed.text
@@ -334,7 +333,7 @@ async def test_run_snapshot_version_scope_and_immutable_decision(domain_setup, c
         assert (
             await client.post(f"/api/runs/{run['id']}/decision", json=decision)
         ).status_code == 409
-        assert process_one(engine, settings, OfflineEncoder())
+        assert not process_one(engine, settings, OfflineEncoder())
         assert (await client.get(f"/api/runs/{run['id']}")).json()["report"]["workflow_complete"]
         await login(client, "foreign")
         assert (await client.get(f"/api/runs/{run['id']}")).status_code == 404
@@ -375,7 +374,7 @@ async def test_explicit_bootstrap_is_idempotent(
         from counterparty.analysis.semantic import validate_narrative_requirements
         from counterparty.documents import chunks_for
         from counterparty.models import Decision
-        from counterparty.worker import process_one, setup_checkpoints
+        from counterparty.worker import process_one
 
         with Session(engine) as session:
             run = session.scalar(select(AnalysisRun))
@@ -409,11 +408,10 @@ async def test_explicit_bootstrap_is_idempotent(
             )
             run.status = "completed"
             session.commit()
-        setup_checkpoints(engine)
-        assert process_one(engine, settings) is True
+        assert process_one(engine, settings) is False
         with Session(engine) as session:
             run = session.get(AnalysisRun, run_id)
-            assert run.status == "completed" and run.report["workflow_complete"] is True
+            assert run.status == "completed"
             assert run.report["findings"] == before_report["findings"]
             assert run.report["recorded_example"] == before_report["recorded_example"]
         assert bootstrap(engine, settings, fixtures) == {
@@ -538,7 +536,7 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
     domain_setup, client_factory
 ):
     from counterparty.analysis.semantic import requirement_query
-    from counterparty.worker import process_one, setup_checkpoints
+    from counterparty.worker import process_one
 
     settings, engine = domain_setup
     async with client_factory(settings) as client:
@@ -562,7 +560,6 @@ async def test_pgvector_search_is_scoped_versioned_and_matches_local_cosine(
         snapshot = run["input_snapshot"]
         assert "retrieval_scores" not in snapshot
         assert run["retrieval_snapshot"] is None
-        setup_checkpoints(engine)
         assert process_one(engine, settings, OfflineEncoder())
         result = (await client.get(f"/api/runs/{run['id']}")).json()
         scores = result["retrieval_snapshot"]["scores"]

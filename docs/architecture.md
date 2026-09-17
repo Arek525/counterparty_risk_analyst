@@ -72,20 +72,21 @@ results must not be confused with real-model validation.
 A job row records state, attempts, lease and input versions. Workers use a
 per-run PostgreSQL session advisory lock and a row lock when claiming. Lease
 expiration allows recovery after a dead process; the advisory lock prevents another
-worker claiming a live execution. The lock and checkpoint saver share one physical
-connection, so loss of ownership also stops checkpoint writes. A claim token fences final business writes if
+worker claiming a live execution. The ownership connection is checked before
+publishing progress or the final report. A claim token fences business writes if
 an old worker loses its connection. A supervisor terminates a job that exceeds its
 active runtime budget. The persistent child reuses its loaded model across commands;
 model preparation has a separate 600-second budget, ordinary work retains 120 seconds.
 A failed preparation does not consume analysis attempts or block review finalization.
 New analyses with evidence require compatible ready indexes.
 
-LangGraph saves checkpoints in PostgreSQL using the run UUID as thread ID. Its
-review node interrupts after the report. A human Decision is an immutable business
-record, then the worker resumes the saved graph. If final graph bookkeeping fails,
-the recorded human decision survives and the report exposes a workflow error.
-Checkpoints belong to the workflow library; explicit Alembic revisions own the
-business schema and are applied before processes start.
+Each completed requirement is saved in the run's assessment progress. After a
+restart, the worker skips saved findings and continues unfinished requirements.
+An interrupted provider request may be repeated if its result was not persisted;
+this is not an exactly-once guarantee for model calls. Once all findings are ready,
+the worker saves the report with status `awaiting_review`. The reviewer API saves
+the immutable decision and marks the run completed in one transaction. No worker
+or model call is needed to finalize a decision. Alembic owns the database schema.
 
 ## Information requests
 
@@ -114,7 +115,7 @@ enterprise identity, distributed quota or production operations platform.
 - `documents.py`, `indexing.py`, `embeddings.py`: ingestion and local retrieval indexes.
 - `analysis/semantic.py`, `analysis/adapters.py`, `analysis/schemas.py`:
   current assessment flow, provider prompts and response validation.
-- `worker.py`: background execution and the durable LangGraph review flow.
+- `worker.py`: background execution, persisted per-requirement progress and recovery.
 - `models.py` and `migrations/`: persistence and versioned database upgrades.
 - `frontend/app/`: pages; `frontend/components/`: shared UI.
 

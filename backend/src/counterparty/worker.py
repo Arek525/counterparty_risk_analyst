@@ -1,4 +1,4 @@
-"""Durable, bounded analysis execution with PostgreSQL and LangGraph checkpoints."""
+"""Durable, bounded analysis execution with PostgreSQL progress records."""
 
 import copy
 import hashlib
@@ -6,16 +6,12 @@ import logging
 import multiprocessing
 import os
 import time
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from functools import partial
-from typing import TypedDict
 from uuid import UUID, uuid4
 
 import psycopg
-from langgraph.checkpoint.postgres import PostgresSaver
-from langgraph.graph import END, START, StateGraph
-from langgraph.types import Command, interrupt
 from psycopg.rows import dict_row
 from sqlalchemy import Engine, and_, or_, select
 from sqlalchemy.orm import Session
@@ -33,16 +29,9 @@ from counterparty.indexing import (
     prepare_retrieval,
     set_model_state,
 )
-from counterparty.models import AnalysisRun, AuditEvent, Decision, Document, PolicySetVersion
+from counterparty.models import AnalysisRun, AuditEvent, Document, PolicySetVersion
 
 logger = logging.getLogger(__name__)
-
-
-class AnalysisState(TypedDict, total=False):
-    run_id: str
-    snapshot: dict
-    report: dict
-    decision: dict
 
 
 def lock_key(run_id: UUID) -> int:
@@ -52,7 +41,7 @@ def lock_key(run_id: UUID) -> int:
 
 
 @contextmanager
-def checkpointer(engine: Engine):
+def ownership_connection(engine: Engine):
     params = engine.url.translate_connect_args(username="user", database="dbname")
     with psycopg.connect(
         **params,
@@ -62,40 +51,7 @@ def checkpointer(engine: Engine):
         connect_timeout=3,
         options="-c statement_timeout=10000",
     ) as connection:
-        yield PostgresSaver(connection)
-
-
-def setup_checkpoints(engine: Engine) -> None:
-    with checkpointer(engine) as saver:
-        # The library owns its schema. Serialize its setup across starting workers.
-        saver.conn.execute("SELECT pg_advisory_lock(471932841)")
-        try:
-            saver.setup()
-        finally:
-            saver.conn.execute("SELECT pg_advisory_unlock(471932841)")
-
-
-def build_graph(saver, assessment=None):
-    def assess(state: AnalysisState):
-        if assessment is not None:
-            report = assessment(state["snapshot"])
-        else:
-            from counterparty.analysis import analyze
-
-            report = analyze(state["snapshot"])
-        return {"report": report}
-
-    def review(state: AnalysisState):
-        decision = interrupt({"run_id": state["run_id"], "action": "review_report"})
-        return {"decision": decision}
-
-    graph = StateGraph(AnalysisState)
-    graph.add_node("assess", assess)
-    graph.add_node("review", review)
-    graph.add_edge(START, "assess")
-    graph.add_edge("assess", "review")
-    graph.add_edge("review", END)
-    return graph.compile(checkpointer=saver)
+        yield connection
 
 
 def _event(session, run, event, details=None):
@@ -118,15 +74,6 @@ def _eligible(now):
             AnalysisRun.status == "running",
             or_(AnalysisRun.lease_expires_at < now, AnalysisRun.lease_expires_at.is_(None)),
         ),
-        and_(
-            AnalysisRun.status == "completed",
-            AnalysisRun.report.is_not(None),
-            AnalysisRun.report["workflow_error"].astext.is_(None),
-            or_(
-                AnalysisRun.report["workflow_complete"].astext.is_(None),
-                AnalysisRun.report["workflow_complete"].astext != "true",
-            ),
-        ),
     )
 
 
@@ -141,10 +88,7 @@ def process_one(engine: Engine, settings: Settings, model=None, heartbeat=None) 
             )
         )
     for run_id in candidates:
-        with checkpointer(engine) as saver:
-            # The checkpoint writer and ownership lock share one physical session.
-            # Losing ownership therefore also prevents stale checkpoint writes.
-            owner = saver.conn
+        with ownership_connection(engine) as owner:
             key = lock_key(run_id)
             acquired = owner.execute(
                 "SELECT pg_try_advisory_lock(%s) AS acquired", (key,)
@@ -152,7 +96,7 @@ def process_one(engine: Engine, settings: Settings, model=None, heartbeat=None) 
             if not acquired:
                 continue
             try:
-                if _execute_claim(engine, settings, run_id, saver, model, heartbeat):
+                if _execute_claim(engine, settings, run_id, owner, model, heartbeat):
                     return True
             finally:
                 if not owner.closed and not owner.broken:
@@ -163,27 +107,19 @@ def process_one(engine: Engine, settings: Settings, model=None, heartbeat=None) 
 MAX_REQUIREMENT_ATTEMPTS = 3
 
 
-def _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock):
-    # Checkpoint writes use this same connection in a background thread.
-    with owner_lock or nullcontext():
+def _publish_progress(engine, settings, run_id, token, owner, progress):
+    owner.execute("SELECT 1")
+    with Session(engine) as session:
+        run = session.scalar(select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update())
+        if run.lease_owner != token or run.status != "running":
+            raise EmbeddingError("Analysis ownership changed before assessment publication")
+        run.assessment_progress = copy.deepcopy(progress)
+        run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=settings.worker_lease_seconds)
         owner.execute("SELECT 1")
-        with Session(engine) as session:
-            run = session.scalar(
-                select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update()
-            )
-            if run.lease_owner != token or run.status != "running":
-                raise EmbeddingError("Analysis ownership changed before assessment publication")
-            run.assessment_progress = copy.deepcopy(progress)
-            run.lease_expires_at = datetime.now(UTC) + timedelta(
-                seconds=settings.worker_lease_seconds
-            )
-            owner.execute("SELECT 1")
-            session.commit()
+        session.commit()
 
 
-def assess_sequential(
-    engine, settings, run_id, token, owner, snapshot, heartbeat=None, owner_lock=None
-):
+def assess_sequential(engine, settings, run_id, token, owner, snapshot, heartbeat=None):
     from counterparty.analysis.semantic import assess_requirement, build_report
 
     with Session(engine) as session:
@@ -218,7 +154,7 @@ def assess_sequential(
             raise ModelError("Requirement attempt limit exceeded; create a new analysis to retry.")
         progress["current_requirement_id"] = requirement_id
         progress["attempts"][requirement_id] = attempts + 1
-        _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
+        _publish_progress(engine, settings, run_id, token, owner, progress)
         if heartbeat:
             heartbeat()
         try:
@@ -231,13 +167,13 @@ def assess_sequential(
                 metrics=progress["metrics"],
             )
         except Exception:
-            _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
+            _publish_progress(engine, settings, run_id, token, owner, progress)
             raise
         progress["findings"].append(finding)
         progress["completed_ids"].append(requirement_id)
         progress["completed"] = len(progress["completed_ids"])
         progress["current_requirement_id"] = None
-        _publish_progress(engine, settings, run_id, token, owner, progress, owner_lock)
+        _publish_progress(engine, settings, run_id, token, owner, progress)
         if heartbeat:
             heartbeat()
     report = build_report(
@@ -248,8 +184,7 @@ def assess_sequential(
     return report
 
 
-def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
-    owner = saver.conn
+def _execute_claim(engine, settings, run_id, owner, model=None, heartbeat=None):
     with Session(engine) as session:
         run = session.scalar(
             select(AnalysisRun)
@@ -258,13 +193,10 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
         )
         if run is None or (model is None and needs_embeddings(run)):
             return False
-        decision = session.scalar(select(Decision).where(Decision.run_id == run_id))
-        attempt_limit = settings.worker_max_attempts + (3 if decision else 0)
+        attempt_limit = settings.worker_max_attempts
         if run.attempts >= attempt_limit:
-            run.status = "failed" if not decision else "completed"
+            run.status = "failed"
             run.error = "Execution attempt limit exceeded; create a new analysis to retry."
-            if decision:
-                run.report = {**run.report, "workflow_complete": False, "workflow_error": run.error}
             _event(session, run, "run.failed", {"reason": "attempt_limit"})
             session.commit()
             return True
@@ -276,70 +208,34 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
         run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=settings.worker_lease_seconds)
         snapshot = run.input_snapshot
         retrieval = run.retrieval_snapshot
-        decision_data = (
-            {
-                "decision": decision.decision,
-                "rationale": decision.rationale,
-                "actor_id": str(decision.actor_id),
-            }
-            if decision
-            else None
-        )
         _event(session, run, "run.started", {"attempt": run.attempts, "model_mode": run.model_mode})
         session.commit()
     started = time.monotonic()
     try:
-        assessment = (
-            partial(
-                assess_sequential,
-                engine,
-                settings,
-                run_id,
-                claim_token,
-                owner,
-                heartbeat=heartbeat,
-                owner_lock=saver.lock,
+        if (
+            snapshot.get("requirements")
+            and any(chunk.get("kind") == "evidence" for chunk in snapshot["chunks"])
+            and "retrieval_config" not in snapshot
+            and "retrieval_scores" not in snapshot
+        ):
+            raise EmbeddingError("Run retrieval configuration is missing. Create a new analysis.")
+        if "retrieval_config" in snapshot and "retrieval_scores" not in snapshot:
+            retrieval = retrieval or prepare_retrieval(
+                engine, run_id, claim_token, snapshot, model, owner
             )
-            if snapshot.get("assessment_version") == "semantic-v2"
-            else None
-        )
-        graph = build_graph(saver, assessment)
-        config = {"configurable": {"thread_id": str(run_id)}, "recursion_limit": 8}
-        state = graph.get_state(config)
-        if not state.values:
-            if (
-                snapshot.get("requirements")
-                and any(chunk.get("kind") == "evidence" for chunk in snapshot["chunks"])
-                and "retrieval_config" not in snapshot
-                and "retrieval_scores" not in snapshot
-            ):
-                raise EmbeddingError(
-                    "Run retrieval configuration is missing. Create a new analysis."
-                )
-            if "retrieval_config" in snapshot and "retrieval_scores" not in snapshot:
-                retrieval = retrieval or prepare_retrieval(
-                    engine, run_id, claim_token, snapshot, model, owner
-                )
-                snapshot = {
-                    **snapshot,
-                    "retrieval_scores": retrieval["scores"],
-                    "retrieval_algorithm": retrieval["config"]["retrieval"],
-                }
-            result = graph.invoke({"run_id": str(run_id), "snapshot": snapshot}, config)
-        elif state.next and decision_data:
-            result = graph.invoke(Command(resume=decision_data), config)
-        elif state.next and any(task.interrupts for task in state.tasks):
-            result = state.values
-        elif state.next:
-            result = graph.invoke(None, config)
+            snapshot = {
+                **snapshot,
+                "retrieval_scores": retrieval["scores"],
+                "retrieval_algorithm": retrieval["config"]["retrieval"],
+            }
+        if snapshot.get("assessment_version") == "semantic-v2":
+            report = assess_sequential(
+                engine, settings, run_id, claim_token, owner, snapshot, heartbeat
+            )
         else:
-            result = state.values
-        # Crash after initial graph completion but before its DB report write
-        # can leave a decision waiting; resume exactly that checkpoint.
-        current = graph.get_state(config)
-        if decision_data and current.next:
-            result = graph.invoke(Command(resume=decision_data), config)
-        finished = not graph.get_state(config).next
+            from counterparty.analysis import analyze
+
+            report = analyze(snapshot)
         owner.execute("SELECT 1")  # Do not persist after losing the exclusive DB session.
         with Session(engine) as session:
             run = session.scalar(
@@ -348,11 +244,11 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
             if run.lease_owner != claim_token or run.status != "running":
                 return True
             run.report = {
-                **(run.report if decision_data else result["report"]),
+                **report,
                 "workflow_version": "assessment-v1",
-                "workflow_complete": finished,
+                "workflow_complete": False,
             }
-            run.status = "completed" if finished else "awaiting_review"
+            run.status = "awaiting_review"
             run.error = None
             run.finished_at = datetime.now(UTC)
             run.lease_owner = None
@@ -360,7 +256,7 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
             _event(
                 session,
                 run,
-                "run.completed" if finished else "run.awaiting_review",
+                "run.awaiting_review",
                 {
                     "duration_ms": round((time.monotonic() - started) * 1000),
                     "metrics": run.report.get("metrics", {}),
@@ -398,9 +294,6 @@ def _execute_claim(engine, settings, run_id, saver, model=None, heartbeat=None):
             )
             run.lease_owner = None
             run.lease_expires_at = datetime.now(UTC) + timedelta(seconds=2**run.attempts)
-            if decision_data and run.status == "failed":
-                run.status = "completed"
-                run.report = {**run.report, "workflow_complete": False, "workflow_error": run.error}
             _event(
                 session,
                 run,
@@ -512,7 +405,6 @@ def main():
     logging.basicConfig(level=logging.INFO)
     settings = Settings()
     engine = create_engine_for_settings(settings)
-    setup_checkpoints(engine)
     child = None
     state, error, retry_after = "pending", None, 0
     try:

@@ -174,7 +174,6 @@ async function mockApi(page: Page) {
               evidence: [],
             },
           ],
-          workflow_error: "Workflow trace finalization must be retried.",
           findings: [
             {
               requirement_id: "req-1",
@@ -254,9 +253,6 @@ test("report separates risk, completeness and decision and opens its source", as
   await expect(page.getByText("72%")).toBeVisible();
   await expect(page.getByText("Awaiting decision")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Execution trace" })).toHaveCount(0);
-  await expect(
-    page.getByText("Workflow trace finalization must be retried."),
-  ).toBeVisible();
   await expect(
     page.getByText("The retention declaration does not match the contract period."),
   ).toBeVisible();

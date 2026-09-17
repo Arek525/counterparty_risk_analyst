@@ -125,11 +125,6 @@ export default function RunPage() {
                 Loading this example makes no model calls. Human review decisions are recorded separately.</p>
             </div>
           )}
-          {run.report.workflow_error && (
-            <div style={{ marginBottom: 18 }}>
-              <ErrorNotice message={run.report.workflow_error} />
-            </div>
-          )}
           <div className="stat-grid">
             <article className="card stat">
               <span className="stat-label">Risk</span>

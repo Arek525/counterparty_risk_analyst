@@ -65,12 +65,10 @@ def workflow_setup(database_url, migration_config):
     from counterparty.models import AnalysisRun, AssessmentCase, PolicySetVersion, User
     from counterparty.organizations import Organization
     from counterparty.security import hash_password
-    from counterparty.worker import setup_checkpoints
 
     command.upgrade(migration_config, "head")
     settings = Settings(database_url=database_url)
     engine = create_engine_for_settings(settings)
-    setup_checkpoints(engine)
     with Session(engine) as session:
         org = Organization(slug="workflow-test", name="Synthetic workflow", is_synthetic=True)
         session.add(org)

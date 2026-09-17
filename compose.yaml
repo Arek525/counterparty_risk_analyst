@@ -14,8 +14,6 @@ x-backend: &backend
     MODEL_MODE: ${MODEL_MODE:-demo}
     GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     GEMINI_MODEL: ${GEMINI_MODEL:-}
-    LANGSMITH_TRACING: "false"
-    LANGCHAIN_TRACING_V2: "false"
   volumes:
     - document-storage:/app/storage
 

@@ -57,10 +57,8 @@ async def test_analyst_cannot_modify_policy_sources_or_versions(domain_setup, cl
 async def test_old_decision_freezes_all_analyst_mutations_even_on_newer_run(
     domain_setup, client_factory, decision_kind
 ):
-    from counterparty.worker import setup_checkpoints
 
     settings, engine = domain_setup
-    setup_checkpoints(engine)
     async with client_factory(settings) as client:
         await login(client, "reviewer")
         policy_source = await upload(client)
@@ -211,7 +209,7 @@ async def test_information_request_keeps_case_open_and_preserves_reviewed_report
         old = (await client.get(f"/api/runs/{run_id}")).json()
         assert old["input_snapshot"] == run["input_snapshot"]
         assert old["decision"]["rationale"] == revised
-        assert old["report"] == {"model_mode": "demo", "findings": []}
+        assert old["report"] == {"model_mode": "demo", "findings": [], "workflow_complete": True}
         assert (
             await client.post(
                 f"/api/runs/{run_id}/ticket-proposals", json={"title": "Removed", "body": "Removed"}

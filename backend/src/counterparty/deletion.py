@@ -65,12 +65,6 @@ def purge_run(session, user, run):
         raise HTTPException(409, "Analysis is running. Wait for it to finish before deleting.")
     session.execute(delete(Decision).where(Decision.run_id == run.id))
     session.execute(delete(AuditEvent).where(AuditEvent.run_id == run.id))
-    # LangGraph tables are installed by the worker, and may not exist on a fresh API.
-    for table in ("checkpoint_writes", "checkpoint_blobs", "checkpoints"):
-        if session.scalar(text("SELECT to_regclass(:name)"), {"name": table}):
-            session.execute(
-                text(f"DELETE FROM {table} WHERE thread_id = :thread"), {"thread": str(run.id)}
-            )
     session.delete(run)
     session.flush()
 

@@ -156,7 +156,6 @@ export interface Report {
   rules_version: string;
   prompt_version: string;
   workflow_complete?: boolean;
-  workflow_error?: string | null;
 }
 
 export interface Decision {

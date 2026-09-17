@@ -290,6 +290,7 @@ def decide(run_id: UUID, body: DecisionCreate, user: Actor, session: DB):
         rationale=body.rationale,
     )
     session.add(decision)
+    run.report = {**run.report, "workflow_complete": True}
     run.status = "completed"
     run.finished_at = datetime.now(UTC)
     audit(

@@ -269,7 +269,7 @@ def prepare_retrieval(engine, run_id, claim_token, snapshot, model, owner):
         "document_ids": sorted(documents),
         "scores": {},
     }
-    # The caller's checkpoint/ownership session must still be alive before publication.
+    # The caller's ownership session must still be alive before publication.
     owner.execute(text("SELECT 1") if hasattr(owner, "dialect") else "SELECT 1")
     with Session(engine) as session:
         run = session.scalar(select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update())

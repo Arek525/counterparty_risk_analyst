@@ -207,7 +207,6 @@ def delete_document(document_id: UUID, request: Request, user: Actor, session: D
         any(chunk.get("document_id") == str(document.id) for chunk in snapshot.get("chunks", []))
         for snapshot in snapshots
     ):
-        # Every checkpoint is tied to a retained AnalysisRun, so this protects it too.
         raise HTTPException(
             409, "Delete analyses using this document first, then delete the document."
         )

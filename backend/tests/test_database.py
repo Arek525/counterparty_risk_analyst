@@ -169,9 +169,10 @@ def test_current_schema_has_one_baseline(migration_config):
     from alembic.script import ScriptDirectory
 
     revisions = list(ScriptDirectory.from_config(migration_config).walk_revisions())
-    assert len(revisions) == 1
-    assert revisions[0].revision == "0007_information_requests"
-    assert revisions[0].down_revision is None
+    assert len(revisions) == 2
+    assert revisions[0].revision == "0008_remove_checkpoints"
+    assert revisions[1].revision == "0007_information_requests"
+    assert revisions[1].down_revision is None
 
 
 def test_current_upgrade_preserves_data(workflow_setup, migration_config):
@@ -200,3 +201,67 @@ def test_current_upgrade_preserves_data(workflow_setup, migration_config):
         connection.execute(
             text("UPDATE users SET role = 'auditor' WHERE id = :id"), {"id": user_id}
         )
+
+
+@pytest.mark.parametrize("old_status", ["completed", "running"])
+def test_checkpoint_cleanup_preserves_reports_and_decisions(
+    workflow_setup, migration_config, old_status
+):
+    import copy
+
+    from sqlalchemy import select
+    from sqlalchemy.orm import Session
+
+    from counterparty.models import AnalysisRun, Decision
+
+    engine, _, (run_id, user_id, org_id) = workflow_setup
+    command.downgrade(migration_config, "0007_information_requests")
+    original = {
+        "summary": "Reviewed report",
+        "workflow_complete": False,
+        "workflow_error": "Old finalization failed",
+    }
+    with Session(engine) as session:
+        run = session.get(AnalysisRun, run_id)
+        run.status = old_status
+        run.lease_owner = "old-worker"
+        run.report = copy.deepcopy(original)
+        run.error = "Old finalization failed"
+        run.assessment_progress = {"completed_ids": ["R1"]}
+        session.add(
+            Decision(
+                organization_id=org_id,
+                run_id=run_id,
+                actor_id=user_id,
+                decision="accepted",
+                rationale="Reviewed",
+            )
+        )
+        session.commit()
+    with engine.begin() as connection:
+        for table in (
+            "checkpoints",
+            "checkpoint_blobs",
+            "checkpoint_writes",
+            "checkpoint_migrations",
+        ):
+            connection.execute(text(f"CREATE TABLE {table} (id int)"))
+            connection.execute(text(f"INSERT INTO {table} VALUES (1)"))
+    command.upgrade(migration_config, "head")
+    command.check(migration_config)
+    with Session(engine) as session:
+        run = session.get(AnalysisRun, run_id)
+        assert run.report == {"summary": "Reviewed report", "workflow_complete": True}
+        assert run.error is None
+        assert run.status == "completed"
+        assert run.lease_owner is None
+        assert run.assessment_progress == {"completed_ids": ["R1"]}
+        assert (
+            session.scalar(select(Decision).where(Decision.run_id == run_id)).decision == "accepted"
+        )
+    assert not {
+        "checkpoints",
+        "checkpoint_blobs",
+        "checkpoint_writes",
+        "checkpoint_migrations",
+    } & set(inspect(engine).get_table_names())

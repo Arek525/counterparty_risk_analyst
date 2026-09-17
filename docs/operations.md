@@ -2,7 +2,7 @@
 
 ## Persistence and recovery
 
-`postgres-data` stores business records, queue leases, workflow checkpoints and
+`postgres-data` stores business records, queue leases, assessment progress and
 saved information-request drafts. `document-storage` stores original uploaded files. Both are
 needed for a complete backup. `docker compose down` retains both. Never use
 `down --volumes` unless deliberately deleting the entire local installation.
@@ -11,17 +11,25 @@ After a worker restart, unfinished jobs become eligible after their lease expire
 The default lease is 30 seconds and the execution supervisor limit is 120 seconds.
 Automatic retry count is bounded; explicit resume retries unfinished requirements
 while retaining completed assessments. A new analysis creates a separate report.
-A stored human decision is not removed by workflow-finalization failure.
+A reviewer decision is saved atomically with completion of its report.
 
 ## Database schema baseline
 
-One frozen migration, `initial_schema.py`, creates the current schema directly.
+The frozen migration `initial_schema.py` creates the application schema directly.
 It retains revision ID `0007_information_requests`, the former history's final
 revision: databases already at that revision need no reset or version stamping.
-`alembic upgrade head` leaves their records untouched. Earlier revisions are no
+Later migrations upgrade that baseline while preserving business records. Earlier revisions are no
 longer supported; do not stamp an older schema as current. Keep the previous
 application version to upgrade such a database before switching to this baseline.
 Future schema changes require new migrations; do not edit the baseline in place.
+
+
+When upgrading from the previous workflow implementation, stop the API and worker
+before running migrations, then recreate them with the new image. Migration
+`0008_remove_checkpoints` removes obsolete execution checkpoint tables and
+finalizes metadata on already-decided reports. Documents, reports, decisions and
+per-requirement progress are retained. Do not restart the old worker against the
+upgraded database; deleted execution checkpoints are not recreated by downgrade.
 
 ## Consistent backup
 
@@ -66,7 +74,7 @@ on a backup. Saved drafts restore with the database.
 There is no automatic time-based expiry of business evidence or analysis history.
 The UI supports explicit permanent deletion of reports, counterparty cases,
 policy sets and documents. Each delete requires confirmation.
-Deleting a report removes its saved progress, decision, workflow checkpoints,
+Deleting a report removes its saved progress, decision,
 saved information-request drafts and related activity content. Deleting a case also removes
 its documents, files, chunks and embeddings. Shared organization policies remain.
 A minimal deletion event records the actor and removed resource ID, without the

@@ -265,53 +265,39 @@ def test_model_change_stops_before_consuming_requirement_attempt(workflow_setup,
         assert session.get(AnalysisRun, run_id).assessment_progress is None
 
 
-def test_progress_waits_for_concurrent_checkpoint_write(workflow_setup, monkeypatch):
-    import time
-    from contextlib import contextmanager
-    from threading import Event
+def test_worker_recovers_saved_findings_after_interruption(workflow_setup, monkeypatch):
+    from datetime import UTC, datetime, timedelta
 
-    import psycopg
-    from langgraph.checkpoint.postgres import PostgresSaver
-
+    from counterparty.analysis import semantic
     from counterparty.worker import process_one
 
     engine, settings, ids = workflow_setup
     run_id, _ = semantic_run(engine, ids[0])
     with Session(engine) as session:
         session.get(AnalysisRun, ids[0]).status = "failed"
-        run = session.get(AnalysisRun, run_id)
-        run.status = "queued"
-        run.lease_owner = None
         session.commit()
+    original = semantic.assess_requirement
+    calls = []
 
-    writing = Event()
-    overlapped = []
-    cursor = PostgresSaver._cursor
-    execute = psycopg.Connection.execute
+    def interrupted(requirement, *args, **kwargs):
+        calls.append(requirement["id"])
+        if calls == ["first", "second"]:
+            raise RuntimeError("Interrupted before persisting the second result")
+        return original(requirement, *args, **kwargs)
 
-    @contextmanager
-    def slow_checkpoint(self, *, pipeline=False):
-        with cursor(self, pipeline=pipeline) as current:
-            if pipeline:
-                writing.set()
-                time.sleep(0.1)
-            try:
-                yield current
-            finally:
-                if pipeline:
-                    writing.clear()
-
-    def guarded_execute(self, query, *args, **kwargs):
-        if query == "SELECT 1" and writing.is_set():
-            overlapped.append(True)
-            raise psycopg.OperationalError("Concurrent checkpoint pipeline")
-        return execute(self, query, *args, **kwargs)
-
-    monkeypatch.setattr(PostgresSaver, "_cursor", slow_checkpoint)
-    monkeypatch.setattr(psycopg.Connection, "execute", guarded_execute)
+    monkeypatch.setattr(semantic, "assess_requirement", interrupted)
     assert process_one(engine, settings)
-    assert not overlapped
+    with Session(engine) as session:
+        run = session.get(AnalysisRun, run_id)
+        assert run.status == "running"
+        assert run.assessment_progress["completed_ids"] == ["first"]
+        run.lease_expires_at = datetime.now(UTC) - timedelta(seconds=1)
+        session.commit()
+    assert process_one(engine, settings)
+    assert calls == ["first", "second", "second", "third"]
     with Session(engine) as session:
         run = session.get(AnalysisRun, run_id)
         assert run.status == "awaiting_review"
         assert run.assessment_progress["completed"] == 3
+        assert len(run.report["findings"]) == 3
+    assert not process_one(engine, settings)
