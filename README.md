@@ -5,7 +5,7 @@ behind each finding, and record a human decision. The application turns uploaded
 into reviewable requirements, retrieves relevant counterparty passages, and asks Gemini to
 assess each requirement in the context of the business relationship.
 
-**Python · FastAPI · PostgreSQL/pgvector · local multilingual E5 · Gemini · Next.js**
+**Python · FastAPI · PostgreSQL + pgvector · Gemini · RAG · Multilingual E5 · Next.js · TypeScript · Docker**
 
 This is a runnable portfolio application with persistent workflows, two-role authorization,
 source-linked reports and a reproducible evaluation. All bundled companies and documents
